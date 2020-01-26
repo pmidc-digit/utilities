@@ -1,0 +1,93 @@
+curl -X POST \
+ http://localhost:8088/user/users/_createnovalidate \
+ -H ‘Content-Type: application/json’ \
+ -H ‘Postman-Token: 3c8eb85e-877e-4b0a-a1db-60676fa5eb45’ \
+ -H ‘cache-control: no-cache’
+
+{
+"RequestInfo": {
+  "apiId": "ap.public",
+  "ver": "1",
+  "ts": null,
+  "action": "POST",
+  "did": null,
+  "key": null,
+  "msgId": "8c11c5ca-03bd-11e7-93ae-92361f002671",
+  "userInfo": {
+    "type" : "SYSTEM",
+    "name" : "kiran",
+    "id" : 32
+  },
+  "authToken": "{{access_token}}"
+},
+ "user": {
+          "id": 3,
+          "userName": "BH_SUPER",
+          "salutation": "MR",
+          "name": "BH_SUPERUSER",
+          "gender": "MALE",
+          "mobileNumber": "9898989897",
+          "emailId": "jamalbhai@maildrop.cc",
+          "altContactNumber": "",
+          "password": "BHEGOV123",
+          "pan": "AITGC5624P",
+          "aadhaarNumber": "96a70",
+          "permanentAddress": "Dawakhana",
+          "permanentCity": "Kaikoo",
+          "permanentPinCode": "111111",
+          "correspondenceAddress": "correAddress",
+          "correspondenceCity": "banglore",
+          "correspondencePinCode": "1234",
+          "addresses": [
+              {
+                  "pinCode": "1234",
+                  "city": "banglore",
+                  "address": "correAddress",
+                  "type": "CORRESPONDENCE",
+                  "id": 1,
+                  "tenantId": "bh.hajipur",
+                  "userId": 1,
+                  "addressType": "CORRESPONDENCE",
+                  "lastModifiedDate": null,
+                  "lastModifiedBy": null
+              },
+              {
+                  "pinCode": "111111",
+                  "city": "Kaikoo",
+                  "address": "Dawakhana",
+                  "type": "PERMANENT",
+                  "id": 2,
+                  "tenantId": "bh.hajipur",
+                  "userId": 1,
+                  "addressType": "PERMANENT",
+                  "lastModifiedDate": null,
+                  "lastModifiedBy": null
+              }
+          ],
+          "active": true,
+          "locale": "string",
+          "type": "EMPLOYEE",
+          "accountLocked": false,
+          "accountLockedDate": 0,
+          "fatherOrHusbandName": "Hamaal",
+          "signature": "",
+          "bloodGroup": "O+",
+          "photo": "photo1",
+          "identificationMark": null,
+          "createdBy": 32,
+          "lastModifiedBy": 32,
+          "tenantId": "bh.hajipur",
+          "roles": [
+              {
+                  "code": "SUPERUSER",
+                  "tenantId": "bh"
+              }
+          ],
+          "uuid": "1fae1f10-f398-4d05-83f5-7457a946aef9",
+          "createdDate": "22-05-2019 12:49:07",
+          "lastModifiedDate": "22-05-2019 12:49:07",
+          "dob": "03/08/1971",
+          "pwdExpiryDate": "20-08-2020 12:49:07"
+      }
+}
+
