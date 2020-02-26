@@ -22,7 +22,7 @@ mdms_data = response.json()
 
 # Call user search to fetch SYSTEM user
 user_url = "http://egov-user.egov:8080/user/v1/_search?tenantId=pb"
-user_payload = "{\n\t\"requestInfo\" :{\n   \"apiId\": \"ap.public\",\n    \"ver\": \"1\",\n    \"ts\": 45646456,\n    \"action\": \"POST\",\n    \"did\": null,\n    \"key\": null,\n    \"msgId\": \"8c11c5ca-03bd-11e7-93ae-92361f002671\",\n    \"userInfo\": {\n    \t\"id\" : 32\n    },\n    \"authToken\": \"4f7e2e9c-e6e8-4320-8f40-3d4d6ffb7505\"\n\t},\n\t\n   \"tenantId\" : \"pb\",\n   \"userType\":\"SYSTEM\",\n   \"userName\" : \"CRONJOB\",\n   \"pageSize\": \"1\",\n   \"roleCodes\" : [\"ANONYMOUS\"]\n\n\n}\n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n}\n"
+user_payload = "{\n\t\"requestInfo\" :{\n   \"apiId\": \"ap.public\",\n    \"ver\": \"1\",\n    \"ts\": 45646456,\n    \"action\": \"POST\",\n    \"did\": null,\n    \"key\": null,\n    \"msgId\": \"8c11c5ca-03bd-11e7-93ae-92361f002671\",\n    \"userInfo\": {\n    \t\"id\" : 32\n    },\n    \"authToken\": \"5eb3655f-31b1-4cd5-b8c2-4f9c033510d4\"\n\t},\n\t\n   \"tenantId\" : \"pb\",\n   \"userType\":\"SYSTEM\",\n   \"userName\" : \"CRONJOB\",\n   \"pageSize\": \"1\",\n   \"roleCodes\" : [\"ANONYMOUS\"]\n\n\n}\n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n   \n}\n"
 user_headers = {
   'Content-Type': 'application/json'
 }
@@ -35,34 +35,34 @@ else:
 
 
 
-RequestInfo = "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"action\": \"\",\n    \"did\": \"1\",\n    \"key\": \"\",\n    \"msgId\": \"20170310130900|en_IN\",\n    \"requesterId\": \"\",\n    \"userInfo\": \"{SYSTEM_USER}\"\n  }\n}"
-RequestInfo = RequestInfo.replace("{SYSTEM_USER}",str(userInfo))
-
+RequestInfo = json.loads("{\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"action\": \"\",\n    \"did\": \"1\",\n    \"key\": \"\",\n    \"msgId\": \"20170310130900|en_IN\",\n    \"requesterId\": \"\",\n    \"userInfo\": \"\"\n  }")
+RequestInfo["userInfo"] = userInfo
 
 
 # Looping through each entry in the config, it checks if the active flag is true and jobName 
 # matches the job name given as argument if both criteria fulfilled the given http request is called
 
-for data in mdms_data["MdmsRes"]["common-masters"]["CronJobs"]:
+for data in mdms_data["MdmsRes"]["common-masters"]["CronJobAPIConfig"]:
     
     params = None
     payload = None
     headers = None
 
-    if data['active'] and data['jobName']==job_name:
-        method = data['method']
-        url = data['url']
+    if data["active"] and data["jobName"]==job_name:
+        method = data["method"]
+        url = data["url"]
         
-        if 'header' in data.keys():
-            headers = data['header']
+        if "header" in data.keys():
+            headers = data["header"]
             
         if 'payload' in data.keys():    
-            payload = data['payload']
-            if 'RequestInfo' in data['payload']:
-                if data['payload']['RequestInfo']=='{DEFAULT_REQUESTINFO}':
-                    data['payload']['RequestInfo'] = RequestInfo
+            payload = data["payload"]
+            if "RequestInfo" in payload:
+                if payload["RequestInfo"]=="{DEFAULT_REQUESTINFO}":
+                    payload["RequestInfo"] = RequestInfo    
             
         if 'parmas' in data.keys():
             params = data['params']
             
-        res = requests.request(method, url, params = json.dumps(params), headers = headers, data = json.dumps(payload))
+        res = requests.request(method, url, params = params, headers = headers, data=json.dumps(payload))
+
