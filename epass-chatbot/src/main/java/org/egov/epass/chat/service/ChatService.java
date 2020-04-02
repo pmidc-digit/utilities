@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,7 +71,7 @@ public class ChatService {
                         requestJson, JsonNode.class);
 
                 if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                    String message = populateTemplateMessage(messageVerifyResponse, responseEntity.getBody());
+                    String message = getSmsText(responseEntity.getBody());
                     sms.setText(message);
                 } else {
                     sms.setText(errorMessageForServerError);
@@ -84,11 +86,28 @@ public class ChatService {
         kafkaTemplate.send(sendMessageTopic, kafkaKey, smsJson);
     }
 
-    private String populateTemplateMessage(String template, JsonNode searchResponse) {
+    String getSmsText(JsonNode epass) {
+        String message =  messageVerifyResponse;
 
-        // TODO : Populate template message
+        String firstName = epass.at("/entity/firstName").asText();
+        message = message.replaceAll("<firstName>", firstName);
+        String lastName = epass.at("/entity/lastName").asText();
+        message = message.replaceAll("<lastName>", lastName);
+        String token = epass.at("/token").asText();
+        message = message.replaceAll("<token>", token);
+        String validLocations = epass.at("/validLocations").asText();
+        message = message.replaceAll("<validLocations>", validLocations);
 
-        return template;
+        Long endTime = epass.at("/endTime").asLong();
+        String validTillDate = getDateFromTimestamp(endTime);
+        message = message.replaceAll("<validTillDate>", validTillDate);
+
+        return message;
+    }
+
+    private String getDateFromTimestamp(Long timestamp) {
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        return dateFormat.format(timestamp);
     }
 
     private String extractToken(String message) {

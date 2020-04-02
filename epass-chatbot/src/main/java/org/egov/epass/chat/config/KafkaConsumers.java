@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.egov.epass.chat.model.Sms;
 import org.egov.epass.chat.service.ChatService;
-import org.egov.epass.chat.service.EpassUpdatesListener;
+import org.egov.epass.chat.service.EpassCreateNotification;
 import org.egov.epass.chat.smsprovider.KarixSendSMSService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ public class KafkaConsumers {
     @Autowired
     private ChatService chatService;
     @Autowired
-    private EpassUpdatesListener epassUpdatesListener;
+    private EpassCreateNotification epassCreateNotification;
 
     @KafkaListener(topics = "${send.message.topic}")
     public void sendSms(ConsumerRecord<String, String> consumerRecord) throws IOException {
@@ -43,8 +43,8 @@ public class KafkaConsumers {
 
     @KafkaListener(topics = "${epass.notifications.topic}")
     public void processUpdates(ConsumerRecord<String, String> consumerRecord) throws IOException {
-        JsonNode epassUpdate = objectMapper.readTree(consumerRecord.value());
-        epassUpdatesListener.getSmsForUpdates(consumerRecord.key(), epassUpdate);
+        JsonNode epass = objectMapper.readTree(consumerRecord.value());
+        epassCreateNotification.sendSmsForCreatedPass(consumerRecord.key(), epass);
     }
 
 }
