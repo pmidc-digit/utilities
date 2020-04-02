@@ -13,6 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +46,9 @@ public class ChatService {
     @Autowired
     private KafkaTemplate<String, JsonNode> kafkaTemplate;
 
-    public void processMessage(JsonNode chatNode) {
+    public void processMessage(String kafkaKey, JsonNode chatNode) throws IOException {
+        log.info("ChatNode : " + chatNode.toString());
+
         String mobileNumber = chatNode.get("mobileNumber").asText();
         Sms sms = Sms.builder().mobileNumber(mobileNumber).build();
 
@@ -60,19 +63,25 @@ public class ChatService {
             WriteContext request = JsonPath.parse(searchRequestBody);
             request.set("$.token", token);
 
-            ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(epassServiceHost + epassServiceSearchPath,
-                    request.json(), JsonNode.class);
+            JsonNode requestJson = objectMapper.readTree(request.jsonString());
+            try {
+                ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(epassServiceHost + epassServiceSearchPath,
+                        requestJson, JsonNode.class);
 
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                String message = populateTemplateMessage(messageVerifyResponse, responseEntity.getBody());
-                sms.setText(message);
-            } else {
+                if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                    String message = populateTemplateMessage(messageVerifyResponse, responseEntity.getBody());
+                    sms.setText(message);
+                } else {
+                    sms.setText(errorMessageForServerError);
+                }
+            } catch (Exception e) {
                 sms.setText(errorMessageForServerError);
+                log.error("Error while calling epass service ", e);
             }
         }
 
         JsonNode smsJson = objectMapper.convertValue(sms, JsonNode.class);
-        kafkaTemplate.send(sendMessageTopic, mobileNumber, smsJson);
+        kafkaTemplate.send(sendMessageTopic, kafkaKey, smsJson);
     }
 
     private String populateTemplateMessage(String template, JsonNode searchResponse) {

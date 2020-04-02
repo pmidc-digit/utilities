@@ -19,30 +19,30 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Value(value = "${kafka.bootstrap.server}")
+    @Value(value = "${kafka.config.bootstrap_server_config}")
     private String bootstrapAddress;
     @Value("${kafka.consumer.poll.ms}")
     private Integer kafkaConsumerPollMs;
     @Value("${kafka.producer.linger.ms}")
     private Integer kafkaProducerLingerMs;
 
-    @Bean
-    public ConsumerFactory<String, JsonNode> consumerFactory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, kafkaConsumerPollMs);
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, JsonNode> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, JsonNode> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        return factory;
-    }
+//    @Bean
+//    public ConsumerFactory<String, JsonNode> consumerFactory() {
+//        Map<String, Object> props = new HashMap<>();
+//        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+//        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, kafkaConsumerPollMs);
+//        return new DefaultKafkaConsumerFactory<>(props);
+//    }
+//
+//    @Bean
+//    public ConcurrentKafkaListenerContainerFactory<String, JsonNode> kafkaListenerContainerFactory() {
+//        ConcurrentKafkaListenerContainerFactory<String, JsonNode> factory =
+//                new ConcurrentKafkaListenerContainerFactory<>();
+//        factory.setConsumerFactory(consumerFactory());
+//        return factory;
+//    }
 
     @Bean
     public ProducerFactory<String, JsonNode> producerFactoryJson() {

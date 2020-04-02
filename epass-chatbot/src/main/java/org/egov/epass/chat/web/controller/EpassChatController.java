@@ -32,13 +32,13 @@ public class EpassChatController {
     public ResponseEntity<JsonNode> receiveMessage(@RequestParam Map<String, String> params) throws Exception {
         log.info("Received sms from user : " + params.toString());
 
-        String mobileNumber = params.get("sender");
-        String messageContent = params.get("msg");
-        String recipientNumber = params.get("dest");
-        String stime = params.get("stime");
+        String mobileNumber = params.get("Send").substring(2);
+        String messageContent = params.get("Rawmessage");
+        String recipientNumber = params.get("VN");
+        String stime = params.get("MID");
 
         ObjectNode extraInfo = objectMapper.createObjectNode();
-        extraInfo.put("stime", stime);
+        extraInfo.put("MID", stime);
         extraInfo.put("recipient", recipientNumber);
 
         ObjectNode chatNode = objectMapper.createObjectNode();
