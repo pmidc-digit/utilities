@@ -28,7 +28,7 @@ public class EpassChatController {
 
     private String receivedMessageTopicName = "karix-received-messages";
 
-    @RequestMapping(value = "/messages", method = RequestMethod.POST)
+    @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public ResponseEntity<JsonNode> receiveMessage(@RequestParam Map<String, String> params) throws Exception {
         log.info("Received sms from user : " + params.toString());
 
