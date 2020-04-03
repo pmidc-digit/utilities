@@ -33,7 +33,7 @@ public class KafkaConsumers {
     @KafkaListener(topics = "${send.message.topic}")
     public void sendSms(List<JsonNode> smsJsonList) throws IOException {
         List<Sms> smsList = objectMapper.readValue(smsJsonList.toString(), new TypeReference<List<Sms>>() {});
-        karixSendSMSService.sendSMS(smsList.get(0));
+        karixSendSMSService.sendSMS(smsList);
     }
 
     @KafkaListener(topics = "karix-received-messages")

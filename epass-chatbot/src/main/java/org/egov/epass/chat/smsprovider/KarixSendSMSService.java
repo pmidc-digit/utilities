@@ -2,6 +2,8 @@ package org.egov.epass.chat.smsprovider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.WriteContext;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -31,33 +35,63 @@ public class KarixSendSMSService {
     private String karixSenderId;
     @Value("${karix.send.sms.enabled}")
     private boolean karixSendSmsEnabled;
+    @Value("${karix.sms.max.batch.size}")
+    private Integer karixMaxBatchSize;
 
     private String karixSendSmsRequestBody = "{\"ver\":\"1.0\",\"key\":\"\",\"messages\":[{\"dest\":[\"\"],\"text\":\"\",\"send\":\"\"}]}";
+    private String karixMessageBody = "{\"dest\":[\"\"],\"text\":\"\",\"send\":\"\"}";
 
-    public void sendSMS(Sms sms) throws IOException {
-
+    @PostConstruct
+    public void initWithCredentials() {
         WriteContext request = JsonPath.parse(karixSendSmsRequestBody);
+        request.set("$.key", karixAuthToken);
+        karixSendSmsRequestBody = request.jsonString();
 
-        request = fillCredentials(request);
+        WriteContext message = JsonPath.parse(karixMessageBody);
+        message.set("$.send", karixSenderId);
+        karixMessageBody = message.jsonString();
+    }
 
-        request.set("$.messages.[0].dest.[0]", sms.getMobileNumber());
-        request.set("$.messages.[0].text", sms.getText());
+    public void sendSMS(List<Sms> smsList) throws IOException {
+        if(smsList.size() <= karixMaxBatchSize) {
+            sendSmsBatch(smsList);
+        } else {
+            int i = 0;
+            while (i < smsList.size()) {
+                int endIndex = i + karixMaxBatchSize < smsList.size() ? i + karixMaxBatchSize : smsList.size();
+                List<Sms> smsSubList = smsList.subList(i, endIndex);
+                sendSmsBatch(smsSubList);
+                i = endIndex;
+            }
+        }
+    }
 
-        JsonNode requestJson = objectMapper.readTree(request.jsonString());
+    public void sendSmsBatch(List<Sms> smsList) throws IOException {
+        ArrayNode messages = objectMapper.createArrayNode();
+
+        for(Sms sms : smsList) {
+            ArrayNode destinationMobileNumbers = objectMapper.createArrayNode();
+            destinationMobileNumbers.add(sms.getMobileNumber());
+
+            ObjectNode message = (ObjectNode) objectMapper.readTree(karixMessageBody);
+            message.put("text", sms.getText());
+            message.put("dest", destinationMobileNumbers);
+
+            messages.add(message);
+        }
+
+        ObjectNode request = (ObjectNode) objectMapper.readTree(karixSendSmsRequestBody);
+
+        request.set("messages", messages);
 
         log.info("Trying to send an sms");
 
+        log.info("Request : " + request.toString());
+
         if(karixSendSmsEnabled) {
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, requestJson,
+            ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, request,
                     String.class);
             log.info("Response from Karix : " + responseEntity.getBody());
         }
     }
-
-    private WriteContext fillCredentials(WriteContext request) {
-        request.set("$.key", karixAuthToken);
-        request.set("$.messages.[0].send", karixSenderId);
-        return request;
-    }
-
 }
