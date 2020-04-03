@@ -45,12 +45,12 @@ public class KarixSendSMSService {
 
         JsonNode requestJson = objectMapper.readTree(request.jsonString());
 
-        log.info(requestJson.toString());
+        log.info("Trying to send an sms");
 
         if(karixSendSmsEnabled) {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, requestJson,
                     String.class);
-            log.info(responseEntity.getBody());
+            log.info("Response from Karix : " + responseEntity.getBody());
         }
     }
 

@@ -49,7 +49,6 @@ public class ChatService {
     private KafkaTemplate<String, JsonNode> kafkaTemplate;
 
     public void processMessage(String kafkaKey, JsonNode chatNode) throws IOException {
-        log.info("ChatNode : " + chatNode.toString());
 
         String mobileNumber = chatNode.get("mobileNumber").asText();
         Sms sms = Sms.builder().mobileNumber(mobileNumber).build();

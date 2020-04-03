@@ -30,7 +30,6 @@ public class EpassChatController {
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public ResponseEntity<JsonNode> receiveMessage(@RequestParam Map<String, String> params) throws Exception {
-        log.info("Received sms from user : " + params.toString());
 
         String mobileNumber = params.get("Send").substring(2);
         String messageContent = params.get("Rawmessage");
@@ -49,12 +48,17 @@ public class EpassChatController {
 
         kafkaTemplate.send(receivedMessageTopicName, mobileNumber, chatNode);
 
-        return new ResponseEntity<>(createResponse(), HttpStatus.OK);
+        JsonNode response = createResponse();
+
+        log.info("Received an sms, replied with : " + response.toString());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     private JsonNode createResponse() {
         ObjectNode response = objectMapper.createObjectNode();
         response.put("id", UUID.randomUUID().toString());
+        response.put("timestamp", System.currentTimeMillis());
         return response;
     }
 
