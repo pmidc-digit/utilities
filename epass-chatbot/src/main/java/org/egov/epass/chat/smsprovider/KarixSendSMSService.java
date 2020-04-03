@@ -29,6 +29,8 @@ public class KarixSendSMSService {
     private String karixAuthToken;
     @Value("${karix.sender.id}")
     private String karixSenderId;
+    @Value("${karix.send.sms.enabled}")
+    private boolean karixSendSmsEnabled;
 
     private String karixSendSmsRequestBody = "{\"ver\":\"1.0\",\"key\":\"\",\"messages\":[{\"dest\":[\"\"],\"text\":\"\",\"send\":\"\"}]}";
 
@@ -45,10 +47,11 @@ public class KarixSendSMSService {
 
         log.info(requestJson.toString());
 
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, requestJson,
-                String.class);
-
-        log.info(responseEntity.getBody());
+        if(karixSendSmsEnabled) {
+            ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, requestJson,
+                    String.class);
+            log.info(responseEntity.getBody());
+        }
     }
 
     private WriteContext fillCredentials(WriteContext request) {
