@@ -45,10 +45,10 @@ public class KarixSendSMSService {
 
         log.info(requestJson.toString());
 
-        ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, requestJson,
-                JsonNode.class);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, requestJson,
+                String.class);
 
-        log.info(responseEntity.getBody().toString());
+        log.info(responseEntity.getBody());
     }
 
     private WriteContext fillCredentials(WriteContext request) {
