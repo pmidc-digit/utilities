@@ -1,5 +1,6 @@
 package org.egov.epass.chat.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -29,22 +31,19 @@ public class KafkaConsumers {
     private EpassCreateNotification epassCreateNotification;
 
     @KafkaListener(topics = "${send.message.topic}")
-    public void sendSms(ConsumerRecord<String, String> consumerRecord) throws IOException {
-        JsonNode data = objectMapper.readTree(consumerRecord.value());
-        Sms sms = Sms.builder().mobileNumber(data.get("mobileNumber").asText()).text(data.get("text").asText()).build();
-        karixSendSMSService.sendSMS(sms);
+    public void sendSms(List<JsonNode> smsJsonList) throws IOException {
+        List<Sms> smsList = objectMapper.readValue(smsJsonList.toString(), new TypeReference<List<Sms>>() {});
+        karixSendSMSService.sendSMS(smsList.get(0));
     }
 
     @KafkaListener(topics = "karix-received-messages")
-    public void processMessage(ConsumerRecord<String, String> consumerRecord) throws IOException {
-        JsonNode chatNode = objectMapper.readTree(consumerRecord.value());
-        chatService.processMessage(consumerRecord.key(), chatNode);
+    public void processMessage(JsonNode chatNode) throws IOException {
+        chatService.processMessage(null, chatNode);
     }
 
     @KafkaListener(topics = "${epass.notifications.topic}")
-    public void processUpdates(ConsumerRecord<String, String> consumerRecord) throws IOException {
-        JsonNode epass = objectMapper.readTree(consumerRecord.value());
-        epassCreateNotification.sendSmsForCreatedPass(consumerRecord.key(), epass);
+    public void processUpdates(JsonNode notification) throws IOException {
+        epassCreateNotification.sendSmsForCreatedPass(null, notification);
     }
 
 }

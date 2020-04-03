@@ -5,13 +5,13 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.connect.json.JsonDeserializer;
+import org.apache.kafka.connect.json.JsonSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,28 +21,38 @@ public class KafkaConfig {
 
     @Value(value = "${kafka.config.bootstrap_server_config}")
     private String bootstrapAddress;
+    @Value("${spring.kafka.consumer.group-id}")
+    private String consumerGroupId;
     @Value("${kafka.consumer.poll.ms}")
     private Integer kafkaConsumerPollMs;
     @Value("${kafka.producer.linger.ms}")
     private Integer kafkaProducerLingerMs;
+    @Value("${kafka.consumer.threads}")
+    private Integer kafkaConsumerThreads;
+    @Value("${kafka.consumer.batch.max.poll.records}")
+    private String maxBatchSize;
 
-//    @Bean
-//    public ConsumerFactory<String, JsonNode> consumerFactory() {
-//        Map<String, Object> props = new HashMap<>();
-//        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-//        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-//        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-//        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, kafkaConsumerPollMs);
-//        return new DefaultKafkaConsumerFactory<>(props);
-//    }
-//
-//    @Bean
-//    public ConcurrentKafkaListenerContainerFactory<String, JsonNode> kafkaListenerContainerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<String, JsonNode> factory =
-//                new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(consumerFactory());
-//        return factory;
-//    }
+    @Bean
+    public ConsumerFactory<String, JsonNode> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, kafkaConsumerPollMs);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxBatchSize);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, JsonNode> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, JsonNode> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setBatchListener(true);
+        factory.setConcurrency(kafkaConsumerThreads);
+        return factory;
+    }
 
     @Bean
     public ProducerFactory<String, JsonNode> producerFactoryJson() {
