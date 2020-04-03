@@ -84,9 +84,7 @@ public class KarixSendSMSService {
 
         request.set("messages", messages);
 
-        log.info("Trying to send an sms");
-
-        log.info("Request : " + request.toString());
+        log.info("Trying to send sms, batch size : " + messages.size());
 
         if(karixSendSmsEnabled) {
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(karixSmsServiceUrl, request,
