@@ -25,7 +25,7 @@ public class EpassCreateNotification {
     @Value("${message.epass.create}")
     private String messageTemplateForCreatePass;
 
-    public void sendSmsForCreatedPass(String kafkaKey, JsonNode epass) {
+    public JsonNode getSmsForCreatedPass(JsonNode epass) {
         String mobileNumber = epass.at("/entity/phoneNumber").asText().substring(3);
 
         Sms sms = Sms.builder().mobileNumber(mobileNumber).build();
@@ -36,7 +36,7 @@ public class EpassCreateNotification {
 
         JsonNode smsJson = objectMapper.convertValue(sms, JsonNode.class);
 
-        kafkaTemplate.send(sendMessageTopic, kafkaKey, smsJson);
+        return smsJson;
     }
 
     private String getSmsText(JsonNode epass) {

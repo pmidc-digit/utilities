@@ -48,7 +48,7 @@ public class ChatService {
     @Autowired
     private KafkaTemplate<String, JsonNode> kafkaTemplate;
 
-    public void processMessage(String kafkaKey, JsonNode chatNode) throws IOException {
+    public JsonNode getSmsForMessage(JsonNode chatNode) {
 
         String mobileNumber = chatNode.get("mobileNumber").asText();
         Sms sms = Sms.builder().mobileNumber(mobileNumber).build();
@@ -60,12 +60,11 @@ public class ChatService {
         if(token.isEmpty()) {
             sms.setText(errorMessageForNotRecognized);
         } else {
-
-            WriteContext request = JsonPath.parse(searchRequestBody);
-            request.set("$.token", token);
-
-            JsonNode requestJson = objectMapper.readTree(request.jsonString());
             try {
+                WriteContext request = JsonPath.parse(searchRequestBody);
+                request.set("$.token", token);
+                JsonNode requestJson = objectMapper.readTree(request.jsonString());
+
                 ResponseEntity<JsonNode> responseEntity = restTemplate.postForEntity(epassServiceHost + epassServiceSearchPath,
                         requestJson, JsonNode.class);
 
@@ -77,12 +76,13 @@ public class ChatService {
                 }
             } catch (Exception e) {
                 sms.setText(errorMessageForServerError);
-                log.error("Error while calling epass service ", e);
+                log.error("Error while calling ecurfew service ", e);
             }
         }
 
         JsonNode smsJson = objectMapper.convertValue(sms, JsonNode.class);
-        kafkaTemplate.send(sendMessageTopic, kafkaKey, smsJson);
+
+        return smsJson;
     }
 
     String getSmsText(JsonNode epass) {

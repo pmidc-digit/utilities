@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.egov.epass.chat.model.Sms;
 import org.egov.epass.chat.service.ChatService;
 import org.egov.epass.chat.service.EpassCreateNotification;
@@ -31,19 +30,9 @@ public class KafkaConsumers {
     private EpassCreateNotification epassCreateNotification;
 
     @KafkaListener(topics = "${send.message.topic}")
-    public void sendSms(List<JsonNode> smsJsonList) throws IOException {
+    public void sendSms(List<JsonNode> smsJsonList) throws IOException, InterruptedException {
         List<Sms> smsList = objectMapper.readValue(smsJsonList.toString(), new TypeReference<List<Sms>>() {});
         karixSendSMSService.sendSMS(smsList);
-    }
-
-    @KafkaListener(topics = "karix-received-messages")
-    public void processMessage(JsonNode chatNode) throws IOException {
-        chatService.processMessage(null, chatNode);
-    }
-
-    @KafkaListener(topics = "${epass.notifications.topic}")
-    public void processUpdates(JsonNode notification) throws IOException {
-        epassCreateNotification.sendSmsForCreatedPass(null, notification);
     }
 
 }

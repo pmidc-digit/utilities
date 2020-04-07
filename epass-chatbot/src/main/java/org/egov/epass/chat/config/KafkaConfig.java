@@ -23,13 +23,13 @@ public class KafkaConfig {
     private String bootstrapAddress;
     @Value("${spring.kafka.consumer.group-id}")
     private String consumerGroupId;
-    @Value("${kafka.consumer.poll.ms}")
+    @Value("${kafka.consumer.poll.ms.for.karix.send}")
     private Integer kafkaConsumerPollMs;
     @Value("${kafka.producer.linger.ms}")
     private Integer kafkaProducerLingerMs;
-    @Value("${kafka.consumer.threads}")
+    @Value("${kafka.consumer.threads.for.karix.send}")
     private Integer kafkaConsumerThreads;
-    @Value("${kafka.consumer.batch.max.poll.records}")
+    @Value("${kafka.consumer.max.poll.records.for.karix.send}")
     private String maxBatchSize;
 
     @Bean
@@ -64,7 +64,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, JsonNode> kafkaTemplateJson() {
+    public KafkaTemplate<String, JsonNode> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactoryJson());
     }
 
