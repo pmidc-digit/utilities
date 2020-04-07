@@ -1,4 +1,4 @@
-package org.egov.epass.chat.web.controller;
+package org.egov.epass.chat.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
