@@ -42,8 +42,7 @@ public class DemoRedirectPreFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-
-        if(! demoRedirectEnabled) {
+        if(! shouldFilter(servletRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
@@ -53,6 +52,17 @@ public class DemoRedirectPreFilter implements Filter {
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
+    }
+
+    boolean shouldFilter(ServletRequest servletRequest) {
+        if(! demoRedirectEnabled)
+            return false;
+        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        String uri = httpServletRequest.getRequestURI();
+        if(uri.contains("/messages")) {
+            return true;
+        }
+        return false;
     }
 
 
