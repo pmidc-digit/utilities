@@ -23,7 +23,7 @@ public class KafkaStreamsConfig {
 
     @Value(value = "${kafka.config.bootstrap_server_config}")
     private String bootstrapAddress;
-    @Value("${kafka.consumer.poll.ms}")
+    @Value("${kafka.consumer.fetch.max.wait.ms}")
     private Integer kafkaConsumerPollMs;
     @Value("${kafka.producer.linger.ms}")
     private Integer kafkaProducerLingerMs;

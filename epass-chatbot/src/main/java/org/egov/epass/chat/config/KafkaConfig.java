@@ -23,7 +23,7 @@ public class KafkaConfig {
     private String bootstrapAddress;
     @Value("${spring.kafka.consumer.group-id}")
     private String consumerGroupId;
-    @Value("${kafka.consumer.poll.ms.for.karix.send}")
+    @Value("${kafka.consumer.fetch.max.wait.ms.for.karix.send}")
     private Integer kafkaConsumerPollMs;
     @Value("${kafka.producer.linger.ms}")
     private Integer kafkaProducerLingerMs;
