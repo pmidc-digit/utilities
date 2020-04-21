@@ -48,7 +48,7 @@ public class ChatService {
     @Autowired
     private KafkaTemplate<String, JsonNode> kafkaTemplate;
 
-    public JsonNode getSmsForMessage(JsonNode chatNode) {
+    public JsonNode getSmsForMessage(JsonNode chatNode) throws Exception {
 
         String mobileNumber = chatNode.get("mobileNumber").asText();
         Sms sms = Sms.builder().mobileNumber(mobileNumber).build();
@@ -109,21 +109,18 @@ public class ChatService {
         return dateFormat.format(timestamp);
     }
 
-    private String extractToken(String message) {
+    private String extractToken(String message) throws Exception {
+        message = message.trim();
         List<String> words = Arrays.asList(message.split(" "));
 
-        if(words.size() == 0) {
-            log.info("Empty message");
-            return "";
+        if(words.size() != 2) {
+            log.error("Invalid chat message. Number of words : " + words.size());
+            throw new Exception("Invalid chat message");
         }
 
         if(!words.get(0).equalsIgnoreCase("Verify")) {
-            log.info("First word is not Verify. Still proceeding");
-        }
-
-        if(words.size() == 1) {
-            log.info("Single word received. Assuming it to be token");
-            return words.get(0);
+            log.error("First word is not Verify. Throwing an error.");
+            throw new Exception("Invalid chat message");
         }
 
         return words.get(1);
