@@ -105,9 +105,9 @@ public class ElasticSearchRepository implements SearchRepository{
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("case.healthDetails.auditDetails.lastModifiedTime");
         rangeQueryBuilder.gte(timestamp);
 
-        MatchQueryBuilder statusQuery = QueryBuilders.matchQuery("case.status", "active");
+        MatchQueryBuilder statusQuery = QueryBuilders.matchQuery("case.status.keyword", "active");
 
-        MatchQueryBuilder tenantIdQuery = QueryBuilders.matchQuery("case.tenantId", tenantId);
+        MatchQueryBuilder tenantIdQuery = QueryBuilders.matchQuery("case.tenantId.keyword", tenantId);
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.should(statusQuery);
