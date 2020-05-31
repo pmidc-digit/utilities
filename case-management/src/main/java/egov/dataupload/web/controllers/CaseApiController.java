@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -53,6 +54,12 @@ public class CaseApiController {
     public ResponseEntity<Void> updateCase(@Valid @RequestBody CaseUpdateRequest body) {
         caseService.updateCase(body);
         return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/getDefaulterCases", method = RequestMethod.POST)
+    public ResponseEntity<CaseSearchResponse> getDefaulterCases(@RequestParam String tenantId) {
+        List<ModelCase> cases = caseService.getDefaulterCases(tenantId);
+        return new ResponseEntity<CaseSearchResponse>( new CaseSearchResponse(cases),HttpStatus.OK);
     }
 
 }

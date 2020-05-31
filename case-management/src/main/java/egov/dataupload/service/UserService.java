@@ -67,6 +67,14 @@ public class UserService {
         modelCase.setUserUuid(userDetailResponse.getUser().get(0).getUuid());
     }
 
+    public UserDetailResponse getUserDetailsFromUuid(String userUuid) {
+        UserSearchRequest userSearchRequest = new UserSearchRequest();
+        userSearchRequest.setTenantId(config.getRootTenantId());
+        userSearchRequest.setRequestInfo(RequestInfo.builder().build());
+        userSearchRequest.setUuid(Collections.singletonList(userUuid));
+        StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
+        return userCall(userSearchRequest, uri);
+    }
 
     /**
      * Sets the immutable fields from search to update request

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import egov.dataupload.config.Configuration;
 import egov.dataupload.models.AuditDetails;
 import egov.dataupload.models.user.User;
+import egov.dataupload.models.user.UserDetailResponse;
 import egov.dataupload.producer.Producer;
 import egov.dataupload.repository.IdGenRepository;
 import egov.dataupload.repository.SearchRepository;
@@ -18,7 +19,9 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -158,6 +161,25 @@ public class CaseService {
         producer.push(configuration.getEsCaseTopic(), modelCase.getUuid(), caseCreateRequest);
 
         return modelCase;
+    }
+
+    public List<ModelCase> getDefaulterCases(String tenantId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().atStartOfDay();
+        Long midnightTimestamp = Timestamp.valueOf(midnight).getTime();
+
+        List<ModelCase> cases = searchRepository.searchDefaulterCases(tenantId, midnightTimestamp);
+        cases = addUserDetails(cases);
+        return cases;
+    }
+
+    private List<ModelCase> addUserDetails(List<ModelCase> cases) {
+        for(ModelCase modelCase : cases) {
+            UserDetailResponse userDetailResponse = userService.getUserDetailsFromUuid(modelCase.getUserUuid());
+            modelCase.setMobileNumber(userDetailResponse.getUser().get(0).getMobileNumber());
+            modelCase.setName(userDetailResponse.getUser().get(0).getName());
+        }
+        return cases;
     }
 
     private JsonNode getCaseObjForSign(ModelCase modelCase){

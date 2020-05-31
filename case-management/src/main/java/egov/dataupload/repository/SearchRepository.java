@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SearchRepository {
     public List<ModelCase> searchCases(CaseSearchRequest request);
+    List<ModelCase> searchDefaulterCases(String tenantId, Long timestamp);
 }

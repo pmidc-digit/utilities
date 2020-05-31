@@ -11,9 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +38,18 @@ public class ElasticSearchRepository implements SearchRepository{
 
     @Override
     public List<ModelCase> searchCases(CaseSearchRequest request){
-        SearchRequest searchRequest = new SearchRequest(configuration.getEsIndexName());
         SearchSourceBuilder sourceBuilder = getSearchBody(request);
+        return getCasesFromES(sourceBuilder);
+    }
+
+    @Override
+    public List<ModelCase> searchDefaulterCases(String tenantId, Long timestamp) {
+        SearchSourceBuilder searchSourceBuilder = getSearchBodyForDefaulterCases(tenantId, timestamp);
+        return getCasesFromES(searchSourceBuilder);
+    }
+
+    private List<ModelCase> getCasesFromES(SearchSourceBuilder sourceBuilder) {
+        SearchRequest searchRequest = new SearchRequest(configuration.getEsIndexName());
         searchRequest.source(sourceBuilder);
 
         List<ModelCase> cases = new ArrayList<>();
@@ -90,4 +98,27 @@ public class ElasticSearchRepository implements SearchRepository{
         sourceBuilder.query(boolQueryBuilder);
         return sourceBuilder;
     }
+
+    private SearchSourceBuilder getSearchBodyForDefaulterCases(String tenantId, Long timestamp) {
+
+
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("case.healthDetails.auditDetails.lastModifiedTime");
+        rangeQueryBuilder.gte(timestamp);
+
+        MatchQueryBuilder statusQuery = QueryBuilders.matchQuery("case.status", "active");
+
+        MatchQueryBuilder tenantIdQuery = QueryBuilders.matchQuery("case.tenantId", tenantId);
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.should(statusQuery);
+        boolQueryBuilder.should(tenantIdQuery);
+        boolQueryBuilder.mustNot(rangeQueryBuilder);
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().timeout(new TimeValue(60, TimeUnit.SECONDS));
+
+        sourceBuilder.query(boolQueryBuilder);
+
+        return sourceBuilder;
+    }
+
 }
