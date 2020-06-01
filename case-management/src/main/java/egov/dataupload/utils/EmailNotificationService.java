@@ -33,31 +33,31 @@ public class EmailNotificationService {
 
     @Value("${email.subject.onboard.health.details.collector}")
     private String emailSubjectOnboardHealthDetailsCollector;
+    @Value("${email.content.onboard.health.details.collector}")
+    private String emailContentOnboardHealthDetailsCollector;
     @Value("${email.subject.onboard.case.admin}")
     private String emailSubjectOnboardCaseAdmin;
+    @Value("${email.content.onboard.case.admin}")
+    private String emailContentOnboardCaseAdmin;
 
     @Value("${isolation.health.collection.time}")
     private String isolationHealthCollectionTime;
 
     public void sendOnboardingEmployeeEmail(EmployeeCreateRequest employeeCreateRequest) throws Exception {
         Employee employee = employeeCreateRequest.getEmployee();
-        String templateFileName = "";
+        String content = "";
         String subject = "";
-        if(employee.getRoles().get(0).equalsIgnoreCase("ISOLATION_HEALTH_DETAILS_COLLECTOR")) {
-            templateFileName = "EmailOnboardHealthDetailsCollector.txt";
-            subject = emailSubjectOnboardHealthDetailsCollector;
-        } else if(employee.getRoles().get(0).equalsIgnoreCase("ISOLATION_CASE_ADMIN")) {
-            templateFileName = "EmailOnboardIsolationCaseManager.txt";
-            subject = emailSubjectOnboardCaseAdmin;
-        }
-
         String districtName = tenantService.getDistrictNameForTenantId(employee.getTenantId());
-
-        URL url = Main.class.getClassLoader().getResource(templateFileName);
-        String content = new String(Files.readAllBytes(Paths.get(url.toURI())));
-        content = content.replace("<district-name>", districtName);
-
-        content = content.replace("<time>", isolationHealthCollectionTime);
+        if(employee.getRoles().get(0).equalsIgnoreCase("ISOLATION_HEALTH_DETAILS_COLLECTOR")) {
+            subject = emailSubjectOnboardHealthDetailsCollector;
+            content = emailContentOnboardHealthDetailsCollector;
+            content = content.replace("<district-name>", districtName);
+            content = content.replace("<time>", isolationHealthCollectionTime);
+        } else if(employee.getRoles().get(0).equalsIgnoreCase("ISOLATION_CASE_ADMIN")) {
+            subject = emailSubjectOnboardCaseAdmin;
+            content = emailContentOnboardCaseAdmin;
+            content = content.replace("<district-name>", districtName);
+        }
 
         ArrayNode emailTo = objectMapper.createArrayNode();
         emailTo.add(employee.getEmailId());
