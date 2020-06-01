@@ -95,6 +95,14 @@
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
+
+        <!-- Egov dependencies -->
+        <dependency>
+            <groupId>org.egov</groupId>
+            <artifactId>mdms-client</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>

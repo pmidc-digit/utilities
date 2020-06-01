@@ -7,9 +7,7 @@ import egov.dataupload.models.user.User;
 import egov.dataupload.models.user.UserDetailResponse;
 import egov.dataupload.models.user.UserSearchRequest;
 import egov.dataupload.repository.ServiceRequestRepository;
-import egov.dataupload.web.models.CaseCreateRequest;
-import egov.dataupload.web.models.CaseSearchRequest;
-import egov.dataupload.web.models.ModelCase;
+import egov.dataupload.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
@@ -75,6 +73,41 @@ public class UserService {
         StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
         return userCall(userSearchRequest, uri);
     }
+
+    public void createEmployee(EmployeeCreateRequest employeeCreateRequest) {
+        RequestInfo requestInfo = employeeCreateRequest.getRequestInfo();
+        Employee employee = employeeCreateRequest.getEmployee();
+
+        User user = new User();
+
+        user.setEmailId(employee.getEmailId());
+        user.setUserName(employee.getEmailId());
+        user.setTenantId(employee.getTenantId());
+        user.setPermanentCity(employee.getTenantId());
+        user.setName(employee.getName());
+        user.setActive(false);
+        user.setType("EMPLOYEE");
+        user.setMobileNumber("9191919191");
+
+        List<Role> roles = new ArrayList<>();
+        for(String employeeRole : employee.getRoles()) {
+            Role role = new Role();
+            role.setCode(employeeRole);
+            roles.add(role);
+        }
+        user.setRoles(roles);
+
+        StringBuilder uri = new StringBuilder(config.getUserHost())
+                .append(config.getUserContextPath())
+                .append(config.getUserCreateEndpoint());
+
+        UserDetailResponse userDetailResponse = userCall(new CreateUserRequest(requestInfo, user), uri);
+        if (userDetailResponse.getUser().get(0).getUuid() == null) {
+            throw new CustomException("INVALID USER RESPONSE", "The user created has uuid as null");
+        }
+    }
+
+
 
     /**
      * Sets the immutable fields from search to update request
