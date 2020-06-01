@@ -25,10 +25,28 @@ public class TenantService {
 
     private String moduleName = "tenant";
     private String masterDetailsName = "citymodule";
-    private String filter = "$.[?(@.module=='CASE_MANAGEMENT')].tenants.*";
 
     public List<String> getAllTenantIds() {
+        String filter = "$.[?(@.module=='CASE_MANAGEMENT')].tenants.*";
+        JSONArray mdmsResValues = getTenantsMaster(filter);
+        List<String> tenantIds = new ArrayList<>();
+        for (Object mdmsResValue : mdmsResValues) {
+            HashMap mdmsValue = (HashMap) mdmsResValue;
+            String tenant = mdmsValue.get("code").toString();
+            tenantIds.add(tenant);
+        }
+        return tenantIds;
+    }
 
+    public String getDistrictNameForTenantId(String tenantId) {
+        String filter = "$.[?(@.module=='CASE_MANAGEMENT')].tenants.[?(@.code=='<tenantId>')].name";
+        filter = filter.replace("<tenantId>", tenantId);
+        JSONArray mdmsResponse = getTenantsMaster(filter);
+        String districtName = (String) mdmsResponse.get(0);
+        return districtName;
+    }
+
+    private JSONArray getTenantsMaster(String filter) {
         String rootTenantId = configuration.getRootTenantId();
 
         MasterDetail masterDetail = MasterDetail.builder().name(masterDetailsName).filter(filter).build();
@@ -46,16 +64,7 @@ public class TenantService {
 
         JSONArray mdmsResValues = mdmsRes.get(moduleName).get(masterDetailsName);
 
-        List<String> tenantIds = new ArrayList<>();
-
-        for (Object mdmsResValue : mdmsResValues) {
-            HashMap mdmsValue = (HashMap) mdmsResValue;
-            String tenant = mdmsValue.get("code").toString();
-            tenantIds.add(tenant);
-        }
-
-        return tenantIds;
+        return mdmsResValues;
     }
-
 
 }
