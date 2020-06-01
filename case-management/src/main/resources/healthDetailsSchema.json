@@ -15,8 +15,7 @@
       "type": "object",
       "properties": {
         "temperature": {
-          "type": "number",
-          "minimum": 95
+          "type": "string"
         },
         "symptoms": {
           "type": "string",

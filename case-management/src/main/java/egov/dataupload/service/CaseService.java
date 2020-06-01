@@ -59,7 +59,7 @@ public class CaseService {
 
         validateCreateRequest(caseCreateRequest);
         enrichCreateRequest(caseCreateRequest);
-        sanitizeData(modelCase);
+        sanitizeData(modelCase, caseCreateRequest.getRequestInfo());
         // Generate signature
         modelCase.setSignature(signatureRepository.sign(modelCase.getTenantId(), getCaseObjForSign(modelCase)));
 
@@ -90,7 +90,7 @@ public class CaseService {
 
         updateFields(caseUpdateRequest, modelCase);
 
-        sanitizeData(modelCase);
+        sanitizeData(modelCase, caseUpdateRequest.getRequestInfo());
 
         modelCase.setSignature(signatureRepository.sign(modelCase.getTenantId(), getCaseObjForSign(modelCase)));
         CaseCreateRequest request = new CaseCreateRequest(caseUpdateRequest.getRequestInfo(), modelCase);
@@ -155,6 +155,8 @@ public class CaseService {
         }
 
         modelCase.setHealthDetails(jsonMerge(modelCase.getHealthDetails(), request.getHealthDetails()));
+
+        sanitizeData(modelCase, request.getRequestInfo());
 
         CaseCreateRequest caseCreateRequest = new CaseCreateRequest(request.getRequestInfo(), modelCase);
         producer.push(configuration.getUpdateTopic(), modelCase.getUuid(), caseCreateRequest);
@@ -247,7 +249,12 @@ public class CaseService {
         userService.createUser(caseCreateRequest);
     }
 
-    private void sanitizeData(ModelCase modelCase){
+    private void sanitizeData(ModelCase modelCase, RequestInfo requestInfo){
+        if(requestInfo != null && requestInfo.getUserInfo()!=null) {
+            requestInfo.getUserInfo().setMobileNumber("");
+            requestInfo.getUserInfo().setUserName("");
+            requestInfo.getUserInfo().setName("");
+        }
         modelCase.setName("");
         modelCase.setMobileNumber("");
     }
