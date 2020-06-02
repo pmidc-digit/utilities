@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import egov.Main;
+import egov.dataupload.config.Configuration;
 import egov.dataupload.producer.Producer;
 import egov.dataupload.web.models.Employee;
 import egov.dataupload.web.models.EmployeeCreateRequest;
@@ -27,9 +28,8 @@ public class EmailNotificationService {
     private ObjectMapper objectMapper;
     @Autowired
     private TenantService tenantService;
-
-    @Value("${send.email.topic}")
-    private String sendEmailTopic;
+    @Autowired
+    private Configuration configuration;
 
     @Value("${email.subject.onboard.health.details.collector}")
     private String emailSubjectOnboardHealthDetailsCollector;
@@ -71,7 +71,7 @@ public class EmailNotificationService {
         emailRequest.set("requestInfo", objectMapper.convertValue(employeeCreateRequest.getRequestInfo(), JsonNode.class));
         emailRequest.set("email", email);
 
-        producer.push(sendEmailTopic, null, emailRequest);
+        producer.push(configuration.getSendEmailTopic(), null, emailRequest);
     }
 
 }

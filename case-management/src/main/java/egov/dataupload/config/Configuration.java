@@ -104,4 +104,10 @@ public class Configuration {
     @Value("${egov.root.tenant.id}")
     private String rootTenantId;
 
+    @Value("${send.email.topic}")
+    private String sendEmailTopic;
+
+    @Value("${send.sms.topic}")
+    private String sendSmsTopic;
+
 }

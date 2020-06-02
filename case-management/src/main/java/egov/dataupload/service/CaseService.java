@@ -11,6 +11,7 @@ import egov.dataupload.producer.Producer;
 import egov.dataupload.repository.IdGenRepository;
 import egov.dataupload.repository.SearchRepository;
 import egov.dataupload.repository.SignatureRepository;
+import egov.dataupload.utils.SmsNotificationService;
 import egov.dataupload.utils.Utils;
 import egov.dataupload.web.models.*;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +54,12 @@ public class CaseService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private SmsNotificationService smsNotificationService;
 
     public ModelCase createCase(CaseCreateRequest caseCreateRequest){
         ModelCase modelCase = caseCreateRequest.get_case();
+        String mobileNumber = caseCreateRequest.get_case().getMobileNumber();
 
         validateCreateRequest(caseCreateRequest);
         enrichCreateRequest(caseCreateRequest);
@@ -65,6 +69,8 @@ public class CaseService {
 
         producer.push(configuration.getSaveTopic(), modelCase.getUuid(), caseCreateRequest);
         producer.push(configuration.getEsCaseTopic(), modelCase.getUuid(), caseCreateRequest);
+
+        smsNotificationService.sendCreateCaseSms(mobileNumber);
 
         return caseCreateRequest.get_case();
     }
