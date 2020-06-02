@@ -39,6 +39,8 @@ public class EmailNotificationService {
     private String emailSubjectOnboardCaseAdmin;
     @Value("${email.content.onboard.case.admin}")
     private String emailContentOnboardCaseAdmin;
+    @Value("${email.attachment.onboard.case.admin.filestoreid}")
+    private String emailAttachmentOnboardCaseAdminFileStoreId;
 
     @Value("${isolation.health.collection.time}")
     private String isolationHealthCollectionTime;
@@ -48,6 +50,12 @@ public class EmailNotificationService {
         String content = "";
         String subject = "";
         String districtName = tenantService.getDistrictNameForTenantId(employee.getTenantId());
+        ArrayNode emailTo = objectMapper.createArrayNode();
+        emailTo.add(employee.getEmailId());
+
+        ObjectNode email = objectMapper.createObjectNode();
+        email.set("emailTo", emailTo);
+
         if(employee.getRoles().get(0).equalsIgnoreCase("ISOLATION_HEALTH_DETAILS_COLLECTOR")) {
             subject = emailSubjectOnboardHealthDetailsCollector;
             content = emailContentOnboardHealthDetailsCollector;
@@ -57,13 +65,11 @@ public class EmailNotificationService {
             subject = emailSubjectOnboardCaseAdmin;
             content = emailContentOnboardCaseAdmin;
             content = content.replace("<district-name>", districtName);
+            ObjectNode attachment = objectMapper.createObjectNode();
+            attachment.put("fileStoreId", emailAttachmentOnboardCaseAdminFileStoreId);
+            email.set("attachment", attachment);
         }
 
-        ArrayNode emailTo = objectMapper.createArrayNode();
-        emailTo.add(employee.getEmailId());
-
-        ObjectNode email = objectMapper.createObjectNode();
-        email.set("emailTo", emailTo);
         email.put("subject", subject);
         email.put("body", content);
 
