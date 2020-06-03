@@ -1,6 +1,7 @@
 package egov.casemanagement.web.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import egov.casemanagement.service.EmployeeService;
 import egov.casemanagement.service.UserService;
 import egov.casemanagement.utils.EmailNotificationService;
 import egov.casemanagement.web.models.EmployeeCreateRequest;
@@ -23,7 +24,8 @@ public class EmployeeController {
 
     private final HttpServletRequest request;
 
-    private UserService userService;
+    @Autowired
+    private EmployeeService employeeService;
 
     @Autowired
     private EmailNotificationService emailNotificationService;
@@ -32,13 +34,11 @@ public class EmployeeController {
     public EmployeeController(ObjectMapper objectMapper, HttpServletRequest request, UserService userService) {
         this.objectMapper = objectMapper;
         this.request = request;
-        this.userService = userService;
     }
 
     @RequestMapping(value = "/_create", method = RequestMethod.POST)
     public ResponseEntity<Void> createEmployee(@Valid @RequestBody EmployeeCreateRequest employeeCreateRequest) throws Exception{
-        userService.createEmployee(employeeCreateRequest);
-        emailNotificationService.sendOnboardingEmployeeEmail(employeeCreateRequest);
+        employeeService.createEmployee(employeeCreateRequest);
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
