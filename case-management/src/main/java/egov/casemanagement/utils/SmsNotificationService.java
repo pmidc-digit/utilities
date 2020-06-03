@@ -2,9 +2,8 @@ package egov.casemanagement.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import egov.dataupload.config.Configuration;
-import egov.dataupload.producer.Producer;
-import egov.dataupload.web.models.CaseCreateRequest;
+import egov.casemanagement.config.Configuration;
+import egov.casemanagement.producer.Producer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

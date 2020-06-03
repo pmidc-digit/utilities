@@ -15,7 +15,7 @@
       "type": "object",
       "properties": {
         "temperature": {
-          "type": "string"
+          "type": ["number", "string"]
         },
         "symptoms": {
           "type": "string",
