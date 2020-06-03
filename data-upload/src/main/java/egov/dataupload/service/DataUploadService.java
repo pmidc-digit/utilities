@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static egov.dataupload.utils.Utils.getErrorMessages;
+
 @Service
 @Slf4j
 public class DataUploadService {
@@ -96,7 +98,7 @@ public class DataUploadService {
                             outputRecord.add("OK");
                         } catch (HttpClientErrorException e) {
                             outputRecord.add("FAIL");
-                            outputRecord.add(e.getResponseBodyAsString());
+                            outputRecord.add(getErrorMessages(e.getResponseBodyAsString()));
                         } catch (Exception e) {
                             outputRecord.add("FAIL");
                             outputRecord.add("SERVER_ERROR");
