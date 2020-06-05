@@ -76,19 +76,19 @@ public class ElasticSearchRepository implements SearchRepository{
         List<QueryBuilder> queries = new ArrayList<>();
 
         if(request.getCaseId() != null)
-            queries.add(QueryBuilders.termsQuery("case.caseId.keyword", request.getCaseId()));
+            queries.add(QueryBuilders.termsQuery("case.caseId", request.getCaseId()));
 
         if(request.getUserUuids() != null)
-            queries.add(QueryBuilders.termsQuery("case.userUuid.keyword", request.getUserUuids()));
+            queries.add(QueryBuilders.termsQuery("case.userUuid", request.getUserUuids()));
 
         if(request.getStatus() != null)
-            queries.add(QueryBuilders.termsQuery("case.status.keyword", request.getStatus()));
+            queries.add(QueryBuilders.termsQuery("case.status", request.getStatus()));
 
         if(request.getUuid() != null)
-            queries.add(QueryBuilders.termsQuery("case.uuid.keyword", request.getUuid()));
+            queries.add(QueryBuilders.termsQuery("case.uuid", request.getUuid()));
 
         if(request.getTenantId() != null)
-            queries.add(QueryBuilders.termsQuery("case.tenantId.keyword", request.getTenantId()));
+            queries.add(QueryBuilders.termsQuery("case.tenantId", request.getTenantId()));
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (QueryBuilder curr : queries) {
@@ -105,9 +105,9 @@ public class ElasticSearchRepository implements SearchRepository{
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("case.healthDetails.auditDetails.lastModifiedTime");
         rangeQueryBuilder.gte(timestamp);
 
-        MatchQueryBuilder statusQuery = QueryBuilders.matchQuery("case.status.keyword", "active");
+        MatchQueryBuilder statusQuery = QueryBuilders.matchQuery("case.status", "active");
 
-        MatchQueryBuilder tenantIdQuery = QueryBuilders.matchQuery("case.tenantId.keyword", tenantId);
+        MatchQueryBuilder tenantIdQuery = QueryBuilders.matchQuery("case.tenantId", tenantId);
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.should(statusQuery);

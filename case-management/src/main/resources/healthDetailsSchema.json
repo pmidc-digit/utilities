@@ -17,6 +17,18 @@
         "temperature": {
           "type": ["number", "string"]
         },
+        "fever": {
+          "type": ["string", "boolean"],
+          "enum": ["true", "false", true, false]
+        },
+        "breathingIssues": {
+          "type": ["string", "boolean"],
+          "enum": ["true", "false", true, false]
+        },
+        "dryCough": {
+          "type": ["string", "boolean"],
+          "enum": ["true", "false", true, false]
+        },
         "symptoms": {
           "type": "string",
           "minLength": 1,

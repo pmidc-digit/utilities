@@ -31,10 +31,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static egov.dataupload.utils.Utils.getErrorMessages;
 
@@ -77,15 +74,22 @@ public class DataUploadService {
                 Mapping mapping = getMappingForTemplate(service, template);
 
                 CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(input);
-                List<String> outputHeaders = getOutputHeaders(csvParser);
 
+                // validate headers by trimming and ignoring case
+                validateHeaders(mapping.getHeaders(), csvParser.getHeaderNames());
+
+                List<String> outputHeaders = getOutputHeaders(csvParser);
                 CSVPrinter csvPrinter = new CSVPrinter(writer,
                         CSVFormat.DEFAULT.withHeader(outputHeaders.toArray(new String[0])));
 
                 for (CSVRecord record : csvParser) {
-                    Map<String, Object> scopes = new HashMap<>(extensions);
+                    Map<String, Object> scopes = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+                    scopes.putAll(extensions);
                     List<String> outputRecord = new ArrayList<>(record.toMap().values());
-                    scopes.putAll(record.toMap());
+
+                    //trim, and then add
+                    addToScopes(scopes, record.toMap());
+
                     scopes.put("RequestInfo", objectMapper.writeValueAsString(requestInfo));
                     scopes.put("tenantId", tenantId);
                     for (Step step : mapping.getSteps()) {
@@ -126,6 +130,22 @@ public class DataUploadService {
         } finally {
             if(outputTempFile != null)
                 outputTempFile.toFile().delete();
+        }
+    }
+
+    private void addToScopes(Map<String, Object> scopes, Map<String, String> additives){
+        additives.keySet().forEach( k -> {
+            scopes.put(k.trim(), additives.get(k));
+        });
+    }
+
+    private void validateHeaders(List<String> expectedHeaders, List<String> requestHeaders){
+        for(String expectedHeader : expectedHeaders){
+            boolean isMatched =
+                    requestHeaders.stream().anyMatch( s -> s.trim().equalsIgnoreCase(expectedHeader.trim()));
+            if(!isMatched)
+                throw new CustomException("INVALID_HEADERS", "Invalid headers found. Please use the correct template " +
+                        "for this operation");
         }
     }
 
