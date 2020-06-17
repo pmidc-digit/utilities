@@ -30,9 +30,9 @@ public class ServiceRequestRepository {
 	public Object fetchResult(String uri, Object request) {
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		Object response = null;
-		log.info("URI: "+uri.toString());
+		log.info("URI: "+ uri);
 		try {
-			response = restTemplate.postForObject(uri.toString(), request, Map.class);
+			response = restTemplate.postForObject(uri, request, Map.class);
 		}catch(HttpClientErrorException e) {
 			log.error("External Service threw an Exception: ",e);
 			throw new ServiceCallException(e.getResponseBodyAsString());

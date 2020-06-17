@@ -110,4 +110,13 @@ public class Configuration {
     @Value("${send.sms.topic}")
     private String sendSmsTopic;
 
+    @Value("${cova.fetch.url}")
+    private String covaFetchUrl;
+
+    @Value("${cova.create.health.record.url}")
+    private String covaCreateHealthRecordUrl;
+
+    @Value("${cova.auth.token}")
+    private String covaAuthToken;
+
 }

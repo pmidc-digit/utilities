@@ -36,6 +36,7 @@ public class CaseApiController {
         this.caseService = caseService;
     }
 
+
     @RequestMapping(value = "/_create", method = RequestMethod.POST)
     public ResponseEntity<Void> createCase(@Valid @RequestBody CaseCreateRequest body) {
         caseService.createCase(body);
@@ -61,5 +62,6 @@ public class CaseApiController {
         List<ModelCase> cases = caseService.getDefaulterCases(tenantId);
         return new ResponseEntity<CaseSearchResponse>( new CaseSearchResponse(cases),HttpStatus.OK);
     }
+
 
 }

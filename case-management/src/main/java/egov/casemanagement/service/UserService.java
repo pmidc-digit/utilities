@@ -39,6 +39,35 @@ public class UserService {
     }
 
 
+
+    void createCovaUsers(RequestInfo requestInfo, Set<String> mobileNumbers) {
+
+        for (String mobile: mobileNumbers) {
+            User user = new User();
+            Role role = getCitizenRole();
+
+            user.setMobileNumber(mobile);
+            user.setName(getUsername(mobile));
+            user.setActive(false);
+            user.setTenantId(config.getRootTenantId());
+            user.setRoles(Collections.singletonList(role));
+            user.setType("CITIZEN");
+            user.setUserName(getUsername(mobile));
+            user.setPermanentCity(config.getRootTenantId());
+
+            //  UserDetailResponse userDetailResponse = userExists(owner,requestInfo);
+            StringBuilder uri = new StringBuilder(config.getUserHost())
+                    .append(config.getUserContextPath())
+                    .append(config.getUserCreateEndpoint());
+
+                UserDetailResponse userDetailResponse = userCall(new CreateUserRequest(requestInfo, user), uri);
+            if (userDetailResponse.getUser().get(0).getUuid() == null) {
+                throw new CustomException("INVALID USER RESPONSE", "The user created has uuid as null");
+            }
+        }
+
+    }
+
     /**
      * Creates users with uuid as username if uuid is already present for the user
      * in the request then the user is updated
@@ -126,52 +155,39 @@ public class UserService {
     /**
      * Checks if the user exists in the database
      *
-     * @param owner       The owner from the tradeLicense
+     * @param mobileNumber       The owner from the tradeLicense
      * @param requestInfo The requestInfo of the request
      * @return The search response from the user service
      */
-    private UserDetailResponse userExists(User owner, RequestInfo requestInfo) {
+    public boolean userExists(String mobileNumber, RequestInfo requestInfo) {
         UserSearchRequest userSearchRequest = new UserSearchRequest();
         userSearchRequest.setTenantId(config.getRootTenantId());
-        //   userSearchRequest.setMobileNumber(owner.getMobileNumber());
-        //   userSearchRequest.setName(owner.getName());
         userSearchRequest.setRequestInfo(requestInfo);
         userSearchRequest.setActive(false);
-        userSearchRequest.setUserType(owner.getType());
-        //   if(owner.getUuid()!=null)
-        userSearchRequest.setUuid(Collections.singletonList(owner.getUuid()));
+        userSearchRequest.setUserType("CITIZEN");
+        userSearchRequest.setUserName(getUsername(mobileNumber));
         StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
-        return userCall(userSearchRequest, uri);
+        UserDetailResponse userDetailResponse =  userCall(userSearchRequest, uri);
+        return !userDetailResponse.getUser().isEmpty();
     }
 
-
-    /**
-     * Sets the username as uuid
-     *
-     * @param owner The owner to whom the username is to assigned
-     */
-    private void setUserName(User owner) {
-//        String username = config.getUsernamePrefix() + ":" + owner.getMobileNumber();
-        String username = owner.getMobileNumber();
-        owner.setUserName(username);
+    private String getUsername(String mobileNumber) {
+        return config.getUsernamePrefix() + "-" + mobileNumber;
 
     }
 
 
-    private Set<String> getMobileNumbers(List<User> owners, RequestInfo requestInfo, String tenantId) {
-        Set<String> listOfMobileNumbers = new HashSet<>();
-        owners.forEach(owner -> {
-            listOfMobileNumbers.add(owner.getMobileNumber());
-        });
+    public Set<String> removeExistingUsers(Set<String> mobileNumbers, RequestInfo requestInfo) {
+
         StringBuilder uri = new StringBuilder(config.getUserHost()).append(config.getUserSearchEndpoint());
         UserSearchRequest userSearchRequest = new UserSearchRequest();
         userSearchRequest.setRequestInfo(requestInfo);
-        userSearchRequest.setTenantId(tenantId);
+        userSearchRequest.setTenantId(config.getRootTenantId());
         userSearchRequest.setUserType("CITIZEN");
         Set<String> availableMobileNumbers = new HashSet<>();
 
-        listOfMobileNumbers.forEach(mobilenumber -> {
-            userSearchRequest.setMobileNumber(mobilenumber);
+        mobileNumbers.forEach(mobilenumber -> {
+            userSearchRequest.setUserName(getUsername(mobilenumber));
             UserDetailResponse userDetailResponse = userCall(userSearchRequest, uri);
             if (CollectionUtils.isEmpty(userDetailResponse.getUser()))
                 availableMobileNumbers.add(mobilenumber);
