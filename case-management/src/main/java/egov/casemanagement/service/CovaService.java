@@ -70,6 +70,7 @@ public class CovaService {
 
         Map<String, Object> map = new HashMap<>();
         map.put("inspection_type", "W");
+        map.put("mobile_no", request.getMobileNumber());
         map.put("arrival_at_home", getValFromBool(true));
         map.put("question_1", getValFromBool(request.getHealthDetails().at("/0/fever").asBoolean()));
         map.put("question_2", getValFromBool(request.getHealthDetails().at("/0/dryCough").asBoolean()));
