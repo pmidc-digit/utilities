@@ -40,9 +40,7 @@ public class UserService {
 
 
 
-    void createCovaUsers(RequestInfo requestInfo, Set<String> mobileNumbers) {
-
-        for (String mobile: mobileNumbers) {
+    User createCovaUser(RequestInfo requestInfo, String mobile) {
             User user = new User();
             Role role = getCitizenRole();
 
@@ -60,11 +58,12 @@ public class UserService {
                     .append(config.getUserContextPath())
                     .append(config.getUserCreateEndpoint());
 
-                UserDetailResponse userDetailResponse = userCall(new CreateUserRequest(requestInfo, user), uri);
-            if (userDetailResponse.getUser().get(0).getUuid() == null) {
-                throw new CustomException("INVALID USER RESPONSE", "The user created has uuid as null");
-            }
-        }
+            UserDetailResponse userDetailResponse = userCall(new CreateUserRequest(requestInfo, user), uri);
+
+            if(userDetailResponse.getUser() !=null && !userDetailResponse.getUser().isEmpty())
+                return userDetailResponse.getUser().get(0);
+            else
+                return null;
 
     }
 

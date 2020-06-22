@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import egov.casemanagement.config.Configuration;
 import egov.casemanagement.models.cova.CovaData;
 import egov.casemanagement.models.cova.CovaSearchResponse;
+import egov.casemanagement.models.user.User;
 import egov.casemanagement.producer.Producer;
 import egov.casemanagement.repository.ServiceRequestRepository;
+import egov.casemanagement.utils.SmsNotificationService;
 import egov.casemanagement.web.models.HealthdetailCreateRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.request.RequestInfo;
@@ -24,6 +26,9 @@ public class CovaService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SmsNotificationService smsNotificationService;
 
     @Autowired
     private ServiceRequestRepository serviceRequestRepository;
@@ -53,7 +58,13 @@ public class CovaService {
                 mobileNumbers.add(record.getMobileNumber());
             }
             Set<String> usersToCreate = userService.removeExistingUsers(mobileNumbers, requestInfo);
-            userService.createCovaUsers(requestInfo, usersToCreate);
+            for (String mobile: usersToCreate) {
+                User user = userService.createCovaUser(requestInfo, mobile);
+                if(user !=null && user.getUuid() != null){
+                    log.info("User successfully created, sending on-boarding SMS.");
+                    smsNotificationService.sendCreateCaseSms(mobile);
+                }
+            }
         }
     }
 
