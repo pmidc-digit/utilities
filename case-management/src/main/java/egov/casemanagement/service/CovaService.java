@@ -64,6 +64,8 @@ public class CovaService {
         if( ! userService.userExists(request.getMobileNumber(), request.getRequestInfo()))
             throw new CustomException("INVALID_CREATE_REQUEST", "No COVA case registered against this number");
 
+
+        producer.push(configuration.getCovaHealthRecordTopic(), request.getMobileNumber(), request);
         HttpHeaders headers = new HttpHeaders();
         headers.set("authorization", configuration.getCovaAuthToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -79,9 +81,12 @@ public class CovaService {
         HttpEntity<Map> body = new HttpEntity<>(map, headers);
         LinkedHashMap responseMap = (LinkedHashMap) serviceRequestRepository.fetchResult(configuration.getCovaCreateHealthRecordUrl(), body);
 
-        if((int) responseMap.get("response") != 1)
+        if((int) responseMap.get("response") != 1) {
+            log.error("Error response received from API!");
+            log.error(responseMap.toString());
             throw new CustomException("HEALTH_DETAILS_SUBMITTED", "You have already submitted Self-Quarantine " +
                     "Inspection for the day.");
+        }
     }
 
     private String getValFromBool(boolean flag){
