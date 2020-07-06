@@ -22,6 +22,8 @@ public class Mapping {
     @JsonProperty("description")
     private String description = null;
 
+    @JsonProperty("headers")
+    private List<String> headers = null;
 
     @JsonProperty("steps")
     private List<Step> steps = null;
