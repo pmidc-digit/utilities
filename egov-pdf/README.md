@@ -15,7 +15,6 @@ Egov-pdf service work in between pdf-service and client requesting pdfs. Earlier
 - Collection service
 - Billing-service
 - Workflow-service
-    ```
 
 
 ### Swagger API Contract
