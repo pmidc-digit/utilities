@@ -7,14 +7,14 @@ Egov-pdf service work in between pdf-service and client requesting pdfs. Earlier
 
 ### Service Dependencies
 
-- ```egov-mdms-service
-    tl-service
-    prroperty-service
-    pdf-service
-    user-service
-    Collection service
-    Billing-service
-    workflow-service
+- egov-mdms-service
+- tl-service
+- Property-service
+- Pdf-service
+- User-service
+- Collection service
+- Billing-service
+- Workflow-service
     ```
 
 
