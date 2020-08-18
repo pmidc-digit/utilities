@@ -27,19 +27,13 @@ Egov-pdf service is new service being added which can work in between existing p
 
 For any new pdf requirement one new endpoint with validations and logic for getting data for pdf has to be added in the code. With separate endpoint for each pdf we can define access rules per pdf basis. Currently egov-pdf service has endpoint for following pdfs used in our system:-
 
-PT mutationcertificate
-
-PT bill
-
-PT receipt
-
-TL receipt
-
-TL certifcate
-
-TL renewal certificate
-
-Consolidated receipt
+- PT mutationcertificate
+- PT bill
+- PT receipt
+- TL receipt
+- TL certifcate
+- TL renewal certificate
+- Consolidated receipt
 
 #### Configurations
 NA
