@@ -39,6 +39,73 @@ For any new pdf requirement one new endpoint with validations and logic for gett
 NA
 
 ### API Details
+Currently below endpoints are in use for ‘CITIZEN' and 'EMPLOYEE’ roles
+
+Endpoint
+
+module
+
+query parameter
+
+Restrict Citizen to own records
+
+/egov-pdf/download/PT/ptreceipt
+
+property-tax
+
+uuid, tenantId
+
+yes
+
+/egov-pdf/download/PT/ptbill
+
+property-tax
+
+uuid, tenantId
+
+no
+
+/egov-pdf/download/PT/ptmutationcertificate
+
+property-tax
+
+uuid, tenantId
+
+yes
+
+/egov-pdf/download/TL/tlrenewalcertificate
+
+Tradelicense
+
+applicationNumber, tenantId
+
+yes
+
+/egov-pdf/download/TL/tlcertificate
+
+Tradelicense
+
+applicationNumber, tenantId
+
+yes
+
+/egov-pdf/download/TL/tlreceipt
+
+Tradelicense
+
+applicationNumber, tenantId
+
+yes
+
+/egov-pdf/download/PAYMENT/consolidatedreceipt
+
+Collection
+
+consumerCode, tenantId
+
+yes
+
+
 
 ### Kafka Consumers
 NA
