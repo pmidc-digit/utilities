@@ -41,13 +41,7 @@ NA
 ### API Details
 Currently below endpoints are in use for ‘CITIZEN' and 'EMPLOYEE’ roles
 
-Endpoint
-
-module
-
-query parameter
-
-Restrict Citizen to own records
+| Endpoint | module | query parameter | Restrict Citizen to own records |
 
 /egov-pdf/download/PT/ptreceipt
 
