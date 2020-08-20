@@ -19,7 +19,7 @@ Egov-pdf service work in between pdf-service and client requesting pdfs. Earlier
 
 ### Swagger API Contract
 
-NA
+http://editor.swagger.io/?url=https://raw.githubusercontent.com/egovernments/utilities/gopesh67-patch-1/docs/egov-pdf_contract.yml#!/
 
 ## Service Details
 
