@@ -11,7 +11,7 @@ paths:
   /PT/ptreceipt:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get property payment receipt pdf
       parameters:
       - name: uuid
@@ -46,7 +46,7 @@ paths:
   /PT/ptbill:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get property bill pdf
       parameters:
       - name: uuid
@@ -81,7 +81,7 @@ paths:
   /PT/ptmutationcertificate:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get property mutation certificate pdf
       parameters:
       - name: uuid
@@ -116,7 +116,7 @@ paths:
   /TL/tlrenewalcertificate:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get tradeicense renewal certificate pdf
       parameters:
       - name: applicationNumber
@@ -151,7 +151,7 @@ paths:
   /TL/tlcertificate:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get tradelicense certificate pdf
       parameters:
       - name: applicationNumber
@@ -186,7 +186,7 @@ paths:
   /TL/tlreceipt:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get tradelicense payment receipt pdf
       parameters:
       - name: applicationNumber
@@ -211,7 +211,7 @@ paths:
   /PAYMENT/consolidatedreceipt:
     post:
       tags:
-      - Chatbot
+      - egov-pdf endpoints
       summary: get consolidated payment receipt pdf
       parameters:
       - name: consumerCode
