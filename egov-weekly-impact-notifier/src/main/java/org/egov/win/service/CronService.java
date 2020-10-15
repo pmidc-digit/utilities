@@ -176,10 +176,12 @@ public class CronService {
 		List<Map<String, Object>> ivr = new ArrayList<>();
 		List<Map<String, Object>> mobiileApp = new ArrayList<>();
 		List<Map<String, Object>> webApp = new ArrayList<>();
+		List<Map<String,Object>>  whatsapp= new ArrayList<>();
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ivrPerWeek = new HashMap<>();
 			Map<String, Object> mobileAppPerWeek = new HashMap<>();
 			Map<String, Object> webAppPerWeek = new HashMap<>();
+			Map<String, Object> whatsappPerWeek = new HashMap<>();
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
 			for (int week = 0; week < noOfWeeks; week++) {
@@ -187,14 +189,16 @@ public class CronService {
 					ivrPerWeek.put("w" + week + "pgrchnlivr", record.get("ivr"));
 					mobileAppPerWeek.put("w" + week + "pgrchnlmapp", record.get("mobileapp"));
 					webAppPerWeek.put("w" + week + "pgrchnlweb", record.get("webapp"));
+					whatsappPerWeek.put("w" + week + "pgrchnlwhatsapp", record.get("whatsapp"));
 				}
 			}
 			ivr.add(ivrPerWeek);
 			mobiileApp.add(mobileAppPerWeek);
 			webApp.add(webAppPerWeek);
+			whatsapp.add(whatsappPerWeek);
 		}
 
-		PGRChannelBreakup channel = PGRChannelBreakup.builder().ivr(ivr).mobileApp(mobiileApp).webApp(webApp).build();
+		PGRChannelBreakup channel = PGRChannelBreakup.builder().ivr(ivr).mobileApp(mobiileApp).webApp(webApp).whatsapp(whatsapp).build();
 		pgr.setChannelBreakup(channel);
 	}
 
