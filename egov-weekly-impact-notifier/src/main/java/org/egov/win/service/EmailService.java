@@ -30,7 +30,7 @@ public class EmailService {
 	public String formatEmail(Email email) {
 		Template t = service.getVelocityTemplate();
 		VelocityContext context = new VelocityContext();
-		buildEmailBody(email.getBody(), context);
+		buildEmailBody(email.getData(), context);
 		StringWriter writer = new StringWriter(10000);
 		t.merge(context, writer);
 
