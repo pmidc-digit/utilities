@@ -244,11 +244,17 @@ public class CronService {
 	private void enrichBodyWithTLData(Body body) {
 		List<Map<String, Object>> data = externalAPIService.getRainmakerData(CronConstants.SEARCHER_TL);
 		List<Map<String, Object>> ulbCovered = new ArrayList<>();
-		List<Map<String, Object>> licenseIssued = new ArrayList<>();
+		List<Map<String, Object>> newLicense = new ArrayList<>();
+		List<Map<String, Object>> newLicenseIssued = new ArrayList<>();
+		List<Map<String, Object>> newRenewalLicense = new ArrayList<>();
+		List<Map<String, Object>> newRenewalLicenseIssued = new ArrayList<>();
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
-			Map<String, Object> licenseIssuedPerWeek = new HashMap<>();
+			Map<String, Object> newLicenseIssuedPerWeek = new HashMap<>();
+			Map<String, Object> newLicensePerWeek = new HashMap<>();
+			Map<String, Object> renewalLicensePerWeek = new HashMap<>();
+			Map<String, Object> renewalLicenseIssuedPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
@@ -256,20 +262,31 @@ public class CronService {
 				if (record.get("day").equals(prefix + week)) {
 					ulbCoveredPerWeek.put("w" + week + "tlulbc",
 							record.get("ulbcovered") != null ? record.get("ulbcovered") : BigDecimal.ZERO);
-					licenseIssuedPerWeek.put("w" + week + "tllicissued",
-							record.get("licenseissued") != null ? record.get("licenseissued") : BigDecimal.ZERO);
+					newLicenseIssuedPerWeek.put("w" + week + "newtllicissued",
+							record.get("newlicenseissued") != null ? record.get("newlicenseissued") : BigDecimal.ZERO);
+					newLicensePerWeek.put("w" + week + "newtllic",
+							record.get("newlicense") != null ? record.get("newlicense") : BigDecimal.ZERO);
+					renewalLicensePerWeek.put("w" + week + "newtlrlic",
+							record.get("renewallicense") != null ? record.get("renewallicense") : BigDecimal.ZERO);
+					renewalLicenseIssuedPerWeek.put("w" + week + "newtlrlicissued",
+							record.get("renewallicenseissued") != null ? record.get("renewallicenseissued")
+									: BigDecimal.ZERO);
 					revenueCollectedPerWeek.put("w" + week + "tlrevcoll",
 							record.get("revenuecollected") != null ? record.get("revenuecollected") : BigDecimal.ZERO);
 
 				}
 			}
 			ulbCovered.add(ulbCoveredPerWeek);
-			licenseIssued.add(licenseIssuedPerWeek);
+			newLicenseIssued.add(newLicenseIssuedPerWeek);
+			newLicense.add(newLicensePerWeek);
+			newRenewalLicense.add(renewalLicensePerWeek);
+			newRenewalLicenseIssued.add(renewalLicenseIssuedPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
 		}
 
-		TL tl = TL.builder().ulbCovered(ulbCovered).licenseIssued(licenseIssued).revenueCollected(revenueCollected)
-				.build();
+		TL tl = TL.builder().ulbCovered(ulbCovered).newLicenseIssued(newLicenseIssued).newLicense(newLicense)
+				.renewalLicense(newRenewalLicense).renewalLicenseIssued(newRenewalLicenseIssued)
+				.revenueCollected(revenueCollected).build();
 		body.setTl(tl);
 	}
 
@@ -329,27 +346,32 @@ public class CronService {
 
 	private void enrichBodyWithMiscCollData(Body body) {
 		List<Map<String, Object>> data = externalAPIService.getRainmakerData(CronConstants.SEARCHER_MC);
+		List<Map<String, Object>> ulbCovered = new ArrayList<>();
 		List<Map<String, Object>> receiptsGenerated = new ArrayList<>();
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
 		for (Map<String, Object> record : data) {
+			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
 			Map<String, Object> receiptsGeneratedPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
 			for (int week = 0; week < noOfWeeks; week++) {
 				if (record.get("day").equals(prefix + week)) {
+					ulbCoveredPerWeek.put("w" + week + "mculbc",
+							record.get("ulbcovered") != null ? record.get("ulbcovered") : BigDecimal.ZERO);
 					receiptsGeneratedPerWeek.put("w" + week + "mcrecgen",
 							record.get("receiptscreated") != null ? record.get("receiptscreated") : BigDecimal.ZERO);
 					revenueCollectedPerWeek.put("w" + week + "mcrevcoll",
 							record.get("revenuecollected") != null ? record.get("revenuecollected") : BigDecimal.ZERO);
 				}
 			}
+			ulbCovered.add(ulbCoveredPerWeek);
 			receiptsGenerated.add(receiptsGeneratedPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
 		}
 
-		MiscCollections miscCollections = MiscCollections.builder().receiptsGenerated(receiptsGenerated)
-				.revenueCollected(revenueCollected).build();
+		MiscCollections miscCollections = MiscCollections.builder().ulbCovered(ulbCovered)
+				.receiptsGenerated(receiptsGenerated).revenueCollected(revenueCollected).build();
 		body.setMiscCollections(miscCollections);
 	}
 
