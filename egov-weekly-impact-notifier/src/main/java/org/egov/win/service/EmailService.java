@@ -94,6 +94,7 @@ public class EmailService {
 		fillData(tl.getRenewalLicenseIssued(), context);
 		fillData(tl.getUlbCovered(), context);
 		fillData(tl.getRevenueCollected(), context);
+		fillData(tl.getReceiptCreated(),context);
 	}
 
 	private void enrichWSData(WaterAndSewerage ws, VelocityContext context) {

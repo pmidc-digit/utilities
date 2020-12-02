@@ -249,6 +249,7 @@ public class CronService {
 		List<Map<String, Object>> newRenewalLicense = new ArrayList<>();
 		List<Map<String, Object>> newRenewalLicenseIssued = new ArrayList<>();
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
+		List<Map<String, Object>> receiptGenerated = new ArrayList<>();
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
 			Map<String, Object> newLicenseIssuedPerWeek = new HashMap<>();
@@ -256,6 +257,7 @@ public class CronService {
 			Map<String, Object> renewalLicensePerWeek = new HashMap<>();
 			Map<String, Object> renewalLicenseIssuedPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
+			Map<String, Object> receiptGeneratedPerWeek = new HashMap<>();
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
 			for (int week = 0; week < noOfWeeks; week++) {
@@ -273,7 +275,8 @@ public class CronService {
 									: BigDecimal.ZERO);
 					revenueCollectedPerWeek.put("w" + week + "tlrevcoll",
 							record.get("revenuecollected") != null ? record.get("revenuecollected") : BigDecimal.ZERO);
-
+					receiptGeneratedPerWeek.put("w" + week + "tlrctcrt",
+							record.get("receiptscreated") != null ? record.get("receiptscreated") : BigDecimal.ZERO);
 				}
 			}
 			ulbCovered.add(ulbCoveredPerWeek);
@@ -282,11 +285,14 @@ public class CronService {
 			newRenewalLicense.add(renewalLicensePerWeek);
 			newRenewalLicenseIssued.add(renewalLicenseIssuedPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
+			receiptGenerated.add(receiptGeneratedPerWeek);
 		}
 
 		TL tl = TL.builder().ulbCovered(ulbCovered).newLicenseIssued(newLicenseIssued).newLicense(newLicense)
 				.renewalLicense(newRenewalLicense).renewalLicenseIssued(newRenewalLicenseIssued)
-				.revenueCollected(revenueCollected).build();
+				.revenueCollected(revenueCollected)
+				.receiptCreated(receiptGenerated)
+				.build();
 		body.setTl(tl);
 	}
 
