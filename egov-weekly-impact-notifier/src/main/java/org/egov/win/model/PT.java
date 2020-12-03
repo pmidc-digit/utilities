@@ -24,4 +24,5 @@ public class PT {
 
 	private List<Map<String, Object>> noOfProperties; //unit - thousands
 
+	private List<Map<String, Object>> receiptsGenerated;
 }

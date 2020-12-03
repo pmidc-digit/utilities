@@ -120,8 +120,12 @@ public class CronService {
 			Integer wsIndex = 0;
 			for (int week = 0; week < noOfWeeks; week++) {
 				if (record.get("day").equals(prefix + week)) {
-					ulbCoveredPerWeek.put("w" + week + "ulbc", record.get("ulbcovered")); // ws not added because we
-																							// need a union logic.
+					ulbCoveredPerWeek.put("w" + week + "ulbc", String.format("%.0f", record.get("ulbcovered"))); // ws
+																													// not
+																													// added
+																													// because
+																													// we
+					// need a union logic.
 					revenueCollectedPerWeek
 							.put("w" + week + "revcoll",
 									(new BigDecimal(record.get("revenuecollected") != null
@@ -131,15 +135,9 @@ public class CronService {
 															? ((Map) (map.get(prefix + week))).get("revenueCollected")
 																	.toString()
 															: BigDecimal.ZERO.toString()))));
-					servicesAppliedPerWeek
-							.put("w" + week + "serapp",
-									(new BigDecimal(record.get("servicesapplied") != null
-											? record.get("servicesapplied").toString()
-											: BigDecimal.ZERO.toString()).add(new BigDecimal(
-													((Map) (map.get(prefix + week))).get("servicesApplied") != null
-															? ((Map) (map.get(prefix + week))).get("servicesApplied")
-																	.toString()
-															: BigDecimal.ZERO.toString()))));
+	
+					servicesAppliedPerWeek.put("w" + week + "serapp", record.get("servicesapplied"));
+
 					noOfCitizensResgisteredPerWeek.put("w" + week + "citreg", record.get("noofusersregistered"));
 					wsIndex++;
 				}
@@ -214,30 +212,38 @@ public class CronService {
 		List<Map<String, Object>> ulbCovered = new ArrayList<>();
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
 		List<Map<String, Object>> noOfProperties = new ArrayList<>();
+		List<Map<String, Object>> receiptGenerated = new ArrayList<>();
+
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
 			Map<String, Object> noOfPropertiesPerWeek = new HashMap<>();
+			Map<String, Object> receiptGeneratedPerWeek = new HashMap<>();
+
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
 			for (int week = 0; week < noOfWeeks; week++) {
 				if (record.get("day").equals(prefix + week)) {
 					ulbCoveredPerWeek.put("w" + week + "ptulbc",
-							record.get("ulbcovered") != null ? record.get("ulbcovered") : BigDecimal.ZERO);
+							record.get("ulbcovered") != null ? String.format("%.0f", record.get("ulbcovered"))
+									: BigDecimal.ZERO);
 					revenueCollectedPerWeek.put("w" + week + "ptrevcoll",
 							record.get("revenuecollected") != null ? record.get("revenuecollected") : BigDecimal.ZERO);
 					noOfPropertiesPerWeek.put("w" + week + "ptnoofprp",
 							record.get("noofpropertiescreated") != null ? record.get("noofpropertiescreated")
 									: BigDecimal.ZERO);
+					receiptGeneratedPerWeek.put("w" + week + "ptrcptgen",
+							record.get("receiptscreated") != null ? record.get("receiptscreated") : BigDecimal.ZERO);
 				}
 			}
 			ulbCovered.add(ulbCoveredPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
 			noOfProperties.add(noOfPropertiesPerWeek);
+			receiptGenerated.add(receiptGeneratedPerWeek);
 		}
 
 		PT pt = PT.builder().noOfProperties(noOfProperties).ulbCovered(ulbCovered).revenueCollected(revenueCollected)
-				.build();
+				.receiptsGenerated(receiptGenerated).build();
 		body.setPt(pt);
 	}
 
@@ -263,7 +269,8 @@ public class CronService {
 			for (int week = 0; week < noOfWeeks; week++) {
 				if (record.get("day").equals(prefix + week)) {
 					ulbCoveredPerWeek.put("w" + week + "tlulbc",
-							record.get("ulbcovered") != null ? record.get("ulbcovered") : BigDecimal.ZERO);
+							record.get("ulbcovered") != null ? String.format("%.0f", record.get("ulbcovered"))
+									: BigDecimal.ZERO);
 					newLicenseIssuedPerWeek.put("w" + week + "newtllicissued",
 							record.get("newlicenseissued") != null ? record.get("newlicenseissued") : BigDecimal.ZERO);
 					newLicensePerWeek.put("w" + week + "newtllic",
@@ -290,9 +297,7 @@ public class CronService {
 
 		TL tl = TL.builder().ulbCovered(ulbCovered).newLicenseIssued(newLicenseIssued).newLicense(newLicense)
 				.renewalLicense(newRenewalLicense).renewalLicenseIssued(newRenewalLicenseIssued)
-				.revenueCollected(revenueCollected)
-				.receiptCreated(receiptGenerated)
-				.build();
+				.revenueCollected(revenueCollected).receiptCreated(receiptGenerated).build();
 		body.setTl(tl);
 	}
 
@@ -364,7 +369,8 @@ public class CronService {
 			for (int week = 0; week < noOfWeeks; week++) {
 				if (record.get("day").equals(prefix + week)) {
 					ulbCoveredPerWeek.put("w" + week + "mculbc",
-							record.get("ulbcovered") != null ? record.get("ulbcovered") : BigDecimal.ZERO);
+							record.get("ulbcovered") != null ? String.format("%.0f", record.get("ulbcovered"))
+									: BigDecimal.ZERO);
 					receiptsGeneratedPerWeek.put("w" + week + "mcrecgen",
 							record.get("receiptscreated") != null ? record.get("receiptscreated") : BigDecimal.ZERO);
 					revenueCollectedPerWeek.put("w" + week + "mcrevcoll",
