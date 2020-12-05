@@ -69,11 +69,12 @@ public class CronService {
 					&& email.getData().getMiscCollections() != null) {
 				String content = emailService.formatEmail(email);
 				send(email, content);
+			}else {
+				log.info("Email will not be sent, ERROR: data issue");
 			}
 		} catch (Exception e) {
 			log.info("Email will not be sent, ERROR: ", e);
 		}
-		log.info("Email will not be sent, ERROR: data issue");
 	}
 
 	private Email getDataFromDb() {
