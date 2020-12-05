@@ -63,12 +63,17 @@ public class CronService {
 	public void fetchData() {
 		try {
 			Email email = getDataFromDb();
-			String content = emailService.formatEmail(email);
-			send(email, content);
+
+			if (email != null & email.getData() != null && email.getData().getStateWide() != null
+					&& email.getData().getPt() != null && email.getData().getTl() != null
+					&& email.getData().getMiscCollections() != null) {
+				String content = emailService.formatEmail(email);
+				send(email, content);
+			}
 		} catch (Exception e) {
 			log.info("Email will not be sent, ERROR: ", e);
 		}
-
+		log.info("Email will not be sent, ERROR: data issue");
 	}
 
 	private Email getDataFromDb() {
@@ -148,9 +153,12 @@ public class CronService {
 			noOfCitizensResgistered.add(noOfCitizensResgisteredPerWeek);
 		}
 
-		StateWide stateWide = StateWide.builder().noOfCitizensResgistered(noOfCitizensResgistered)
-				.revenueCollected(revenueCollected).servicesApplied(servicesApplied).ulbCovered(ulbCovered).build();
-		body.setStateWide(stateWide);
+		if (!data.isEmpty()) {
+			StateWide stateWide = StateWide.builder().noOfCitizensResgistered(noOfCitizensResgistered)
+					.revenueCollected(revenueCollected).servicesApplied(servicesApplied).ulbCovered(ulbCovered).build();
+			body.setStateWide(stateWide);
+		}
+
 	}
 
 	private void enrichBodyWithPGRData(Body body) {
@@ -241,10 +249,11 @@ public class CronService {
 			noOfProperties.add(noOfPropertiesPerWeek);
 			receiptGenerated.add(receiptGeneratedPerWeek);
 		}
-
-		PT pt = PT.builder().noOfProperties(noOfProperties).ulbCovered(ulbCovered).revenueCollected(revenueCollected)
-				.receiptsGenerated(receiptGenerated).build();
-		body.setPt(pt);
+		if (!data.isEmpty()) {
+			PT pt = PT.builder().noOfProperties(noOfProperties).ulbCovered(ulbCovered)
+					.revenueCollected(revenueCollected).receiptsGenerated(receiptGenerated).build();
+			body.setPt(pt);
+		}
 	}
 
 	private void enrichBodyWithTLData(Body body) {
@@ -295,10 +304,12 @@ public class CronService {
 			receiptGenerated.add(receiptGeneratedPerWeek);
 		}
 
-		TL tl = TL.builder().ulbCovered(ulbCovered).newLicenseIssued(newLicenseIssued).newLicense(newLicense)
-				.renewalLicense(newRenewalLicense).renewalLicenseIssued(newRenewalLicenseIssued)
-				.revenueCollected(revenueCollected).receiptCreated(receiptGenerated).build();
-		body.setTl(tl);
+		if (!data.isEmpty()) {
+			TL tl = TL.builder().ulbCovered(ulbCovered).newLicenseIssued(newLicenseIssued).newLicense(newLicense)
+					.renewalLicense(newRenewalLicense).renewalLicenseIssued(newRenewalLicenseIssued)
+					.revenueCollected(revenueCollected).receiptCreated(receiptGenerated).build();
+			body.setTl(tl);
+		}
 	}
 
 	private void enrichBodyWithFirenocData(Body body) {
@@ -381,10 +392,11 @@ public class CronService {
 			receiptsGenerated.add(receiptsGeneratedPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
 		}
-
-		MiscCollections miscCollections = MiscCollections.builder().ulbCovered(ulbCovered)
-				.receiptsGenerated(receiptsGenerated).revenueCollected(revenueCollected).build();
-		body.setMiscCollections(miscCollections);
+		if (!data.isEmpty()) {
+			MiscCollections miscCollections = MiscCollections.builder().ulbCovered(ulbCovered)
+					.receiptsGenerated(receiptsGenerated).revenueCollected(revenueCollected).build();
+			body.setMiscCollections(miscCollections);
+		}
 	}
 
 	private void send(Email email, String content) {
