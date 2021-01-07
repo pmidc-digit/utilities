@@ -30,10 +30,10 @@ config:
       - work-dir: "kuberhealthy-checks"
         image-name: "kuberhealthy-checks"
 
-  - name: "builds/utilities/egov-pdf"
+  - name: "builds/utilities/pdf-util"
     build:
-      - work-dir: "egov-pdf"
-        image-name: "egov-pdf"  
+      - work-dir: "pdf-util"
+        image-name: "pdf-util"
 
   - name: "builds/utilities/epass-chatbot"
     build:

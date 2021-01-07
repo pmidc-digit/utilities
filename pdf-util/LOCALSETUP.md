@@ -1,6 +1,6 @@
 # Local Setup
 
-To setup the egov-pdf service in your local system, clone the [utilities Service repository](https://github.com/egovernments/utilities).
+To setup the pdf-util service in your local system, clone the [utilities Service repository](https://github.com/egovernments/utilities).
 
 ## Dependencies
 
@@ -42,6 +42,6 @@ payments: process.env.EGOV_PAYMENTS_HOST || HOST || "http://localhost:8090/",
 workflow: process.env.EGOV_WORKFLOW_HOST || HOST || "http://localhost:8091/"
 ```
 - Open the terminal and run the following command
-    - `cd [filepath to egov-pdf service]`
+    - `cd [filepath to pdf-util service]`
     - `npm install`
     - `npm start`

@@ -1,17 +1,17 @@
 openapi: 3.0.1
 info:
-  title: Egov-pdf service
-  description: APIs available in Egov-pdf service to get different pdfs
+  title: Pdf-util service
+  description: APIs available in Pdf-util service to get different pdfs
   contact:
     name: Abhishek Jain
   version: 1.0.0
 servers:
-- url: /egov-pdf/download
+- url: /pdf-util/download
 paths:
   /PT/ptreceipt:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get property payment receipt pdf
       parameters:
       - name: uuid
@@ -46,7 +46,7 @@ paths:
   /PT/ptbill:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get property bill pdf
       parameters:
       - name: uuid
@@ -81,7 +81,7 @@ paths:
   /PT/ptmutationcertificate:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get property mutation certificate pdf
       parameters:
       - name: uuid
@@ -116,7 +116,7 @@ paths:
   /TL/tlrenewalcertificate:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get tradeicense renewal certificate pdf
       parameters:
       - name: applicationNumber
@@ -151,7 +151,7 @@ paths:
   /TL/tlcertificate:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get tradelicense certificate pdf
       parameters:
       - name: applicationNumber
@@ -186,7 +186,7 @@ paths:
   /TL/tlreceipt:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get tradelicense payment receipt pdf
       parameters:
       - name: applicationNumber
@@ -211,7 +211,7 @@ paths:
   /PAYMENT/consolidatedreceipt:
     post:
       tags:
-      - egov-pdf endpoints
+      - pdf-util endpoints
       summary: get consolidated payment receipt pdf
       parameters:
       - name: consumerCode
