@@ -55,9 +55,9 @@ config:
         image-name: "data-upload"
         dockerfile: "build/maven/Dockerfile"
 
-  - name: "builds/utilities/egov-custom-consumer"
+  - name: "builds/utilities/custom-consumer"
     build:
-      - work-dir: "egov-custom-consumer"
-        image-name: "egov-custom-consumer"
+      - work-dir: "custom-consumer"
+        image-name: "custom-consumer"
         dockerfile: "build/maven/Dockerfile"
 
