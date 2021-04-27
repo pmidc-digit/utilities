@@ -42,7 +42,6 @@ router.post(
           false
         );
       } catch (ex) {
-        console.log(ex.stack);
         if (ex.response && ex.response.data) console.log(ex.response.data);
         return renderError(res, "Failed to query details of tradelicense", 500);
       }
@@ -64,7 +63,6 @@ router.post(
             bussinessService
           );
         } catch (ex) {
-          console.log(ex.stack);
           if (ex.response && ex.response.data) console.log(ex.response.data);
           return renderError(
             res,
@@ -84,7 +82,7 @@ router.post(
               requestinfo
             );
           } catch (ex) {
-            console.log(ex.stack);
+            
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(
               res,
@@ -109,7 +107,7 @@ router.post(
         );
       }
     } catch (ex) {
-      console.log(ex.stack);
+      return renderError(res, "Failed to query receipt details of tradelicense", 500);
     }
   })
 );
@@ -140,7 +138,7 @@ router.post(
           false
         );
       } catch (ex) {
-        console.log(ex.stack);
+        
         if (ex.response && ex.response.data) console.log(ex.response.data);
         return renderError(res, "Failed to query details of tradelicense", 500);
       }
@@ -168,7 +166,7 @@ router.post(
             requestinfo
           );
         } catch (ex) {
-          console.log(ex.stack);
+          
           if (ex.response && ex.response.data) console.log(ex.response.data);
           return renderError(
             res,
@@ -190,7 +188,7 @@ router.post(
         );
       }
     } catch (ex) {
-      console.log(ex.stack);
+      return renderError(res, "Failed to query certificate details of tradelicense", 500);
     }
   })
 );
@@ -221,7 +219,7 @@ router.post(
           false
         );
       } catch (ex) {
-        console.log(ex.stack);
+        
         if (ex.response && ex.response.data) console.log(ex.response.data);
         return renderError(res, "Failed to query details of tradelicense", 500);
       }
@@ -256,7 +254,7 @@ router.post(
             requestinfo
           );
         } catch (ex) {
-          console.log(ex.stack);
+          
           if (ex.response && ex.response.data) console.log(ex.response.data);
           return renderError(
             res,
@@ -278,7 +276,7 @@ router.post(
         );
       }
     } catch (ex) {
-      console.log(ex.stack);
+      return renderError(res, "Failed to query certificate details of tradelicense", 500);
     }
   })
 );
@@ -309,7 +307,7 @@ router.post(
            true
          );
        } catch (ex) {
-         console.log(ex.stack);
+         
          if (ex.response && ex.response.data) console.log(ex.response.data);
          return renderError(res, "Failed to query details of tradelicense");
        }
@@ -331,7 +329,7 @@ router.post(
              requestinfo
            );
          } catch (ex) {
-           console.log(ex.stack);
+           
            if (ex.response && ex.response.data) console.log(ex.response.data);
            return renderError(res, `Failed to query bills for tradelicense`);
          }
@@ -349,7 +347,7 @@ router.post(
                requestinfo
              );
            } catch (ex) {
-             console.log(ex.stack);
+             
              if (ex.response && ex.response.data) console.log(ex.response.data);
              return renderError(
                res,
@@ -372,7 +370,7 @@ router.post(
          );
        }
      } catch (ex) {
-       console.log(ex.stack);
+      return renderError(res, "Failed to query bill details of tradelicense", 500);
      }
    })
  );

@@ -33,7 +33,7 @@ var router = express.Router();
        try {
          resBill = await search_billV2(tenantId, consumerCode, bussinessService, requestinfo);
        } catch (ex) {
-         console.log(ex.stack);
+         
          if (ex.response && ex.response.data) console.log(ex.response.data);
          return renderError(res, "Failed to query details of the bill");
        }
@@ -52,7 +52,7 @@ var router = express.Router();
              requestinfo
            );
          } catch (ex) {
-           console.log(ex.stack);
+           
            if (ex.response && ex.response.data) console.log(ex.response.data);
            return renderError(res, "Failed to generate PDF for the bill");
          }
@@ -67,8 +67,8 @@ var router = express.Router();
          return renderError(res, "There is no bill for this code");
        }
      } catch (ex) {
-       console.log(ex.stack);
-     }
+      return renderError(res, "Failed to query details of the bill");
+    }
    })
  );
 
@@ -94,7 +94,7 @@ var router = express.Router();
         try {
           billAmendment = await search_amendment(tenantId, amendmentId, bussinessService, requestinfo);
         } catch (ex) {
-          console.log(ex.stack);
+          
           if (ex.response && ex.response.data) console.log(ex.response.data);
           return renderError(res, "Failed to query details of the bill amendment");
         }
@@ -112,7 +112,7 @@ var router = express.Router();
               requestinfo
             );
           } catch (ex) {
-            console.log(ex.stack);
+            
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(res, "Failed to generate PDF for the bill amendment");
           }
@@ -127,7 +127,7 @@ var router = express.Router();
           return renderError(res, "There is no bill amendment for this amendment id");
         }
       } catch (ex) {
-        console.log(ex.stack);
+        return renderError(res, "Failed to query details of the bill amendment");
       }
     })
   );

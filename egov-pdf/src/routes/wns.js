@@ -57,7 +57,6 @@ router.post(
             }
           
         } catch (ex) {
-          console.log(ex.stack);
           if (ex.response && ex.response.data) console.log(ex.response.data);
           return renderError(res, "Failed to query details of water and sewerage application");
         }
@@ -79,7 +78,6 @@ router.post(
               requestinfo
             );
           } catch (ex) {
-            console.log(ex.stack);
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(res, `Failed to query bills for water application`);
           }
@@ -97,7 +95,6 @@ router.post(
                 requestinfo
               );
             } catch (ex) {
-              console.log(ex.stack);
               let errorMessage;
               if(bussinessService == 'WS')
                 errorMessage = "Failed to generate PDF for water connection bill";
@@ -135,7 +132,6 @@ router.post(
               requestinfo
             );
           } catch (ex) {
-            console.log(ex.stack);
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(res, `Failed to query bills for sewerage application`);
           }
@@ -153,7 +149,6 @@ router.post(
                 requestinfo
               );
             } catch (ex) {
-              console.log(ex.stack);
               let errorMessage;
               if(bussinessService == 'SW')
                 errorMessage = "Failed to generate PDF for sewerage connection bill";
@@ -183,7 +178,7 @@ router.post(
           );
         }
       } catch (ex) {
-        console.log(ex.stack);
+        return renderError(res, `Failed to query bill for water and sewerage application`);
       }
     })
   );
@@ -226,7 +221,6 @@ router.post(
             }
           
         } catch (ex) {
-          console.log(ex.stack);
           if (ex.response && ex.response.data) console.log(ex.response.data);
           return renderError(res, "Failed to query details of water and sewerage application");
         }
@@ -247,7 +241,6 @@ router.post(
                 bussinessService
               );
           } catch (ex) {
-            console.log(ex.stack);
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(res, `Failed to query receipt for water application`);
           }
@@ -264,7 +257,6 @@ router.post(
                 requestinfo
               );
             } catch (ex) {
-              console.log(ex.stack);
               let errorMessage;
               if(bussinessService == 'WS')
                 errorMessage = "Failed to generate PDF for water connection receipt";
@@ -302,7 +294,6 @@ router.post(
                 bussinessService
               );
           } catch (ex) {
-            console.log(ex.stack);
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(res, `Failed to query receipt for sewerage application`);
           }
@@ -319,7 +310,6 @@ router.post(
                 requestinfo
               );
             } catch (ex) {
-              console.log(ex.stack);
               let errorMessage;
               if(bussinessService == 'SW')
                 errorMessage = "Failed to generate PDF for sewerage connection receipt";
@@ -349,7 +339,7 @@ router.post(
           );
         }
       } catch (ex) {
-        console.log(ex.stack);
+        return renderError(res, `Failed to query receipt for water and sewerage application`);
       }
     })
   );  

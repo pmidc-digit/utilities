@@ -84,7 +84,7 @@ var {
               requestinfo
             );
           } catch (ex) {
-            console.log(ex.stack);
+            
             if (ex.response && ex.response.data) console.log(ex.response.data);
             return renderError(
               res,
@@ -117,7 +117,7 @@ var {
                 requestinfo
               );
             } catch (ex) {
-             // console.log(ex.stack);
+             // 
              // if (ex.response && ex.response.data) console.log(ex.response.data);
               return renderError(
                 res,
@@ -147,7 +147,7 @@ var {
         }
        
       } catch (ex) {
-        console.log(ex.stack);
+        return renderError(res, "Failed to query details of Challan", 500);
       }
     })
   );
@@ -208,7 +208,7 @@ var {
                 requestinfo
               );
             } catch (ex) {
-              console.log(ex.stack);
+              
               if (ex.response && ex.response.data) console.log(ex.response.data);
               return renderError(
                 res,
@@ -229,7 +229,7 @@ var {
          
        
       } catch (ex) {
-        console.log(ex.stack);
+        return renderError(res, "Failed to query bill details of Challan", 500);
       }
     })
   );
