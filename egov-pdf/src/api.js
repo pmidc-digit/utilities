@@ -103,12 +103,12 @@ async function search_bill(consumerCode, tenantId, requestinfo) {
   });
 }
 
-async function search_tllicense(applicationNumber, tenantId, requestinfo) {
+async function search_tllicense(applicationNumber, tenantId, requestinfo, allowCitizenTOSearchOthersRecords) {
   var params = {
     tenantId: tenantId,
     applicationNumber: applicationNumber,
   };
-  if (checkIfCitizen(requestinfo)) {
+  if (checkIfCitizen(requestinfo) && allowCitizenTOSearchOthersRecords != true) {
     var mobileNumber = requestinfo.RequestInfo.userInfo.mobileNumber;
     var userName = requestinfo.RequestInfo.userInfo.userName;
     params["mobileNumber"] = mobileNumber || userName;
@@ -116,6 +116,42 @@ async function search_tllicense(applicationNumber, tenantId, requestinfo) {
   return await axios({
     method: "post",
     url: url.resolve(config.host.tl, config.paths.tl_search),
+    data: requestinfo,
+    params,
+  });
+}
+
+async function search_water(applicationNumber, tenantId, requestinfo, allowCitizenTOSearchOthersRecords) {
+  var params = {
+    tenantId: tenantId,
+    applicationNumber: applicationNumber,
+  };
+  if (checkIfCitizen(requestinfo) && allowCitizenTOSearchOthersRecords != true) {
+    var mobileNumber = requestinfo.RequestInfo.userInfo.mobileNumber;
+    var userName = requestinfo.RequestInfo.userInfo.userName;
+    params["mobileNumber"] = mobileNumber || userName;
+  }
+  return await axios({
+    method: "post",
+    url: url.resolve(config.host.wns, config.paths.water_search),
+    data: requestinfo,
+    params,
+  });
+}
+
+async function search_sewerage(applicationNumber, tenantId, requestinfo, allowCitizenTOSearchOthersRecords) {
+  var params = {
+    tenantId: tenantId,
+    applicationNumber: applicationNumber,
+  };
+  if (checkIfCitizen(requestinfo) && allowCitizenTOSearchOthersRecords != true) {
+    var mobileNumber = requestinfo.RequestInfo.userInfo.mobileNumber;
+    var userName = requestinfo.RequestInfo.userInfo.userName;
+    params["mobileNumber"] = mobileNumber || userName;
+  }
+  return await axios({
+    method: "post",
+    url: url.resolve(config.host.wns, config.paths.sewerage_search),
     data: requestinfo,
     params,
   });
@@ -154,7 +190,7 @@ async function search_bill_genie(data,requestinfo) {
   });
 }
 
-async function search_billV2(tenantId, consumerCode,serviceId,requestinfo) {
+async function search_billV2(tenantId, consumerCode, serviceId, requestinfo) {
   //console.log("search_billV2 consumerCode--",consumerCode,"tenantId",tenantId,"serviceId",serviceId);
   return await axios({
     method: "post",
@@ -164,6 +200,20 @@ async function search_billV2(tenantId, consumerCode,serviceId,requestinfo) {
       tenantId: tenantId,
       consumerCode: consumerCode,
       service:serviceId
+    },
+  });
+}
+
+async function search_amendment(tenantId, amendmentId, serviceId, requestinfo) {
+  //console.log("search_billV2 consumerCode--",amendmentId,"tenantId",tenantId,"serviceId",serviceId);
+  return await axios({
+    method: "post",
+    url: url.resolve(config.host.mcollectBilling, config.paths.bill_ammendment_search),
+    data: requestinfo,
+    params: {
+      tenantId: tenantId,
+      amendmentId: amendmentId,
+      businessService:serviceId
     },
   });
 }
@@ -202,5 +252,8 @@ module.exports = {
   search_workflow,
   search_echallan,
   search_billV2,
-  search_bill_genie
+  search_bill_genie,
+  search_amendment,
+  search_water,
+  search_sewerage
 };

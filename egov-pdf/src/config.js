@@ -29,6 +29,12 @@ module.exports = {
       process.env.MCOLLECT_CHALLAN || "mcollect-challan",
     mcollect_bill_template:
       process.env.MCOLLECT_BILL || "mcollect-bill",
+    bill_amendment_template:
+      process.env.BILL_AMENDMENT || "bill-amendment-credit-note",
+    wns_one_time_receipt:
+    process.env.WNS_ONE_TIME_RECEIPT || "ws-onetime-receipt",
+    wns_bill:
+    process.env.WNS_BILL || "ws-bill"
   },
   app: {
     port: parseInt(process.env.APP_PORT) || 8080,
@@ -46,7 +52,8 @@ module.exports = {
     bill: process.env.EGOV_SEARCHER_HOST || HOST,
     workflow: process.env.EGOV_WORKFLOW_HOST || HOST,
     challan: process.env.EGOV_ECHALLAN_HOST || 'http://echallan-services.egov:8080/',
-    mcollectBilling: process.env.EGOV_BILLING_HOST || 'http://billing-service.egov:8080/'
+    mcollectBilling: process.env.EGOV_BILLING_HOST || 'http://billing-service.egov:8080/',
+    wns: process.env.EGOV_WNS_HOST || HOST
   },
   paths: {
     pdf_create: "/pdf-service/v1/_createnosave",
@@ -61,6 +68,9 @@ module.exports = {
     workflow_search: "/egov-workflow-v2/egov-wf/process/_search",
     mcollect_challan_search:"/echallan-services/eChallan/v1/_search",
     mcollect_bill:"/billing-service/bill/v2/_search",
-    bill_genie_getBill:"/egov-searcher/bill-genie/mcollectbills/_get"
+    bill_genie_getBill:"/egov-searcher/bill-genie/mcollectbills/_get",
+    bill_ammendment_search: "/billing-service/amendment/_search",
+    water_search: "ws-services/wc/_search",
+    sewerage_search: "sw-services/swc/_search"
   },
 };
