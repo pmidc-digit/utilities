@@ -105,7 +105,8 @@ var {
             challanObj.mobileNumber = challanObj.citizen.mobileNumber;
             challanObj.serviceType= challanObj.businessService.split(".")[0];
             //console.log("final obj--",challanObj);
-            var finalObj = {Challan :challanObj};
+            var finalObj = {Challan :[]};
+            finalObj.Challan.push(challanObj);
             tenantId = tenantId.split('.')[0];
             var pdfResponse;
             var pdfkey = config.pdf.mcollect_challan_template;
