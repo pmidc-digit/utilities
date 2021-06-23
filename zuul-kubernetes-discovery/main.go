@@ -123,4 +123,6 @@ func main() {
 	s := listAllServices(clientset, n)
 	r := getZuulRoutes(s)
 	writeTemplate(r)
+
+	createLimiterPropertiesFile()
 }
