@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"reflect"
 	"strings"
 	"text/template"
 )
@@ -35,13 +34,10 @@ zuul.ratelimit.repository=REDIS
 zuul.ratelimit.behind-proxy=true
 zuul.ratelimit.add-response-headers=true`
 
-func getMDMSData() {
+func createLimiterPropertiesFile() {
 
-	//host, _ := os.LookupEnv("HOST")
-	//tenantId, _ := os.LookupEnv("TENANTID")
-
-	host := "https://dev.digit.org/"
-	tenantId := "pb"
+	host, _ := os.LookupEnv("HOST")
+	tenantId, _ := os.LookupEnv("TENANTID")
 
 	url := host + "egov-mdms-service/v1/_search"
 
@@ -100,8 +96,6 @@ func getMDMSData() {
 	}
 
 	rateLimitingURLs := data["MdmsRes"].(map[string]interface{})["zuul"].(map[string]interface{})["RateLimiting"]
-
-	fmt.Println("var1 = ", reflect.TypeOf(rateLimitingURLs))
 
 	l := getLimiters(rateLimitingURLs.([]interface{}))
 
