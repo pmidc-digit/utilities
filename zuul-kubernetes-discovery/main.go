@@ -69,13 +69,17 @@ func listAllServices(clientset *kubernetes.Clientset, namespace string) (s *v1.S
 }
 
 func getZuulRoutes(s *v1.ServiceList) (r *[]Route) {
+	if RerouteMap, _ := os.LookupEnv("INTERNAL_ROUTER_MAP");
 	routes := []Route{}
 	for _, s := range s.Items {
 
 		if s.Annotations != nil {
 			if val, ok := s.Annotations[sAnnotation]; ok {
 				path := fmt.Sprintf("%s", val)
-				url := fmt.Sprintf("http://%s.%s:%d/", s.Name, s.Namespace, s.Spec.Ports[0].Port)
+				serviceName = s.Name
+				replacedPath, ok := RerouteMap[path]
+				if ok { serviceName = replacedPath}
+				url := fmt.Sprintf("http://%s.%s:%d/", serviceName, s.Namespace, s.Spec.Ports[0].Port)
 				routes = append(routes, Route{path, url})
 				log.Printf("Configuring service %s routing to service URL %s \n", path, url)
 			}
