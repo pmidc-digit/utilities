@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"text/template"
 
 	v1 "k8s.io/api/core/v1"
@@ -69,16 +70,19 @@ func listAllServices(clientset *kubernetes.Clientset, namespace string) (s *v1.S
 }
 
 func getZuulRoutes(s *v1.ServiceList) (r *[]Route) {
-	if RerouteMap, _ := os.LookupEnv("INTERNAL_ROUTER_MAP");
+
+	alternateRouteMap := getAlternateRouteMap()
 	routes := []Route{}
 	for _, s := range s.Items {
 
 		if s.Annotations != nil {
 			if val, ok := s.Annotations[sAnnotation]; ok {
 				path := fmt.Sprintf("%s", val)
-				serviceName = s.Name
-				replacedPath, ok := RerouteMap[path]
-				if ok { serviceName = replacedPath}
+				serviceName := s.Name
+				replacedPath, ok := alternateRouteMap[path]
+				if ok {
+					serviceName = replacedPath
+				}
 				url := fmt.Sprintf("http://%s.%s:%d/", serviceName, s.Namespace, s.Spec.Ports[0].Port)
 				routes = append(routes, Route{path, url})
 				log.Printf("Configuring service %s routing to service URL %s \n", path, url)
@@ -108,6 +112,18 @@ func writeTemplate(r *[]Route) {
 	}
 
 	f.Close()
+}
+
+func getAlternateRouteMap() map[string]string {
+
+	keymap := make(map[string]string)
+	routes, _ := os.LookupEnv("INTERNAL_ROUTER_MAP")
+	routeList := strings.SplitN(routes, ",", 2)
+	for _, element := range routeList {
+		arr := strings.SplitN(element, ":", 2)
+		keymap[arr[0]] = arr[1]
+	}
+	return keymap
 }
 
 // Get all kubernetes services in the cluster using config serviceaccount
