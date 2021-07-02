@@ -31,4 +31,6 @@ public class TL {
 	private List<Map<String, Object>> revenueCollected;
 
 	private List<Map<String, Object>> receiptCreated;
+	
+	private List<Map<String, Object>> onlineCollection;
 }

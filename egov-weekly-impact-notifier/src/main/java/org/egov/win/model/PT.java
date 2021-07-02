@@ -25,4 +25,9 @@ public class PT {
 	private List<Map<String, Object>> noOfProperties; //unit - thousands
 
 	private List<Map<String, Object>> receiptsGenerated;
+	
+	private List<Map<String, Object>> onlineCollection; //unit - Lakhs
+
+	private List<Map<String, Object>> updatedCollection; //unit - INR Crs.
+
 }

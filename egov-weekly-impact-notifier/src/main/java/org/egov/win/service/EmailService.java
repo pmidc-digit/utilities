@@ -64,6 +64,7 @@ public class EmailService {
 		fillData(stateWide.getRevenueCollected(), context);
 		fillData(stateWide.getServicesApplied(), context);
 		fillData(stateWide.getUlbCovered(), context);
+		fillData(stateWide.getOnlineCollection(), context);
 	}
 
 	private void enrichPGRData(PGR pgr, VelocityContext context) {
@@ -80,6 +81,8 @@ public class EmailService {
 		fillData(pt.getRevenueCollected(), context);
 		fillData(pt.getUlbCovered(), context);
 		fillData(pt.getReceiptsGenerated(), context);
+		fillData(pt.getOnlineCollection(), context);
+		fillData(pt.getUpdatedCollection(), context);
 	}
 
 	private void enrichFirenocData(Firenoc firenoc, VelocityContext context) {
@@ -96,6 +99,7 @@ public class EmailService {
 		fillData(tl.getUlbCovered(), context);
 		fillData(tl.getRevenueCollected(), context);
 		fillData(tl.getReceiptCreated(),context);
+		fillData(tl.getOnlineCollection(), context);
 	}
 
 	private void enrichWSData(WaterAndSewerage ws, VelocityContext context) {

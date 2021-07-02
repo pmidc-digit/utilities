@@ -115,12 +115,14 @@ public class CronService {
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
 		List<Map<String, Object>> servicesApplied = new ArrayList<>();
 		List<Map<String, Object>> noOfCitizensResgistered = new ArrayList<>();
+		List<Map<String, Object>> amountCollectedOnline = new ArrayList<>();
 		Map<String, Object> map = utils.getWeekWiseRevenue(data);
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
 			Map<String, Object> servicesAppliedPerWeek = new HashMap<>();
 			Map<String, Object> noOfCitizensResgisteredPerWeek = new HashMap<>();
+			Map<String, Object> amountCollectedOnlinePerWeek = new HashMap<>();
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
 			Integer wsIndex = 0;
@@ -145,6 +147,16 @@ public class CronService {
 					servicesAppliedPerWeek.put("w" + week + "serapp", record.get("servicesapplied"));
 
 					noOfCitizensResgisteredPerWeek.put("w" + week + "citreg", record.get("noofusersregistered"));
+					
+					amountCollectedOnlinePerWeek
+						.put("w" + week + "onlinecoll",
+								(new BigDecimal(record.get("onlinecollection") != null
+										? record.get("onlinecollection").toString()
+										: BigDecimal.ZERO.toString()).add(new BigDecimal(
+												((Map) (map.get(prefix + week))).get("onlineCollection") != null
+														? ((Map) (map.get(prefix + week))).get("onlineCollection")
+																.toString()
+														: BigDecimal.ZERO.toString()))));
 					wsIndex++;
 				}
 			}
@@ -152,11 +164,12 @@ public class CronService {
 			revenueCollected.add(revenueCollectedPerWeek);
 			servicesApplied.add(servicesAppliedPerWeek);
 			noOfCitizensResgistered.add(noOfCitizensResgisteredPerWeek);
+			amountCollectedOnline.add(amountCollectedOnlinePerWeek);
 		}
 
 		if (!data.isEmpty()) {
 			StateWide stateWide = StateWide.builder().noOfCitizensResgistered(noOfCitizensResgistered)
-					.revenueCollected(revenueCollected).servicesApplied(servicesApplied).ulbCovered(ulbCovered).build();
+					.revenueCollected(revenueCollected).onlineCollection(amountCollectedOnline).servicesApplied(servicesApplied).ulbCovered(ulbCovered).build();
 			body.setStateWide(stateWide);
 		}
 
@@ -222,12 +235,16 @@ public class CronService {
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
 		List<Map<String, Object>> noOfProperties = new ArrayList<>();
 		List<Map<String, Object>> receiptGenerated = new ArrayList<>();
+		List<Map<String, Object>> onlineCollection = new ArrayList<>();
+		List<Map<String, Object>> updatedCollection = new ArrayList<>();
 
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
 			Map<String, Object> noOfPropertiesPerWeek = new HashMap<>();
 			Map<String, Object> receiptGeneratedPerWeek = new HashMap<>();
+			Map<String, Object> onlineCollectionPerWeek = new HashMap<>();
+			Map<String, Object> updatedCollectionPerWeek = new HashMap<>();
 
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
@@ -243,16 +260,22 @@ public class CronService {
 									: BigDecimal.ZERO);
 					receiptGeneratedPerWeek.put("w" + week + "ptrcptgen",
 							record.get("receiptscreated") != null ? record.get("receiptscreated") : BigDecimal.ZERO);
+					onlineCollectionPerWeek.put("w" + week + "ptonlinecoll",
+							record.get("onlinecollection") != null ? record.get("onlinecollection") : BigDecimal.ZERO);
+					updatedCollectionPerWeek.put("w" + week + "ptupdatedcoll",
+							record.get("updatedcollection") != null ? record.get("updatedcollection") : BigDecimal.ZERO);
 				}
 			}
 			ulbCovered.add(ulbCoveredPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
 			noOfProperties.add(noOfPropertiesPerWeek);
 			receiptGenerated.add(receiptGeneratedPerWeek);
+			onlineCollection.add(onlineCollectionPerWeek);
+			updatedCollection.add(updatedCollectionPerWeek);
 		}
 		if (!data.isEmpty()) {
 			PT pt = PT.builder().noOfProperties(noOfProperties).ulbCovered(ulbCovered)
-					.revenueCollected(revenueCollected).receiptsGenerated(receiptGenerated).build();
+					.revenueCollected(revenueCollected).receiptsGenerated(receiptGenerated).onlineCollection(onlineCollection).updatedCollection(updatedCollection).build();
 			body.setPt(pt);
 		}
 	}
@@ -266,6 +289,7 @@ public class CronService {
 		List<Map<String, Object>> newRenewalLicenseIssued = new ArrayList<>();
 		List<Map<String, Object>> revenueCollected = new ArrayList<>();
 		List<Map<String, Object>> receiptGenerated = new ArrayList<>();
+		List<Map<String, Object>> onlineCollection = new ArrayList<>();
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
 			Map<String, Object> newLicenseIssuedPerWeek = new HashMap<>();
@@ -274,6 +298,7 @@ public class CronService {
 			Map<String, Object> renewalLicenseIssuedPerWeek = new HashMap<>();
 			Map<String, Object> revenueCollectedPerWeek = new HashMap<>();
 			Map<String, Object> receiptGeneratedPerWeek = new HashMap<>();
+			Map<String, Object> onlineCollectionPerWeek = new HashMap<>();
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
 			for (int week = 0; week < noOfWeeks; week++) {
@@ -294,6 +319,8 @@ public class CronService {
 							record.get("revenuecollected") != null ? record.get("revenuecollected") : BigDecimal.ZERO);
 					receiptGeneratedPerWeek.put("w" + week + "tlrctcrt",
 							record.get("receiptscreated") != null ? record.get("receiptscreated") : BigDecimal.ZERO);
+					onlineCollectionPerWeek.put("w" + week + "tlonlinecoll",
+							record.get("onlinecollection") != null ? record.get("onlinecollection") : BigDecimal.ZERO);
 				}
 			}
 			ulbCovered.add(ulbCoveredPerWeek);
@@ -303,12 +330,13 @@ public class CronService {
 			newRenewalLicenseIssued.add(renewalLicenseIssuedPerWeek);
 			revenueCollected.add(revenueCollectedPerWeek);
 			receiptGenerated.add(receiptGeneratedPerWeek);
+			onlineCollection.add(onlineCollectionPerWeek);
 		}
 
 		if (!data.isEmpty()) {
 			TL tl = TL.builder().ulbCovered(ulbCovered).newLicenseIssued(newLicenseIssued).newLicense(newLicense)
 					.renewalLicense(newRenewalLicense).renewalLicenseIssued(newRenewalLicenseIssued)
-					.revenueCollected(revenueCollected).receiptCreated(receiptGenerated).build();
+					.revenueCollected(revenueCollected).receiptCreated(receiptGenerated).onlineCollection(onlineCollection).build();
 			body.setTl(tl);
 		}
 	}
