@@ -61,3 +61,7 @@ config:
         image-name: "egov-custom-consumer"
         dockerfile: "build/maven/Dockerfile"
 
+  - name: "builds/utilities/verification"
+    build:
+      - work-dir: "verification"
+        image-name: "verification"
