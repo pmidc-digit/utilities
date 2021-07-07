@@ -6,4 +6,6 @@ COPY package-lock.json ./
 RUN npm install --silent
 COPY . ./
 
+ENV PORT 8080
+
 CMD ["npm", "start"]
