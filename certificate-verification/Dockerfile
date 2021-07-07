@@ -8,4 +8,4 @@ COPY . ./
 
 ENV PORT 8080
 
-CMD ["npm", "start"]
+CMD ["npm", "build"]
