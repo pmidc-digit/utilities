@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.velocity.Template;
@@ -22,20 +21,16 @@ import org.egov.win.model.MiscCollections;
 import org.egov.win.model.PGR;
 import org.egov.win.model.PGRChannelBreakup;
 import org.egov.win.model.PT;
-import org.egov.win.model.SearcherRequest;
 import org.egov.win.model.StateWide;
 import org.egov.win.model.TL;
 import org.egov.win.model.WaterAndSewerage;
 import org.egov.win.producer.Producer;
-import org.egov.win.repository.ServiceCallRepository;
 import org.egov.win.utils.CronConstants;
 import org.egov.win.utils.CronUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,8 +65,12 @@ public class CronService {
 	public void fetchData() {
 		try {
 			Email email = getDataFromDb();
-			String content = emailService.formatEmail(email);
-			send(email, content);
+			if (isValidData(email)) {
+				String content = emailService.formatEmail(email);
+				send(email, content);
+			} else {
+				log.info("Email will not be sent, as the data is not valid.");
+			}
 		} catch (Exception e) {
 			log.info("Email will not be sent, ERROR: ", e);
 		}
@@ -356,6 +355,20 @@ public class CronService {
 		ve.init();
 		Template t = ve.getTemplate("velocity/weeklyimpactflasher.vm");
 		return t;
+	}
+	
+	private boolean isValidData(Email email) {
+		Body body = email.getBody();
+		if (body == null) {
+			return false;
+		} else if (body.getStateWide().isStateWideDataEmpty() || body.getFirenoc().isFirenocDataEmpty()
+				|| body.getMiscCollections().isMiscCollDataEmpty() || body.getPgr().isPGRDataEmpty()
+				|| body.getPt().isPTDataEmpty() || body.getTl().isTLDataEmpty()
+				|| body.getWaterAndSewerage().isWSDataEmpty()) {
+			return false;
+
+		}
+		return true;
 	}
 
 }
