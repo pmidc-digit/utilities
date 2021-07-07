@@ -5,6 +5,7 @@ COPY package.json ./
 COPY package-lock.json ./
 RUN npm ci --silent
 COPY . ./
+ENV PORT 8080
 RUN npm run build
 
 # production environment
