@@ -6,4 +6,4 @@ COPY package-lock.json ./
 RUN npm ci --silent
 COPY . ./
 ENV PORT 8080
-CMD ["npm", "start"]
+CMD ["npm", "run-script", "build"]
