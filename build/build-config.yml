@@ -63,6 +63,6 @@ config:
 
   - name: "builds/utilities/certificate-verification"
     build:
-      - work-dir: "certificate-verification"
-        dockerfile: "certificate-verification/Dockerfile"
-        image-name: "certificate-verification"
+      - work-dir: .
+        dockerfile: certificate-verification/Dockerfile
+        image-name: certificate-verification
