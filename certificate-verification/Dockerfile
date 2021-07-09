@@ -16,4 +16,4 @@ ENV WORK_DIR=/var/certificate-verification
 RUN mkdir -p ${WORK_DIR}
 
 COPY --from=build /app/certificate-verification/build ${WORK_DIR}/
-COPY --from=build /app/certificate-verification/docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/certificate-verification/nginx.conf /etc/nginx/conf.d/default.conf
