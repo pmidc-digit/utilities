@@ -14,4 +14,4 @@ FROM nginx:mainline-alpine
 ENV WEB_DIR=/var/certificate-verification
 RUN mkdir -p ${WEB_DIR}
 COPY --from=build /app/build ${WEB_DIR}/
-COPY --from=build /app/docker/verification/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/docker/certificate-verification/nginx.conf /etc/nginx/conf.d/default.conf
