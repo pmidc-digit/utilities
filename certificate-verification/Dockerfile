@@ -9,11 +9,9 @@ ENV HOME=/tmp
 COPY ${WORK_DIR} .
 RUN apk --update add git
 RUN npm i && npm run-script build
-RUN pwd
-RUN ls
 # Create runtime image
 FROM nginx:mainline-alpine 
 ENV WEB_DIR=/var/certificate-verification
 RUN mkdir -p ${WEB_DIR}
-COPY --from=build /app/certificate-verification/build ${WEB_DIR}/
-COPY --from=build /app/certificate-verification/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build ${WEB_DIR}/
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
