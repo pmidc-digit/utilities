@@ -9,6 +9,8 @@ ENV HOME=/tmp
 COPY ${WORK_DIR} .
 RUN apk --update add git
 RUN npm i && npm run-script build
+RUN pwd
+RUN ls
 # Create runtime image
 FROM nginx:mainline-alpine 
 ENV WEB_DIR=/var/certificate-verification
