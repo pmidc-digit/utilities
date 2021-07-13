@@ -19,37 +19,33 @@ export const CertificateDetailsPaths = {
         path: ["credentialSubject", "applicationNumber"],
         format: (data) => (data)
     },
-    "finyear": {
-        path: ["credentialSubject", "finyear"],
+    "Financial Year": {
+        path: ["credentialSubject", "financialYear"],
         format: (data) => (data)
     },
-    "issuedate": {
-        path: ["issuanceDate"],
-        format: (data) => (data)
-    },
-    "ownercontact": {
+    "Owner Contact": {
         path: ["credentialSubject", "ownerContact"],
         format: (data) => (data)
     },
-    "ownername": {
-        path: ["credentialSubject", "ownername"],
+    "Owner Name": {
+        path: ["credentialSubject", "ownerName"],
         format: (data) => (data)
     },
 
-    "tlno": {
-        path: ["credentialSubject", "tlno"],
+    "License Number": {
+        path: ["credentialSubject", "licenseNumber"],
         format: (data) => (data)
     },
-    "tradeaddress": {
-        path: ["credentialSubject.tradeaddress", "tradeaddress"],
+    "Trade Address": {
+        path: ["credentialSubject", "tradeAddress", "tradeAddressLocality"],
         format: (data) => (data)
     },
-    "tradename": {
+    "Trade Name": {
         path: ["credentialSubject", "tradeName"],
         format: (data) => (data)
     },
 
-    "tradetype": {
+    "Trade Type": {
         path: ["credentialSubject", "tradeType"],
         format: (data) => (data)
     }
