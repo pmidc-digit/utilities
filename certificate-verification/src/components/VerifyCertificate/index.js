@@ -47,8 +47,8 @@ export const VerifyCertificate = () => {
                         </CustomButton>
                          <Container className="mt-2 p-4">
                             <p>
-                                Once the Trade License flow is completed and the license is approved, a Trade License certificate is issued to the citizens.
-                                The trade license certificate has a secure QR code to protect it against falsification.
+                                Once the Trade License flow is completed and the license is approved, a Trade License certificate is issued to the respective trade owners.
+                                The Trade License certificate has a secure QR code to protect it against falsification.
                                 The genuineness of the certificate can be authenticated from this portal.
                             </p>
                             <p style={{color:"#646D82"}}>Steps for verification</p>
@@ -60,20 +60,22 @@ export const VerifyCertificate = () => {
                                 <Row>
                                     <Col>
                                         <ul className="success-verify">
-                                            <li>Message “Certificate Successfully Verified”</li>
-                                            <li>Application No</li>
-                                            <li>Financial Year</li>
-                                            <li>Owner Contact</li>
-                                            <li>Owner Name</li>
+                                            <li>Message “Trade License Certificate Successfully Verified”</li>
                                             <li>License Number</li>
-                                            <li>Trade Address</li>
+                                            <li>Application Number</li>
+                                            <li>Financial Year</li>
                                             <li>Trade Name</li>
+                                            <li>Trade Owner Name</li>
+                                            <li>Trade Owner Address</li>
                                             <li>Trade Type</li>
+                                            <li>License Issue Date</li>
+                                            <li>License Valid From</li>
+                                            <li>License Valid To</li>
                                         </ul>
                                     </Col>
                                 </Row>
                                 </li>
-                                <li>If the certificate is not genuine, “Certificate Invalid” will be displayed</li>
+                                <li>If the certificate is not genuine, “Trade License Certificate Invalid” will be displayed</li>
                                 </ol>
                          </Container>
                     </>}
