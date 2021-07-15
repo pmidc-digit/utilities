@@ -2,6 +2,8 @@ import psycopg2
 import csv
 import pandas as pd
 import numpy as np
+from datetime import date
+from datetime import datetime
 
 def map_MC(s):
     if s in MC:
@@ -268,64 +270,100 @@ def connect():
     try:
         conn = psycopg2.connect(database="{{REPLACE-WITH-DATABASE}}", user="{{REPLACE-WITH-USERNAME}}",
                             password="{{REPLACE-WITH-PASSWORD}}", host="{{REPLACE-WITH-HOST}}")
-        print("Connection established!")
-        
     except Exception as exception:
         print("Exception occurred while connecting to the database")
         print(exception)
     
         
-    newdataquery = pd.read_sql_query("SELECT tl.tenantid, tl.financialYear AS \"Financial Year\", to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date AS \"Application Date\", tl.applicationNumber AS \"Application Number\", to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date  AS \"Commencement Date\", tl.licenseNumber as \"License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\", INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\", to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\" FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN  egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'NEW' AND tl.tenantId != 'pb.testing'", conn)
-    renewdataquery = pd.read_sql_query("SELECT tl.tenantid, tl.financialYear AS \"Financial Year\", to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date AS \"Application Date\", tl.applicationNumber AS \"Application Number\", to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date  AS \"Commencement Date\", tl.licenseNumber as \"License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\", INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\", to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\" FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN  egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'RENEWAL' AND tl.tenantId != 'pb.testing'",conn)
+    newdataquery = pd.read_sql_query("SELECT tl.applicationNumber AS \"Application Number\",   to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date AS \"Application Date\",tl.tenantid, tl.validto AS \"Valid Till\", tl.financialYear AS \"Financial Year\", to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date  AS \"Commencement Date\", tl.licenseNumber as \"License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\",acc.accessoryCategory AS \"Accessory Category\" , INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\", tld.adhocpenalty AS \"Penalty\", to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\", INITCAP(SUBSTRING(adr.tenantid,4)) AS \"ULB\", adr.locality AS \"Locality\"  FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId INNER JOIN eg_tl_address adr ON tld.id = adr.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN  egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'NEW' AND tl.tenantId != 'pb.testing'", conn)
+    renewdataquery = pd.read_sql_query("SELECT tl.tenantid, tl.financialYear AS \"Financial Year\", to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date AS \"Application Date\", tl.applicationNumber AS \"Application Number\", to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date  AS \"Commencement Date\", tl.licenseNumber as \"License Number\",tl.oldlicensenumber AS \"Old License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\", INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", tld.adhocpenalty AS \"Penalty\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\", to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\", INITCAP(tl.workflowcode) AS \"Renewal Type\", INITCAP(SUBSTRING(adr.tenantid,4)) AS \"ULB\", adr.locality AS \"Locality\" FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId INNER JOIN eg_tl_address adr ON tld.id = adr.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'RENEWAL' AND tl.tenantId != 'pb.testing'",conn)
    
     newdata = pd.DataFrame(newdataquery)
     renewdata = pd.DataFrame(renewdataquery)
-    
+     
     newdata['ULB Type'] = newdata['tenantid'].map(map_MC)
     renewdata['ULB Type'] = newdata['tenantid'].map(map_MC)
-
+ 
     newdata['Ownership Subtype'] = newdata['Ownership Subtype'].map(map_ownershipsubtype)
     renewdata['Ownership Subtype'] = renewdata['Ownership Subtype'].map(map_ownershipsubtype)
-
     newdata['Ownership Type'] = newdata['Ownership Subtype'].map(map_ownershiptype)
     renewdata['Ownership Type'] = renewdata['Ownership Subtype'].map(map_ownershiptype)
-
     newdata['Application Status'] = newdata['Application Status'].map(map_status)  
     renewdata['Application Status'] = renewdata['Application Status'].map(map_status)    
-
+ 
     newdata['Structure Type'] = newdata['Structure Type'].map(map_structuretype)  
     renewdata['Structure Type'] = renewdata['Structure Type'].map(map_structuretype)    
- 
+  
     newdata[['tradetype','Trade Subtype','Trade Type Code']] = pd.DataFrame(newdata.tradetype.str.split('.').tolist(),columns = ['tradetype','Trade Subtype','Trade Type Code'])
     renewdata[['tradetype','Trade Subtype','Trade Type Code']] = pd.DataFrame(renewdata.tradetype.str.split('.').tolist(),columns = ['tradetype','Trade Subtype','Trade Type Code'])
-
-    newdata = newdata.rename(columns={"Application Date": "Application_Date","Commencement Date":"Commencement_Date","Payment Date":"Payment_Date"})
-    renewdata = renewdata.rename(columns={"Application Date": "Application_Date","Commencement Date":"Commencement_Date","Payment Date":"Payment_Date"}) 
-
+ 
+    newdata = newdata.rename(columns={"Application Date": "Application_Date","Commencement Date":"Commencement_Date","Payment Date":"Payment_Date", "Valid Till":"validtill"})
+    renewdata = renewdata.rename(columns={"Application Date": "Application_Date","Commencement Date":"Commencement_Date","Payment Date":"Payment_Date"})
+     
     newdata['Application_Date'] = pd.to_datetime(newdata.Application_Date, format='%Y-%m-%d')
     newdata['Commencement_Date'] = pd.to_datetime(newdata.Commencement_Date, format='%Y-%m-%d')
     newdata['Payment_Date'] = pd.to_datetime(newdata.Payment_Date, format='%Y-%m-%d')
-
+    newdata['validtill'] = pd.to_datetime(newdata.validtill, format='%Y-%m-%d')
+ 
     renewdata['Application_Date'] = pd.to_datetime(renewdata.Application_Date, format='%Y-%m-%d')
     renewdata['Commencement_Date'] = pd.to_datetime(renewdata.Commencement_Date, format='%Y-%m-%d')
-    renewdata['Payment_Date'] = pd.to_datetime(renewdata.Payment_Date, format='%Y-%m-%d')  
-
+    renewdata['Payment_Date'] = pd.to_datetime(renewdata.Payment_Date, format='%Y-%m-%d')
+    
     newdata['Application_Date'] = newdata['Application_Date'].dt.strftime("%d-%m-%y")
     newdata['Commencement_Date'] = newdata['Commencement_Date'].dt.strftime("%d-%m-%y")
     newdata['Payment_Date'] = newdata['Payment_Date'].dt.strftime("%d-%m-%y")
+    newdata['validtill'] = newdata['validtill'].dt.strftime("%d-%m-%y")    
 
-    renewdata['Application_Date'] = renewdata['Application_Date'].dt.strftime("%d-%m-%y")  
-    renewdata['Commencement_Date'] = renewdata['Commencement_Date'].dt.strftime("%d-%m-%y")  
+    renewdata['Application_Date'] = renewdata['Application_Date'].dt.strftime("%d-%m-%y")
+    renewdata['Commencement_Date'] = renewdata['Commencement_Date'].dt.strftime("%d-%m-%y")
     renewdata['Payment_Date'] = renewdata['Payment_Date'].dt.strftime("%d-%m-%y")
-
-    newdata = newdata.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date"})
-    renewdata = renewdata.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date"}) 
-
+     
+    newdata = newdata.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date", "validtill":"Valid Till"})
+    renewdata = renewdata.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date"})
+    
     newdata = newdata.drop(columns=['tenantid'])
     renewdata = renewdata.drop(columns=['tenantid'])
+ 
+    newdata['Is Renewal Pending'] = newdata['Financial Year'].apply(lambda x: 'Yes' if date.today().month==1 | date.today().month==2 | date.today().month==3 & int(x[0:4]) + 1 <= date.today().year  else 'No')
+    newdata = newdata.rename(columns={"Structure Type":"structuretype","Trade Type":"tradetype","Trade Subtype":"tradesubtype", "Accessory Category": "accessorycategory" })
+    renewdata = renewdata.rename(columns={"Structure Type":"structuretype","Trade Type":"tradetype","Trade Subtype":"tradesubtype", "Accessory Category": "accessorycategory" })
+ 
+    result = pd.merge(newdata, renewdata, how="right", on=["License Number"])
+    result = result.drop_duplicates(subset = ["License Number"])
+   
+    result['Structure Type Modified?'] = (result.structuretype_x!=result.structuretype_y)
+    result['Trade Type Modified?'] = (result.tradetype_x!=result.tradetype_y)
+    result['Trade Subtype Modified?'] = (result.tradesubtype_x!=result.tradesubtype_y)
+    result['Accessory Category Modified?'] = (result.accessorycategory_x!=result.accessorycategory_y)
+    result['Renewed with Penanlty?'] = (result.Penalty_x!=result.Penalty_y)
+
+    columns_to_retain=['Structure Type Modified?','Trade Type Modified?','Trade Subtype Modified?','Accessory Category Modified?','Renewed with Penanlty?','License Number']
+    result = result[columns_to_retain]
+    renewdata = pd.merge(renewdata,result, how="inner", on=["License Number"])
+    renewdata['Trade details modified during Renewal?'] = renewdata['Structure Type Modified?'] | renewdata['Trade Type Modified?'] | renewdata['Trade Subtype Modified?'] | renewdata['Accessory Category Modified?']
+    newdata['Is Renewal Pending'] = newdata['Is Renewal Pending'].map({'Yes':True,'No':False})
+    newdata['temp'] = newdata['Valid Till'].apply(lambda x: True if  datetime.date(datetime.strptime(x,'%d-%m-%y')) > date.today()   else False)
+    newdata['Is License Void'] = newdata['temp'] & newdata['Is Renewal Pending']
+
+    renewdata['Structure Type Modified?'] = renewdata['Structure Type Modified?'].map({True:'Yes',False:'No'})
+    renewdata['Trade Type Modified?'] = renewdata['Trade Type Modified?'].map({True:'Yes',False:'No'})
+    renewdata['Trade Subtype Modified?'] = renewdata['Trade Subtype Modified?'].map({True:'Yes',False:'No'})
+    renewdata['Accessory Category Modified?'] = renewdata['Accessory Category Modified?'].map({True:'Yes',False:'No'})
+    renewdata['Trade details modified during Renewal?'] = renewdata['Trade details modified during Renewal?'].map({True:'Yes',False:'No'})
+    renewdata['Renewed with Penanlty?'] = renewdata['Renewed with Penanlty?'].map({True:'Yes',False:'No'})
+    newdata['Is License Void'] = newdata['Is License Void'].map({True:'Yes',False:'No'})
+    newdata['Is Renewal Pending'] = newdata['Is Renewal Pending'].map({True:'Yes',False:'No'})
+   
+    newdata = newdata.rename(columns={"structuretype":"Structure Type","tradetype":"Trade Type","tradesubtype":"Trade Subtype", "accessorycategory":"Accessory Category" })
+    renewdata = renewdata.rename(columns={"structuretype":"Structure Type","tradetype":"Trade Type","tradesubtype":"Trade Subtype", "accessorycategory":"Accessory Category" })
+
+    newdata = newdata.drop(columns=['temp','Penalty'])
     
     newdata.fillna("", inplace=True)
     renewdata.fillna("", inplace=True)
+    renewdata = pd.merge(renewdata,newdata[['License Number','Total Amount Paid']],on='License Number', how='left')
+    renewdata = renewdata.drop_duplicates(subset = ["License Number"])
+    renewdata = renewdata.rename(columns={"Total Amount Paid_y":"Old Trade license Amount","Total Amount Paid_x": "Total Amount Paid"})
      
     newdata.to_csv('/tmp/tlDatamart.csv')
     renewdata.to_csv('/tmp/tlRenewDatamart.csv')
