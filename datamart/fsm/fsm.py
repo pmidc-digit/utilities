@@ -249,6 +249,9 @@ def connect():
     fsmdata['Slum Name'] = fsmdata['Slum Name'].map(mapslumName)
     fsmdata['Waste Dumped']=fsmdata['Waste Dumped'].apply(np.int64)
     fsmdata['Fstp Plant Name'] = fsmdata['Fstp Plant Name'].map(mapplantname)
+   
+    fsmdata.to_csv('/tmp/fsmDatamart.csv')
+
     print("Datamart exported. Please copy it using kubectl cp command to your required location.")
 
 if __name__ == '__main__':
