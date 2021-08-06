@@ -294,20 +294,23 @@ def connect():
     dataquery = pd.read_sql_query("SELECT bp.applicationno AS \"Application Number\", to_timestamp(CAST(bp.applicationdate AS bigint)/1000)::date AS \"Application Date\",  bp.edcrnumber AS \"eDCR Number\", bp.tenantid, bp.status AS \"Application Status\", usr.gender AS \"Application Gender\", INITCAP(usr.type) AS \"Logged in User\", bp.additionaldetails->> 'serviceType' AS \"Service Type\",  bp.additionaldetails->>'applicationType' AS \"Application Type\", bp.businessservice AS \"Business Service\",land.occupancytype AS \"Occupancy Type\", INITCAP(landinfo.ownershipcategory) AS \"Ownership Subtype\", CASE WHEN bp.businessservice = 'BPA_OC' THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END AS \"OC Issued Date\", CASE WHEN bp.businessservice = 'BPA' THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END AS \"Permit Issued Date\" ,CASE WHEN bp.businessservice = 'BPA_LOW' THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END AS \"Permit Low Issued Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid LEFT OUTER JOIN eg_user usr ON bp.createdby = usr.uuid INNER JOIN eg_land_unit land ON land.landinfoid = bp.landid INNER JOIN eg_land_landinfo landinfo ON land.landinfoid = landinfo.id", conn)
     sanctionquery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",ep.totaldue As \"Sanction Fee Total Amount Due\", ep.totalamountpaid as \"Sanction Fee Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Sanction Fee Payment Mode\",to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Sanction Fee Payment Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE epd.businessservice = 'BPA.NC_SAN_FEE' OR epd.businessservice = 'BPA.NC_OC_SAN_FEE'", conn)
     feequery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",ep.totaldue As \"Application Fee Total Amount Due\", ep.totalamountpaid as \"Application Fee Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Application Fee Payment Mode\",to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Application Fee Payment Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE epd.businessservice = 'BPA.NC_APP_FEE' OR epd.businessservice = 'BPA.NC_OC_APP_FEE' OR epd.businessservice = 'BPA.LOW_RISK_PERMIT_FEE'", conn)
-    firequery = pd.read_sql_query("SELECT bp.edcrnumber  AS \"eDCR Number\",to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date AS \"Fire Noc Sent Date\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid WHERE noctype = 'FIRE_NOC'", conn)
-    airportquery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date AS \"Airport Noc Sent Date\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid WHERE noctype = 'AIRPORT_AUTHORITY'", conn)
+    firequery = pd.read_sql_query("SELECT DISTINCT(bp.edcrnumber) AS \"eDCR Number\",to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date AS \"Fire Noc Sent Date\",CASE WHEN noc.applicationstatus = 'APPROVED' or noc.applicationstatus = 'REJECTED' or noc.applicationstatus = 'AUTO_APPROVED' THEN to_timestamp(CAST(bs.createdtime AS bigint)/1000)::date END AS \"Fire Noc Approved/Rejected Date\", INITCAP(noc.applicationstatus) AS \"Fire Noc Status\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid LEFT OUTER JOIN eg_wf_processinstance_v2 wf ON bp.applicationno = wf.businessid LEFT OUTER JOIN eg_wf_businessservice_v2 bs ON wf.businessservice = bs.businessservice LEFT OUTER JOIN eg_wf_state_v2 state ON  state.businessserviceid = bs.uuid WHERE noc.noctype = 'FIRE_NOC'", conn)
+    airportquery = pd.read_sql_query("SELECT DISTINCT(bp.edcrnumber) AS \"eDCR Number\",to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date AS \"Airport Noc Sent Date\" ,CASE WHEN noc.applicationstatus = 'APPROVED' or noc.applicationstatus = 'REJECTED' or noc.applicationstatus = 'AUTO_APPROVED' THEN to_timestamp(CAST(bs.createdtime AS bigint)/1000)::date END AS \"Airport Noc Approved/Rejected Date\", INITCAP(noc.applicationstatus) AS \"Airport Noc Status\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid LEFT OUTER JOIN eg_wf_processinstance_v2 wf ON bp.applicationno = wf.businessid LEFT OUTER JOIN eg_wf_businessservice_v2 bs ON wf.businessservice = bs.businessservice LEFT OUTER JOIN eg_wf_state_v2 state ON  state.businessserviceid = bs.uuid WHERE noctype = 'AIRPORT_AUTHORITY'", conn)
+    ownergenderquery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",usr.gender AS \"Owner Gender\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN eg_land_unit land ON land.landinfoid = bp.landid INNER JOIN eg_land_landinfo landinfo ON land.landinfoid = landinfo.id INNER JOIN eg_land_ownerinfo owner ON owner.landinfoid = landinfo.id LEFT OUTER JOIN eg_user usr ON owner.uuid = usr.uuid",conn)
      
     data = pd.DataFrame(dataquery)
     sanction = pd.DataFrame(sanctionquery)
     fee = pd.DataFrame(feequery)
     fire = pd.DataFrame(firequery)
     airport = pd.DataFrame(airportquery)
+    ownergender = pd.DataFrame(ownergenderquery)
     
     data = pd.merge(data, sanction, how="left", on=["eDCR Number"])
     data = pd.merge(data, fee, how="left", on=["eDCR Number"])
     data = pd.merge(data, fire, how="left", on=["eDCR Number"])
     data = pd.merge(data, airport, how="left", on=["eDCR Number"])
-
+    data = pd.merge(data, ownergender, how="inner", on=["eDCR Number"])
+    
     data['Airport Noc?'] = pd.notnull(data['Airport Noc Sent Date']).map({True:'Yes',False:'No'})
     data['Fire Noc?'] = pd.notnull(data['Fire Noc Sent Date']).map({True:'Yes',False:'No'})
     
@@ -322,28 +325,43 @@ def connect():
     data['Application Type'] = data['Application Type'].map({'BUILDING_PLAN_SCRUTINY':'Building Plan Scrutiny','BUILDING_OC_PLAN_SCRUTINY':'Building OC Plan Scrutiny'})
     data['Business Service'] = data['Business Service'].map({'BPA':"Bpa",'BPA_LOW':'Bpa Low Risk','BPA_OC':'Bpa OC'})
     
-    data = data.rename(columns={"Application Date": "Application_Date","OC Issued Date":"oc_date","Permit Issued Date":"permit_date", "Permit Low Issued Date":"permit_low_date","Sanction Fee Payment Date":"sanction_fee","Application Fee Payment Date":"app_fee"})
-    
+    data = data.rename(columns={"Fire Noc Sent Date":"FireSent","Airport Noc Sent Date":"AirportSent","Fire Noc Approved/Rejected Date":"FireRecieved", "Airport Noc Approved/Rejected Date":"AirportRecieved","Application Date": "Application_Date","OC Issued Date":"oc_date","Permit Issued Date":"permit_date", "Permit Low Issued Date":"permit_low_date","Sanction Fee Payment Date":"sanction_fee","Application Fee Payment Date":"app_fee"})    
     data['Application_Date'] = pd.to_datetime(data.Application_Date, format='%Y-%m-%d')
     data['oc_date'] = pd.to_datetime(data.oc_date, format='%Y-%m-%d')
     data['permit_date'] = pd.to_datetime(data.permit_date, format='%Y-%m-%d')
     data['permit_low_date'] = pd.to_datetime(data.permit_low_date, format='%Y-%m-%d')
     data['sanction_fee'] = pd.to_datetime(data.sanction_fee, format='%Y-%m-%d')
     data['app_fee'] = pd.to_datetime(data.app_fee, format='%Y-%m-%d')
-    
+    data['FireSent'] = pd.to_datetime(data.FireSent, format='%Y-%m-%d')
+    data['AirportSent'] = pd.to_datetime(data.AirportSent, format='%Y-%m-%d')
+    data['FireRecieved'] = pd.to_datetime(data.FireRecieved, format='%Y-%m-%d')
+    data['AirportRecieved'] = pd.to_datetime(data.AirportRecieved, format='%Y-%m-%d')
+
     data['Application_Date'] = data['Application_Date'].dt.strftime("%d-%m-%y")
     data['oc_date'] = data['oc_date'].dt.strftime("%d-%m-%y")
     data['permit_date'] = data['permit_date'].dt.strftime("%d-%m-%y")
     data['permit_low_date'] =data['permit_low_date'].dt.strftime("%d-%m-%y")
     data['sanction_fee'] = data['sanction_fee'].dt.strftime("%d-%m-%y")
     data['app_fee'] = data['app_fee'].dt.strftime("%d-%m-%y")
+    data['FireSent'] = data['FireSent'].dt.strftime("%d-%m-%y")
+    data['AirportSent'] = data['AirportSent'].dt.strftime("%d-%m-%y")
+    data['FireRecieved'] = data['FireRecieved'].dt.strftime("%d-%m-%y")
+    data['AirportRecieved'] = data['AirportRecieved'].dt.strftime("%d-%m-%y")
 
-    data = data.rename(columns={ "Application_Date":"Application Date","oc_date":"OC Issued Date","permit_date":"Permit Issued Date","permit_low_date":"Permit Low Risk Issued Date","sanction_fee":"Sanction Fee Payment Date","app_fee":"Application Fee Payment Date"})
+    data = data.rename(columns={"FireSent":"Fire Noc Sent Date","AirportSent":"Airport Noc Sent Date","FireRecieved":"Fire Noc Approved/Rejected Date","AirportRecieved":"Airport Noc Approved/Rejected Date", "oc_date":"OC Issued Date","permit_date":"Permit Issued Date","permit_low_date":"Permit Low Risk Issued Date","sanction_fee":"Sanction Fee Payment Date","app_fee":"Application Fee Payment Date"})    
     
     data["Application Gender"] = data["Application Gender"].map(map_gender)         
+    data["Owner Gender"] = data["Owner Gender"].map(map_gender)         
+    
+    data['FinancialYear'] = ""
+    data['FinancialYear'] = data.apply(lambda x: calcFinancialYear(x.Application_Date), axis=1)
+
+    data = data.rename(columns={ "FinancialYear":"Financial Year","Application_Date":"Application Date"})
+     
     data = data[['eDCR Number',
     'Application Number',
  'Application Date',
+    'Financial Year',
  'Application Status',
   'Application Type',
  'Application Gender',
@@ -353,6 +371,7 @@ def connect():
  'Occupancy Type',
   'Ownership Type',
  'Ownership Subtype',
+ 'Owner Gender',
  'OC Issued Date',
  'Permit Issued Date',
  'Permit Low Risk Issued Date',
@@ -366,19 +385,27 @@ def connect():
  'Application Fee Payment Date',
   'Fire Noc?',
  'Fire Noc Sent Date',
+ 'Fire Noc Approved/Rejected Date',
   'Airport Noc?',
  'Airport Noc Sent Date',
+ 'Airport Noc Approved/Rejected Date',  
  'ULB Type']]
+
     data.fillna("", inplace=True)
 
     data.to_csv('/tmp/bpaDatamart.csv')
 
     print("Datamart exported. Please copy it using kubectl cp command to your required location.")
-    
+
+
+def calcFinancialYear(x):
+    if(isinstance(x, str)):
+        if int(x[3:5])<=3:
+            return ("20"+str(int(x[-2:])-1)+" - 20"+x[-2:])
+        else:
+            return ("20"+x[-2:]+" - 20"+str(int(x[-2:])+1))
+        
+            
 if __name__ == '__main__':
     connect()     
-    
-    
-    
-    
     
