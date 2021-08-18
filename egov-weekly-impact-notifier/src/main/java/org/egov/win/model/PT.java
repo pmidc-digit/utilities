@@ -29,5 +29,7 @@ public class PT {
 	private List<Map<String, Object>> onlineCollection; //unit - Lakhs
 
 	private List<Map<String, Object>> updatedCollection; //unit - INR Crs.
+	
+	private List<Map<String, Object>> bbpsCollection; //unit -INR Lakhs
 
 }

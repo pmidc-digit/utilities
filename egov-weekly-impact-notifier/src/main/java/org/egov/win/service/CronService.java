@@ -237,6 +237,7 @@ public class CronService {
 		List<Map<String, Object>> receiptGenerated = new ArrayList<>();
 		List<Map<String, Object>> onlineCollection = new ArrayList<>();
 		List<Map<String, Object>> updatedCollection = new ArrayList<>();
+		List<Map<String, Object>> bbpsCollection = new ArrayList<>();		
 
 		for (Map<String, Object> record : data) {
 			Map<String, Object> ulbCoveredPerWeek = new HashMap<>();
@@ -245,6 +246,7 @@ public class CronService {
 			Map<String, Object> receiptGeneratedPerWeek = new HashMap<>();
 			Map<String, Object> onlineCollectionPerWeek = new HashMap<>();
 			Map<String, Object> updatedCollectionPerWeek = new HashMap<>();
+			Map<String, Object> bbpsCollectionPerWeek = new HashMap<>();
 
 			String prefix = "Week";
 			Integer noOfWeeks = 6;
@@ -264,6 +266,8 @@ public class CronService {
 							record.get("onlinecollection") != null ? record.get("onlinecollection") : BigDecimal.ZERO);
 					updatedCollectionPerWeek.put("w" + week + "ptupdatedcoll",
 							record.get("updatedcollection") != null ? record.get("updatedcollection") : BigDecimal.ZERO);
+					bbpsCollectionPerWeek.put("w" + week + "ptbbpscoll",
+							record.get("bbpscollection") != null ? record.get("bbpscollection") : BigDecimal.ZERO);
 				}
 			}
 			ulbCovered.add(ulbCoveredPerWeek);
@@ -272,10 +276,11 @@ public class CronService {
 			receiptGenerated.add(receiptGeneratedPerWeek);
 			onlineCollection.add(onlineCollectionPerWeek);
 			updatedCollection.add(updatedCollectionPerWeek);
+			bbpsCollection.add(bbpsCollectionPerWeek);
 		}
 		if (!data.isEmpty()) {
 			PT pt = PT.builder().noOfProperties(noOfProperties).ulbCovered(ulbCovered)
-					.revenueCollected(revenueCollected).receiptsGenerated(receiptGenerated).onlineCollection(onlineCollection).updatedCollection(updatedCollection).build();
+					.revenueCollected(revenueCollected).receiptsGenerated(receiptGenerated).onlineCollection(onlineCollection).updatedCollection(updatedCollection).bbpsCollection(bbpsCollection).build();
 			body.setPt(pt);
 		}
 	}
