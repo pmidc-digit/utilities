@@ -2,6 +2,8 @@ import psycopg2
 import csv
 import pandas as pd
 import numpy as np
+import requests
+import json
 
 def map_MC(s):
     if s in MC:
@@ -291,11 +293,11 @@ def connect():
         print("Exception occurred while connecting to the database")
         print(exception)
     
-    dataquery = pd.read_sql_query("SELECT bp.applicationno AS \"Application Number\", to_timestamp(CAST(bp.applicationdate AS bigint)/1000)::date AS \"Application Date\",  bp.edcrnumber AS \"eDCR Number\", bp.tenantid, bp.status AS \"Application Status\", usr.gender AS \"Application Gender\", INITCAP(usr.type) AS \"Logged in User\", bp.additionaldetails->> 'serviceType' AS \"Service Type\",  bp.additionaldetails->>'applicationType' AS \"Application Type\", bp.businessservice AS \"Business Service\",land.occupancytype AS \"Occupancy Type\", INITCAP(landinfo.ownershipcategory) AS \"Ownership Subtype\", CASE WHEN bp.businessservice = 'BPA_OC' THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END AS \"OC Issued Date\", CASE WHEN bp.businessservice = 'BPA' THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END AS \"Permit Issued Date\" ,CASE WHEN bp.businessservice = 'BPA_LOW' THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END AS \"Permit Low Issued Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid LEFT OUTER JOIN eg_user usr ON bp.createdby = usr.uuid INNER JOIN eg_land_unit land ON land.landinfoid = bp.landid INNER JOIN eg_land_landinfo landinfo ON land.landinfoid = landinfo.id", conn)
-    sanctionquery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",ep.totaldue As \"Sanction Fee Total Amount Due\", ep.totalamountpaid as \"Sanction Fee Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Sanction Fee Payment Mode\",to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Sanction Fee Payment Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE epd.businessservice = 'BPA.NC_SAN_FEE' OR epd.businessservice = 'BPA.NC_OC_SAN_FEE'", conn)
-    feequery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",ep.totaldue As \"Application Fee Total Amount Due\", ep.totalamountpaid as \"Application Fee Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Application Fee Payment Mode\",to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Application Fee Payment Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE epd.businessservice = 'BPA.NC_APP_FEE' OR epd.businessservice = 'BPA.NC_OC_APP_FEE' OR epd.businessservice = 'BPA.LOW_RISK_PERMIT_FEE'", conn)
-    firequery = pd.read_sql_query("SELECT DISTINCT(bp.edcrnumber) AS \"eDCR Number\",to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date AS \"Fire Noc Sent Date\",CASE WHEN noc.applicationstatus = 'APPROVED' or noc.applicationstatus = 'REJECTED' or noc.applicationstatus = 'AUTO_APPROVED' THEN to_timestamp(CAST(bs.createdtime AS bigint)/1000)::date END AS \"Fire Noc Approved/Rejected Date\", INITCAP(noc.applicationstatus) AS \"Fire Noc Status\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid LEFT OUTER JOIN eg_wf_processinstance_v2 wf ON bp.applicationno = wf.businessid LEFT OUTER JOIN eg_wf_businessservice_v2 bs ON wf.businessservice = bs.businessservice LEFT OUTER JOIN eg_wf_state_v2 state ON  state.businessserviceid = bs.uuid WHERE noc.noctype = 'FIRE_NOC'", conn)
-    airportquery = pd.read_sql_query("SELECT DISTINCT(bp.edcrnumber) AS \"eDCR Number\",to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date AS \"Airport Noc Sent Date\" ,CASE WHEN noc.applicationstatus = 'APPROVED' or noc.applicationstatus = 'REJECTED' or noc.applicationstatus = 'AUTO_APPROVED' THEN to_timestamp(CAST(bs.createdtime AS bigint)/1000)::date END AS \"Airport Noc Approved/Rejected Date\", INITCAP(noc.applicationstatus) AS \"Airport Noc Status\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid LEFT OUTER JOIN eg_wf_processinstance_v2 wf ON bp.applicationno = wf.businessid LEFT OUTER JOIN eg_wf_businessservice_v2 bs ON wf.businessservice = bs.businessservice LEFT OUTER JOIN eg_wf_state_v2 state ON  state.businessserviceid = bs.uuid WHERE noctype = 'AIRPORT_AUTHORITY'", conn)
+    dataquery = pd.read_sql_query("SELECT DISTINCT(bp.applicationno) AS \"Application Number\", CASE WHEN (bp.applicationdate!= 0) THEN to_timestamp(CAST(bp.applicationdate AS bigint)/1000)::date END AS \"Application Date\", bp.edcrnumber AS \"eDCR Number\", bp.tenantid, adr.locality, bp.status AS \"Application Status\", usr.gender AS \"Application Gender\", INITCAP(usr.type) AS \"Logged in User\", bp.additionaldetails->> 'serviceType' AS \"Service Type\",  bp.additionaldetails->>'applicationType' AS \"Application Type\", bp.businessservice AS \"Business Service\",land.occupancytype AS \"Occupancy Type\", INITCAP(landinfo.ownershipcategory) AS \"Ownership Subtype\", CASE WHEN bp.businessservice = 'BPA_OC' THEN CASE WHEN (bp.approvaldate!= 0) THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END END AS \"OC Issued Date\", CASE WHEN bp.businessservice = 'BPA' THEN CASE WHEN (bp.approvaldate!= 0) THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END END AS \"Permit Issued Date\" ,CASE WHEN bp.businessservice = 'BPA_LOW' THEN CASE WHEN (bp.approvaldate!= 0) THEN to_timestamp(CAST(bp.approvaldate AS bigint)/1000)::date END END AS \"Permit Low Issued Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN eg_user usr ON bp.createdby = usr.uuid INNER JOIN eg_land_unit land ON land.landinfoid = bp.landid INNER JOIN eg_land_landinfo landinfo ON land.landinfoid = landinfo.id LEFT OUTER JOIN eg_land_address adr ON adr.landinfoid = landinfo.id WHERE bp.tenantid != 'pb.testing'", conn)
+    sanctionquery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",ep.totaldue As \"Sanction Fee Total Amount Due\", ep.totalamountpaid as \"Sanction Fee Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Sanction Fee Payment Mode\",CASE WHEN (ep.createdtime!= 0) THEN to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date END AS \"Sanction Fee Payment Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE epd.businessservice = 'BPA.NC_SAN_FEE' OR epd.businessservice = 'BPA.NC_OC_SAN_FEE'", conn)
+    feequery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",ep.totaldue As \"Application Fee Total Amount Due\", ep.totalamountpaid as \"Application Fee Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Application Fee Payment Mode\",CASE WHEN (ep.createdtime!= 0) THEN to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date END AS \"Application Fee Payment Date\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN egcl_bill eb ON bp.applicationno=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE epd.businessservice = 'BPA.NC_APP_FEE' OR epd.businessservice = 'BPA.NC_OC_APP_FEE' OR epd.businessservice = 'BPA.LOW_RISK_PERMIT_FEE'", conn)
+    firequery = pd.read_sql_query("SELECT DISTINCT(bp.edcrnumber) AS \"eDCR Number\", CASE WHEN (noc.createdtime!= 0) THEN to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date END AS \"Fire Noc Sent Date\" ,CASE WHEN noc.applicationstatus = 'APPROVED' or noc.applicationstatus = 'REJECTED' or noc.applicationstatus = 'AUTO_APPROVED' THEN  CASE WHEN (bs.createdtime!= 0) THEN to_timestamp(CAST(bs.createdtime AS bigint)/1000)::date END END AS \"Fire Noc Approved/Rejected Date\", INITCAP(noc.applicationstatus) AS \"Fire Noc Status\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid LEFT OUTER JOIN eg_wf_processinstance_v2 wf ON bp.applicationno = wf.businessid LEFT OUTER JOIN eg_wf_businessservice_v2 bs ON wf.businessservice = bs.businessservice LEFT OUTER JOIN eg_wf_state_v2 state ON  state.businessserviceid = bs.uuid WHERE noc.noctype = 'FIRE_NOC'", conn)
+    airportquery = pd.read_sql_query("SELECT DISTINCT(bp.edcrnumber) AS \"eDCR Number\", CASE WHEN (noc.createdtime!= 0) THEN to_timestamp(CAST(noc.createdtime AS bigint)/1000)::date END AS \"Airport Noc Sent Date\" ,CASE WHEN noc.applicationstatus = 'APPROVED' or noc.applicationstatus = 'REJECTED' or noc.applicationstatus = 'AUTO_APPROVED' THEN  CASE WHEN (bs.createdtime!= 0) THEN to_timestamp(CAST(bs.createdtime AS bigint)/1000)::date END END AS \"Airport Noc Approved/Rejected Date\", INITCAP(noc.applicationstatus) AS \"Airport Noc Status\" FROM eg_bpa_buildingplan bp INNER JOIN eg_noc noc ON bp.applicationno = noc.sourcerefid LEFT OUTER JOIN eg_wf_processinstance_v2 wf ON bp.applicationno = wf.businessid LEFT OUTER JOIN eg_wf_businessservice_v2 bs ON wf.businessservice = bs.businessservice LEFT OUTER JOIN eg_wf_state_v2 state ON  state.businessserviceid = bs.uuid WHERE noctype = 'AIRPORT_AUTHORITY'", conn)
     ownergenderquery = pd.read_sql_query("SELECT bp.edcrnumber AS \"eDCR Number\",usr.gender AS \"Owner Gender\" FROM eg_bpa_buildingplan bp LEFT OUTER JOIN eg_land_unit land ON land.landinfoid = bp.landid INNER JOIN eg_land_landinfo landinfo ON land.landinfoid = landinfo.id INNER JOIN eg_land_ownerinfo owner ON owner.landinfoid = landinfo.id LEFT OUTER JOIN eg_user usr ON owner.uuid = usr.uuid",conn)
      
     data = pd.DataFrame(dataquery)
@@ -318,7 +320,6 @@ def connect():
     data['Ownership Type'] = data['Ownership Subtype'].map(map_ownershiptype)
     
     data['ULB Type'] = data['tenantid'].map(map_MC)
-    data = data.drop(columns=['tenantid'])
     
     data['Service Type'] = data['Service Type'].map({'NEW_CONSTRUCTION':'New Construction'})
     data['Application Status'] = data['Application Status'].map(map_status)
@@ -358,6 +359,22 @@ def connect():
 
     data = data.rename(columns={ "FinancialYear":"Financial Year","Application_Date":"Application Date"})
      
+    global uniquetenant
+    uniquetenant = data['tenantid'].unique()
+    global accesstoken 
+    accesstoken = accessToken()
+    global localitydict
+    localitydict={}
+    storeTenantValues()    
+
+    data['Locality'] = data.apply(lambda x : enrichLocality(x.tenantid,x.locality), axis=1)
+    data['Locality'] = data['Locality'].str.upper().str.title()
+    data['City'] = data['tenantid'].apply(lambda x: x[3:])
+    data['City']=data['City'].str.upper().str.title()
+    data['State'] = data['tenantid'].apply(lambda x: 'Punjab' if x[0:2]=='pb' else '')
+
+    data = data.drop(columns=['tenantid','locality'])
+    
     data = data[['eDCR Number',
     'Application Number',
  'Application Date',
@@ -385,11 +402,12 @@ def connect():
  'Application Fee Payment Date',
   'Fire Noc?',
  'Fire Noc Sent Date',
- 'Fire Noc Approved/Rejected Date',
+             'Fire Noc Approved/Rejected Date',
   'Airport Noc?',
  'Airport Noc Sent Date',
- 'Airport Noc Approved/Rejected Date',  
- 'ULB Type']]
+       'Airport Noc Approved/Rejected Date',       
+ 'ULB Type','Locality','City','State']]
+
 
     data.fillna("", inplace=True)
 
@@ -397,6 +415,65 @@ def connect():
 
     print("Datamart exported. Please copy it using kubectl cp command to your required location.")
 
+
+def accessToken():
+    query = {'username':'{{REPLACE-WITH-USERNAME}}','password':'{{REPLACE-WITH-PASSWORD}}','userType':'EMPLOYEE',"scope":"read","grant_type":"password"}
+    query['tenantId']='pb.amritsar'
+    response = requests.post("{{REPLACE-WITH-URL}}",data=query, headers={
+   "Connection":"keep-alive","content-type":"application/x-www-form-urlencoded", "origin":"{{REPLACE-WITH-URL}}","Authorization": "Basic ZWdvdi11c2VyLWNsaWVudDo="})
+    jsondata = response.json()
+    return jsondata.get('access_token')
+
+
+def locationApiCall(tenantid):
+    body = { "RequestInfo": {"apiId": "Rainmaker", "ver": ".01","ts": "","action": "","did": "1","key": "","msgId": "20170310130900|en_IN",}}
+    body["RequestInfo"]["authToken"]=accesstoken
+    paramlist = {"hierarchyTypeCode":"REVENUE","boundaryType":"locality"}
+    paramlist["tenantId"]=tenantid
+    response = requests.post("{{REPLACE-WITH-URL}}",params = paramlist,json=body, headers={
+       "Connection":"keep-alive","content-type":"application/json;charset=UTF-8", "origin":"{{REPLACE-WITH-URL}}"})
+
+    jsondata={}
+    if response.status_code == 200:
+        jsondata = response.json()
+    else:
+        return ''
+
+    if 'TenantBoundary' in jsondata:
+        jsondata = jsondata['TenantBoundary']
+    else:
+        return ''
+    if len(jsondata)>0:
+        jsondata = jsondata[0]
+    else:
+        return ''    
+    if 'boundary' in jsondata:
+        jsondata = jsondata['boundary']
+    else:
+        return '' 
+    
+
+    dictionary={} 
+    for v in jsondata:
+        dictionary[v['code']]= v['name']
+            
+    return dictionary     
+    
+def storeTenantValues():
+    for tenant in uniquetenant:
+        localitydict[tenant]=locationApiCall(tenant)
+
+       
+def enrichLocality(tenantid,locality):
+    if tenantid in localitydict:
+        if localitydict[tenantid]=='':
+            return ''
+        elif locality in localitydict[tenantid]:
+            return localitydict[tenantid][locality]
+        else:
+            return ''
+    else:
+        return ''    
 
 def calcFinancialYear(x):
     if(isinstance(x, str)):
