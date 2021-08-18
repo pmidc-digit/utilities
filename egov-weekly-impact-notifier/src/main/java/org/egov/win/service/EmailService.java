@@ -83,6 +83,7 @@ public class EmailService {
 		fillData(pt.getReceiptsGenerated(), context);
 		fillData(pt.getOnlineCollection(), context);
 		fillData(pt.getUpdatedCollection(), context);
+		fillData(pt.getBbpsCollection(), context);
 	}
 
 	private void enrichFirenocData(Firenoc firenoc, VelocityContext context) {
