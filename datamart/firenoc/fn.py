@@ -2,6 +2,8 @@ import psycopg2
 import csv
 import pandas as pd
 import numpy as np
+import requests
+import json
 
 def map_MC(s):
     if s in MC:
@@ -408,18 +410,15 @@ def connect():
         print("Exception occurred while connecting to the database")
         print(exception)
     
-    query = pd.read_sql_query("SELECT fn.tenantid, fnd.applicationNumber AS \"Application Number\",fn.firenocnumber AS \"Fire NOC Number\", to_timestamp(CAST(fnd.applicationDate AS bigint)/1000)::date AS \"Application Date\", INITCAP(fnd.channel) AS \"Application Created By?\", INITCAP(fnd.status) AS \"Application Status\", fnd.financialYear AS \"Financial Year\", INITCAP(fnd.firenoctype) AS \"Fire NOC Type\",INITCAP( bld.usagetype) AS \"Usage Type\", INITCAP(SUBSTRING(fn.tenantid, 4)) AS \"City\", INITCAP(own.ownertype) AS \"Ownership Type\", usr.gender AS \"Owner Gender\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\",to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\" FROM eg_fn_firenoc fn INNER JOIN eg_fn_firenocdetail fnd ON fn.uuid = fnd.firenocuuid INNER JOIN eg_fn_buidlings bld ON fnd.uuid = bld.firenocdetailsuuid INNER JOIN eg_fn_address adr ON fnd.uuid = adr.firenocdetailsuuid INNER JOIN eg_fn_owner own  ON fnd.uuid = own.firenocdetailsuuid LEFT OUTER JOIN eg_user usr ON own.useruuid = usr.uuid LEFT OUTER JOIN egcl_bill eb ON  fnd.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE fn.tenantid != 'pb.testing'", conn)
+    query = pd.read_sql_query("SELECT DISTINCT(fnd.applicationNumber) AS \"Application Number\",fn.tenantid,adr.locality, fn.firenocnumber AS \"Fire NOC Number\", CASE WHEN (fnd.applicationDate!= 0) THEN to_timestamp(CAST(fnd.applicationDate AS bigint)/1000)::date END AS \"Application Date\", INITCAP(fnd.channel) AS \"Application Created By?\", INITCAP(fnd.status) AS \"Application Status\", fnd.financialYear AS \"Financial Year\", INITCAP(fnd.firenoctype) AS \"Fire NOC Type\",INITCAP( bld.usagetype) AS \"Usage Type\", INITCAP(own.ownertype) AS \"Ownership Type\", usr.gender AS \"Owner Gender\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\",CASE WHEN (ep.createdtime!= 0) THEN  to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date END AS \"Payment Date\" FROM eg_fn_firenoc fn INNER JOIN eg_fn_firenocdetail fnd ON fn.uuid = fnd.firenocuuid INNER JOIN eg_fn_buidlings bld ON fnd.uuid = bld.firenocdetailsuuid INNER JOIN eg_fn_address adr ON fnd.uuid = adr.firenocdetailsuuid INNER JOIN eg_fn_owner own  ON fnd.uuid = own.firenocdetailsuuid LEFT OUTER JOIN eg_user usr ON own.useruuid = usr.uuid LEFT OUTER JOIN egcl_bill eb ON  fnd.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE fn.tenantid != 'pb.testing'", conn)
     genderquery = pd.read_sql_query("SELECT fnd.applicationnumber AS \"Application Number\",usr.gender AS \"Application Created By Gender\" FROM eg_fn_firenoc fn INNER JOIN eg_fn_firenocdetail fnd ON fn.uuid = fnd.firenocuuid LEFT OUTER JOIN eg_user usr ON fn.createdby = usr.uuid WHERE fn.tenantid != 'pb.testing'", conn)
     provquery = pd.read_sql_query("SELECT fnd.applicationNumber AS \"Application Number\", fn.firenocnumber AS \"Fire NOC Number\", INITCAP( bld.usagetype) AS \"Usage Type\", INITCAP(own.ownertype) AS \"Ownership Type\" FROM eg_fn_firenoc fn INNER JOIN eg_fn_firenocdetail fnd ON fn.uuid = fnd.firenocuuid INNER JOIN eg_fn_owner own  ON fnd.uuid = own.firenocdetailsuuid INNER JOIN eg_fn_buidlings bld ON fnd.uuid = bld.firenocdetailsuuid WHERE fn.tenantid != 'pb.testing' AND fnd.firenoctype = 'PROVISIONAL'", conn)
 
-   
     data = pd.DataFrame(query)
     gender = pd.DataFrame(genderquery)
     prov = pd.DataFrame(provquery)
-
     
     data['ULB Type'] = data['tenantid'].map(map_MC)
-    data = data.drop(columns=['tenantid'])
 
     data.rename(columns = {'Ownership Type':'Ownership Subtype'},inplace = 'True')
     prov.rename(columns = {'Ownership Type':'Ownership Subtype'},inplace = 'True')
@@ -453,7 +452,7 @@ def connect():
     
     data = pd.merge(data, gender, how="left", left_on=["Application Number"],right_on = ["Application Number"])
     data['Owner Gender'] = data['Owner Gender'].map(map_gender)             
-    data["Application Created By Gender"] = data["Application Created By Gender"].map(map_usagetype)         
+    data["Application Created By Gender"] = data["Application Created By Gender"].map(map_gender)         
     data = data.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date"})
     
     data = data.rename(columns={"Ownership Type":"ownershiptype","Ownership Subtype":"ownershipsubtype","Usage Type":"usagetype","Usage Subtype":"usagesubtype"})
@@ -476,11 +475,86 @@ def connect():
     data.loc[data['Fire NOC Type'] == 'Provisional', 'Data modified during new NOC creation?'] = ''  
     data.loc[data['Data modified during new NOC creation?'] == 'Not There', 'Data modified during new NOC creation?'] = ''  
 
+    global uniquetenant
+    uniquetenant = data['tenantid'].unique()
+    global accesstoken 
+    accesstoken = accessToken()
+    global localitydict
+    localitydict={}
+    storeTenantValues()    
+
+    data['Locality'] = data.apply(lambda x : enrichLocality(x.tenantid,x.locality), axis=1)
+    data['Locality'] = data['Locality'].str.upper().str.title()
+    data['City'] = data['tenantid'].apply(lambda x: x[3:])
+    data['City']=data['City'].str.upper().str.title()
+    data['State'] = data['tenantid'].apply(lambda x: 'Punjab' if x[0:2]=='pb' else '')
+
+    data = data.drop(columns=['tenantid','locality'])
     data.fillna("", inplace=True)
      
     data.to_csv('/tmp/FNDatamart.csv')
 
     print("Datamart exported. Please copy it using kubectl cp command to your required location.")
+
+def accessToken():
+    query = {'username':'{{REPLACE-WITH-USERNAME}}','password':'{{REPLACE-WITH-PASSWORD}}','userType':'EMPLOYEE',"scope":"read","grant_type":"password"}
+    query['tenantId']='pb.amritsar'
+    response = requests.post("{{REPLACE-WITH-URL}}",data=query, headers={
+   "Connection":"keep-alive","content-type":"application/x-www-form-urlencoded", "origin":"{{REPLACE-WITH-URL}}","Authorization": "Basic ZWdvdi11c2VyLWNsaWVudDo="})
+    jsondata = response.json()
+    return jsondata.get('access_token')
+
+
+def locationApiCall(tenantid):
+    body = { "RequestInfo": {"apiId": "Rainmaker", "ver": ".01","ts": "","action": "","did": "1","key": "","msgId": "20170310130900|en_IN",}}
+    body["RequestInfo"]["authToken"]=accesstoken
+    paramlist = {"hierarchyTypeCode":"REVENUE","boundaryType":"locality"}
+    paramlist["tenantId"]=tenantid
+    response = requests.post("{{REPLACE-WITH-URL}}",params = paramlist,json=body, headers={
+       "Connection":"keep-alive","content-type":"application/json;charset=UTF-8", "origin":"{{REPLACE-WITH-URL}}"})
+
+    jsondata={}
+    if response.status_code == 200:
+        jsondata = response.json()
+    else:
+        return ''
+
+    if 'TenantBoundary' in jsondata:
+        jsondata = jsondata['TenantBoundary']
+    else:
+        return ''
+    if len(jsondata)>0:
+        jsondata = jsondata[0]
+    else:
+        return ''    
+    if 'boundary' in jsondata:
+        jsondata = jsondata['boundary']
+    else:
+        return '' 
     
+    dictionary={} 
+    for v in jsondata:
+        dictionary[v['code']]= v['name']
+            
+    return dictionary     
+    
+def storeTenantValues():
+    for tenant in uniquetenant:
+        localitydict[tenant]=locationApiCall(tenant)
+
+       
+def enrichLocality(tenantid,locality):
+    if tenantid in localitydict:
+        if localitydict[tenantid]=='':
+            return ''
+        elif locality in localitydict[tenantid]:
+            return localitydict[tenantid][locality]
+        else:
+            return ''
+    else:
+        return ''    
+        
+            
 if __name__ == '__main__':
     connect()
+    
