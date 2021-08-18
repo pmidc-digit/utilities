@@ -2,6 +2,8 @@ import psycopg2
 import csv
 import pandas as pd
 import numpy as np
+import requests
+import json
 
 def map_CompSubtype(s):
     if s == 'NoStreetlight':
@@ -222,20 +224,100 @@ def map_CompType(s):
     
 def connect(): 
     try:
-        conn = psycopg2.connect(database="{{REPLACE-WITH-DATABASE}}", user="{{REPLACE-WITH-USERNAME}}", password="{{REPLACE-WITH-PASSWORD}}", host="{{REPLACE-WITH-HOST}}", port="5432")
+        conn = psycopg2.connect(database="{{REPLACE-WITH-DATABASE}}", user="{{REPLACE-WITH-USERNAME}}",
+                            password="{{REPLACE-WITH-PASSWORD}}", host="{{REPLACE-WITH-HOST}}")
         print("Connection established!")
    
     except Exception as exception:
         print("Exception occurred while connecting to the database")
         print(exception)
 
-    sqlquery = pd.read_sql_query("SELECT DISTINCT(srv.servicerequestid) AS \"Service ID\", srv.servicecode AS \"Complaint Subtype\", INITCAP(srv.status) AS \"Status\", INITCAP(srv.rating) AS \"Rating\",  INITCAP(srv.source) AS \"Source\", INITCAP( SUBSTRING(adr.city, 4)) AS \"City\" FROM eg_pgr_service srv INNER JOIN eg_pgr_action act ON srv.servicerequestid = act.businesskey INNER JOIN eg_pgr_address adr ON srv.addressid = adr.uuid WHERE active != 'f' AND srv.tenantid != 'pb.testing'",conn)
+    sqlquery = pd.read_sql_query("SELECT  DISTINCT(srv.servicerequestid) AS \"Service ID\",srv.tenantid, adr.mohalla as locality, srv.servicecode AS \"Complaint Subtype\", INITCAP(srv.status) AS  \"Status\", INITCAP(srv.rating) AS \"Rating\",  INITCAP(srv.source) AS \"Source\" FROM eg_pgr_service srv INNER JOIN eg_pgr_action act ON srv.servicerequestid = act.businesskey INNER JOIN eg_pgr_address adr ON srv.addressid = adr.uuid WHERE active != 'f' AND srv.tenantid != 'pb.testing'",conn)
     pgrgen = pd.DataFrame(sqlquery)
     pgrgen['Complaint Subtype'] = pgrgen['Complaint Subtype'].map(map_CompSubtype)
     pgrgen['Complaint Type'] = pgrgen['Complaint Subtype'].map(map_CompType)
+    
+    global uniquetenant
+    uniquetenant = pgrgen['tenantid'].unique()
+    global accesstoken 
+    accesstoken = accessToken()
+    global localitydict
+    localitydict={}
+    storeTenantValues()    
+
+    pgrgen['Locality'] = pgrgen.apply(lambda x : enrichLocality(x.tenantid,x.locality), axis=1)
+    pgrgen['Locality'] = pgrgen['Locality'].str.upper().str.title()
+    pgrgen['City'] = pgrgen['tenantid'].apply(lambda x: x[3:])
+    pgrgen['City'] = pgrgen['City'].str.upper().str.title()
+    pgrgen['State'] = pgrgen['tenantid'].apply(lambda x: 'Punjab' if x[0:2]=='pb' else '')
+
+    pgrgen = pgrgen.drop(columns=['tenantid','locality'])
+    
     pgrgen.fillna('', inplace=True)
     pgrgen.to_csv('/home/priyanka/Desktop/pgrDatamart.csv')
     print("Datamart exported. Please copy it using kubectl cp command to you required location.")
 
+
+def accessToken():
+    query = {'username':'{{REPLACE-WITH-USERNAME}}','password':'{{REPLACE-WITH-PASSWORD}}','userType':'EMPLOYEE',"scope":"read","grant_type":"password"}
+    query['tenantId']='pb.amritsar'
+    response = requests.post("{{REPLACE-WITH-URL}}",data=query, headers={
+   "Connection":"keep-alive","content-type":"application/x-www-form-urlencoded", "origin":"{{REPLACE-WITH-URL}}","Authorization": "Basic ZWdvdi11c2VyLWNsaWVudDo="})
+    jsondata = response.json()
+    return jsondata.get('access_token')
+
+
+def locationApiCall(tenantid):
+    body = { "RequestInfo": {"apiId": "Rainmaker", "ver": ".01","ts": "","action": "","did": "1","key": "","msgId": "20170310130900|en_IN",}}
+    body["RequestInfo"]["authToken"]=accesstoken
+    paramlist = {"hierarchyTypeCode":"REVENUE","boundaryType":"locality"}
+    paramlist["tenantId"]=tenantid
+    response = requests.post("{{REPLACE-WITH-URL}}",params = paramlist,json=body, headers={
+       "Connection":"keep-alive","content-type":"application/json;charset=UTF-8", "origin":"{{REPLACE-WITH-URL}}"})
+
+    jsondata={}
+    if response.status_code == 200:
+        jsondata = response.json()
+    else:
+        return ''
+
+    if 'TenantBoundary' in jsondata:
+        jsondata = jsondata['TenantBoundary']
+    else:
+        return ''
+    if len(jsondata)>0:
+        jsondata = jsondata[0]
+    else:
+        return ''    
+    if 'boundary' in jsondata:
+        jsondata = jsondata['boundary']
+    else:
+        return '' 
+    
+
+    dictionary={} 
+    for v in jsondata:
+        dictionary[v['code']]= v['name']
+            
+    return dictionary     
+    
+def storeTenantValues():
+    for tenant in uniquetenant:
+        localitydict[tenant]=locationApiCall(tenant)
+
+       
+def enrichLocality(tenantid,locality):
+    if tenantid in localitydict:
+        if localitydict[tenantid]=='':
+            return ''
+        elif locality in localitydict[tenantid]:
+            return localitydict[tenantid][locality]
+        else:
+            return ''
+    else:
+        return ''    
+    
+    
 if __name__ == '__main__':
     connect()
+    
