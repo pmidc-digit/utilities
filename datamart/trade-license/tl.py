@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 from datetime import date
 from datetime import datetime
+import requests
+import json
 
 def map_MC(s):
     if s in MC:
@@ -277,14 +279,11 @@ def connect():
         print(exception)
     
         
-    newdataquery = pd.read_sql_query("SELECT tl.applicationNumber AS \"Application Number\",   to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date AS \"Application Date\",tl.tenantid, tl.validto AS \"Valid Till\", tl.financialYear AS \"Financial Year\", to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date  AS \"Commencement Date\", tl.licenseNumber as \"License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype)  AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\",acc.accessoryCategory AS \"Accessory Category\" , INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\",tld.adhocpenalty AS \"Penalty\", to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\", INITCAP(SUBSTRING(adr.tenantid,4)) AS \"ULB\", adr.locality AS \"Locality\"  FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId INNER JOIN eg_tl_address adr ON tld.id = adr.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN  egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'NEW' AND tl.tenantId != 'pb.testing'", conn)
-    renewdataquery = pd.read_sql_query("SELECT tl.tenantid, tl.financialYear AS \"Financial Year\", to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date AS \"Application Date\", tl.applicationNumber AS \"Application Number\", to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date  AS \"Commencement Date\", tl.licenseNumber as \"License Number\",tl.oldlicensenumber AS \"Old License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\", acc.accessoryCategory AS \"Accessory Category\",INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", tld.adhocpenalty AS \"Penalty\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\", to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\", INITCAP(tl.workflowcode) AS \"Renewal Type\", INITCAP(SUBSTRING(adr.tenantid,4)) AS \"ULB\", adr.locality AS \"Locality\" FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId INNER JOIN eg_tl_address adr ON tld.id = adr.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'RENEWAL' AND tl.tenantId != 'pb.testing'",conn)
+    newdataquery = pd.read_sql_query("SELECT tl.applicationNumber AS \"Application Number\", CASE WHEN (tl.applicationDate!= 0) THEN   to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date END AS \"Application Date\",tl.tenantid, adr.locality, CASE WHEN (tl.validto!= 0) THEN to_timestamp(CAST(tl.validto AS bigint)/1000)::date END AS \"Valid Till\" , tl.financialYear AS \"Financial Year\", CASE WHEN (tl.commencementDate!= 0) THEN  to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date END AS \"Commencement Date\", tl.licenseNumber as \"License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\",acc.accessoryCategory AS \"Accessory Category\" , INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\",tld.adhocpenalty AS \"Penalty\", CASE WHEN (ep.createdtime!= 0) THEN  to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date END AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\" FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId INNER JOIN eg_tl_address adr ON tld.id = adr.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN  egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'NEW' AND tl.tenantId != 'pb.testing'", conn)
+    renewdataquery = pd.read_sql_query("SELECT tl.tenantid, adr.locality, tl.financialYear AS \"Financial Year\",CASE WHEN (tl.applicationDate!= 0) THEN  to_timestamp(CAST(tl.applicationDate AS bigint)/1000)::date END AS \"Application Date\", tl.applicationNumber AS \"Application Number\",CASE WHEN (tl.commencementDate!= 0) THEN  to_timestamp(CAST(tl.commencementDate AS bigint)/1000)::date END AS \"Commencement Date\", tl.licenseNumber as \"License Number\",tl.oldlicensenumber AS \"Old License Number\", INITCAP(tl.status) AS \"Application Status\", INITCAP(tu.tradetype) AS tradetype, INITCAP(tu.tradetype) AS \"Trade Subtype\", tu.uom AS \"Trade UOM\", tu.uomvalue AS \"Trade UOM Value\", INITCAP(acc.uom) AS \"Accessory UOM\", acc.uomvalue AS \"Accessory UOM Value\", acc.accessoryCategory AS \"Accessory Category\",INITCAP(tld.subOwnerShipCategory) AS \"Ownership Subtype\", INITCAP(tld.structuretype) AS \"Structure Type\", tld.adhocpenalty AS \"Penalty\", ep.totaldue As \"Total Amount Due\", ep.totalamountpaid as \"Total Amount Paid\", INITCAP(ep.paymentmode) AS \"Payment Mode\", CASE WHEN (ep.createdtime!= 0) THEN  to_timestamp(CAST(ep.createdtime AS bigint)/1000)::date END AS \"Payment Date\", INITCAP(tl.applicationtype) AS \"Application Type\", INITCAP(tl.workflowcode) AS \"Renewal Type\" FROM eg_tl_TradeLicense tl INNER JOIN eg_tl_TradeLicenseDetail tld ON tl.id = tld.tradelicenseId INNER JOIN eg_tl_Accessory acc ON tld.id = acc.tradeLicenseDetailId INNER JOIN eg_tl_TradeUnit tu ON tld.id = tu.tradeLicenseDetailId INNER JOIN eg_tl_address adr ON tld.id = adr.tradeLicenseDetailId LEFT OUTER JOIN egcl_bill eb ON  tl.applicationNumber=eb.consumercode LEFT OUTER JOIN egcl_paymentdetail epd ON eb.id=epd.billid LEFT OUTER JOIN egcl_payment ep ON ep.id=epd.paymentid WHERE tl.applicationtype = 'RENEWAL' AND tl.tenantId != 'pb.testing'",conn)
    
     newdata = pd.DataFrame(newdataquery)
     renewdata = pd.DataFrame(renewdataquery)
-    
-    newdata['ULB Type'] = newdata['tenantid'].map(map_MC)
-    renewdata['ULB Type'] = newdata['tenantid'].map(map_MC)     
     
     newdata['Ownership Subtype'] = newdata['Ownership Subtype'].map(map_ownershipsubtype)
     renewdata['Ownership Subtype'] = renewdata['Ownership Subtype'].map(map_ownershipsubtype)
@@ -325,9 +324,35 @@ def connect():
     newdata = newdata.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date", "validtill":"Valid Till"})
     renewdata = renewdata.rename(columns={"Application_Date":"Application Date" ,"Commencement_Date":"Commencement Date","Payment_Date":"Payment Date"})  
     
-    newdata = newdata.drop(columns=['tenantid'])
-    renewdata = renewdata.drop(columns=['tenantid'])
+    global uniquetenant
+    uniquetenantnew = newdata['tenantid'].unique()
+    uniquetenantrenew = renewdata['tenantid'].unique()
+    uniquetenant =[*uniquetenantnew, *uniquetenantrenew]
+    uniquetenantset = set(uniquetenant)
+    uniquetenant = list(uniquetenantset)
+    global accesstoken 
+    accesstoken = accessToken()
+    global localitydict
+    localitydict={}
+    storeTenantValues()    
     
+    newdata['ULB Type'] = newdata['tenantid'].map(map_MC)
+    renewdata['ULB Type'] = renewdata['tenantid'].map(map_MC)     
+    
+    newdata['Locality'] = newdata.apply(lambda x : enrichLocality(x.tenantid,x.locality), axis=1)
+    renewdata['Locality'] = renewdata.apply(lambda x : enrichLocality(x.tenantid,x.locality), axis=1)
+
+    newdata['City'] = newdata['tenantid'].apply(lambda x:'' if 'DEACTIVATE' in x else x[3:])
+    newdata['City']=newdata['City'].str.upper().str.title()
+    newdata['State'] = newdata['tenantid'].apply(lambda x: 'Punjab' if x[0:2]=='pb' else '')
+
+    renewdata['City'] = renewdata['tenantid'].apply(lambda x:'' if 'DEACTIVATE' in x else x[3:])
+    renewdata['City']=renewdata['City'].str.upper().str.title()
+    renewdata['State'] = renewdata['tenantid'].apply(lambda x: 'Punjab' if x[0:2]=='pb' else '')
+    
+    newdata = newdata.drop(columns=['tenantid','locality'])
+    renewdata = renewdata.drop(columns=['tenantid','locality'])
+  
     newdata.fillna("", inplace=True)
     renewdata.fillna("", inplace=True)
     
@@ -378,9 +403,69 @@ def connect():
     renewdata.fillna("", inplace=True)
     
     newdata.to_csv('/tmp/tlDatamart.csv')
-    renewdata.to_csv('/tmp/tlRenewDatamart.csv')
+    renewdata.to_csv('/tmp/tlrenewDatamart.csv')
 
     print("Datamart exported. Please copy it using kubectl cp command to your required location.")
+
+
+def accessToken():
+    query = {'username':'{{REPLACE-WITH-USERNAME}}','password':'{{REPLACE-WITH-PASSWORD}}','userType':'EMPLOYEE',"scope":"read","grant_type":"password"}
+    query['tenantId']='pb.amritsar'
+    response = requests.post("{{REPLACE-WITH-URL}}",data=query, headers={
+   "Connection":"keep-alive","content-type":"application/x-www-form-urlencoded", "origin":"{{REPLACE-WITH-URL}}","Authorization": "Basic ZWdvdi11c2VyLWNsaWVudDo="})
+    jsondata = response.json()
+    return jsondata.get('access_token')
+
+
+def locationApiCall(tenantid):
+    body = { "RequestInfo": {"apiId": "Rainmaker", "ver": ".01","ts": "","action": "","did": "1","key": "","msgId": "20170310130900|en_IN",}}
+    body["RequestInfo"]["authToken"]=accesstoken
+    paramlist = {"hierarchyTypeCode":"REVENUE","boundaryType":"locality"}
+    paramlist["tenantId"]=tenantid
+    response = requests.post("{{REPLACE-WITH-URL}}",params = paramlist,json=body, headers={
+       "Connection":"keep-alive","content-type":"application/json;charset=UTF-8", "origin":"{{REPLACE-WITH-URL}}"})
+
+    jsondata={}
+    if response.status_code == 200:
+        jsondata = response.json()
+    else:
+        return ''
+
+    if 'TenantBoundary' in jsondata:
+        jsondata = jsondata['TenantBoundary']
+    else:
+        return ''
+    if len(jsondata)>0:
+        jsondata = jsondata[0]
+    else:
+        return ''    
+    if 'boundary' in jsondata:
+        jsondata = jsondata['boundary']
+    else:
+        return '' 
     
+
+    dictionary={} 
+    for v in jsondata:
+        dictionary[v['code']]= v['name']
+            
+    return dictionary     
+    
+def storeTenantValues():
+    for tenant in uniquetenant:
+        localitydict[tenant]=locationApiCall(tenant)
+
+       
+def enrichLocality(tenantid,locality):
+    if tenantid in localitydict:
+        if localitydict[tenantid]=='':
+            return ''
+        elif locality in localitydict[tenantid]:
+            return localitydict[tenantid][locality]
+        else:
+            return ''
+    else:
+        return ''        
+        
 if __name__ == '__main__':
     connect()
