@@ -6,7 +6,7 @@ import requests
 import json
 
 def map_bs(s):
-    if s == 'Tx.Ts1_copy_register_for_old_survey':
+    if s == 'Tx.Ts1_copy_register_for_old_survey' or s == 'Tx.Ts1_Copy_Register_For_Old_Survey':
         return 'Taxes - TS1 copy register for old survey'
     elif s == 'Advt.Unipolls':
         return 'Advertisement Tax - Unipolls'
@@ -24,6 +24,8 @@ def map_bs(s):
         return 'Taxes - No Dues Certificate'
     elif s == 'Advt.Light_Wala_Board':
         return 'Advertisement Tax - Light Wala Board'
+    elif s == 'Tx.Electricity_Chungi':
+    	return 'Taxes - Electricty Chungi'
 
 def connect():
     try:
