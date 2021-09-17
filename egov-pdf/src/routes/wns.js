@@ -515,11 +515,16 @@ router.post(
             if(waterBills.length>0){
               for(let waterBill of waterBills){
                 if(waterBill.status ==='EXPIRED'){
+                  try{
                   var billresponse = await fetch_bill(
                   tenantId, waterBill.consumerCode,
                   waterBill.businessService, requestinfo);
                 
                   consolidatedResult.Bill.push(billresponse.data.Bill[0]);
+                  }catch (ex) {
+                    console.log("Exception while generating new ST bill for consumer:", waterBill.consumerCode)
+                    if (ex.response && ex.response.data) console.log(ex.response.data);
+                  } 
                 }
                 else{
                   if(waterBill.status ==='ACTIVE')
@@ -571,11 +576,16 @@ router.post(
             if(sewerageBills.length>0){
               for(let sewerageBill of sewerageBills){
                 if(sewerageBill.status ==='EXPIRED'){
+                  try{
                   var billresponse = await fetch_bill(
                   tenantId, sewerageBill.consumerCode,
                   sewerageBill.businessService, requestinfo);
                 
                   consolidatedResult.Bill.push(billresponse.data.Bill[0]);
+                  }catch (ex) {
+                    console.log("Exception while generating new SW bill for consumer:", sewerageBill.consumerCode)
+                    if (ex.response && ex.response.data) console.log(ex.response.data);
+                  }
                 }
                 else{
                   if(sewerageBill.status ==='ACTIVE')
