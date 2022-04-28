@@ -57,7 +57,7 @@ pt_closed_applications = {'path': 'property-services/_search',
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "Data.tenantData.city.districtCode.keyword"
+                      "field": "Data.tenantData.city.districtName.keyword"
                     }},
                               "aggs": {{
                                 "todaysClosedApplications": {{
@@ -126,7 +126,7 @@ pt_total_applications = {'path': 'property-services/_search',
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "Data.tenantData.city.districtCode.keyword"
+                      "field": "Data.tenantData.city.districtName.keyword"
                     }},
                     "aggs": {{
                       "todaysTotalApplications": {{
@@ -219,7 +219,7 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "domainObject.tenantId.keyword"
+                    "field": "dataObject.tenantId.keyword"
                   }},
                   "aggs": {{
                   "region": {{
@@ -331,7 +331,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "domainObject.tenantId.keyword"
+                    "field": "dataObject.tenantId.keyword"
                   }},
                   "aggs": {{
                   "region": {{
@@ -515,7 +515,7 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "domainObject.tenantId.keyword"
+                    "field": "dataObject.tenantId.keyword"
                   }},
                   "aggs": {{
                   "region": {{
@@ -667,7 +667,7 @@ pt_assessed_properties_by_usage = {'path': 'property-services/_search',
                 "aggs": {{
                "region": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtCode.keyword"
+                    "field": "Data.tenantData.city.districtName.keyword"
                 }},
              "aggs": {{
                     "byUsageType": {{
@@ -840,7 +840,7 @@ pt_properties_assessments = {'path': 'property-assessments/_search',
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword"
-          }},
+      batch starting at 0 with batch size 50    }},
           "aggs": {{
             "region": {{
               "terms": {{
@@ -867,7 +867,7 @@ pt_properties_assessments = {'path': 'property-assessments/_search',
 
 
 
-# pt_properties_registered_by_year, pt_properties_assessments
+
 pt_queries = [pt_closed_applications, pt_total_applications,
               pt_collection_transactions_by_usage, pt_collection_taxes, pt_collection_cess, 
               pt_assessed_properties_by_usage  ]

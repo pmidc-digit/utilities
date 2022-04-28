@@ -10,7 +10,10 @@ import json
 from queries.tl import *
 from queries.pgr import *
 from queries.ws import *
+from queries.ws_digit import *
 from queries.pt import *
+from queries.firenoc import *
+from queries.mcollect import *
 from utils.utils import log
 from pytz import timezone
 
@@ -27,13 +30,17 @@ module_map = {
     'TL' : (tl_queries, empty_tl_payload),
     'PGR' : (pgr_queries, empty_pgr_payload),
     'WS' : (ws_queries, empty_ws_payload),
-    'PT' : (pt_queries, empty_pt_payload)
+    'WS_DIGIT' : (ws_digit_queries, empty_ws_digit_payload),
+    'PT' : (pt_queries, empty_pt_payload),
+    'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
+    'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
+
 }
 
 
 dag = DAG('national_dashboard_template', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
-
+batch_size = 50
 
 def dump_kibana(**kwargs):
     connection = BaseHook.get_connection('qa-punjab-kibana')
@@ -56,11 +63,8 @@ def dump_kibana(**kwargs):
         response = r.json()
         merged_document[query.get('name')] = response
         logging.info(json.dumps(response))
-        # with open('{0}{1}.json'.format(file_share, query.get('name')), "wt") as outfile:
-        #     outfile.write(json.dumps(response))
     ward_list = transform_response_sample(merged_document, date, module)
     kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
-    # logging.info(merged_document)
     return json.dumps(ward_list)
 
 
@@ -76,6 +80,9 @@ def transform_response_sample(merged_document, date, module):
     ward_list = [ward_map[k] for k in ward_map.keys()]
     logging.info(json.dumps(ward_list))
     return ward_list
+
+def get_key(ward, ulb):
+    return '{0}|{1}'.format(ward, ulb)
 
 def transform_single(single_document, ward_map, date, lambda_function, module):
     module_config = module_map.get(module)
@@ -96,13 +103,10 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
                     ward_payload = ward_map.get(ward)
                 else:
                     ward_payload = empty_lambda(region, ulb, ward, date)
-                # logging.info(region_bucket)
                 metrics = ward_payload.get('metrics')
                 metrics = lambda_function(metrics, region_bucket)
                 ward_payload['metrics'] = metrics
-                # logging.info(ward_payload)
-                # logging.info(ward_map)
-                ward_map[ward] = ward_payload
+                ward_map[get_key(ward, ulb)] = ward_payload
     
     return ward_map
 
@@ -135,7 +139,7 @@ def get_auth_token(connection):
         'tenantId' : 'pb.amritsar',
         'userType' : 'EMPLOYEE'
     }
-    # data = "grant_type=password&scope=read&username=amr001&password=eGov@123&tenantId=pb.amritsar&userType=EMPLOYEE"
+
     r = requests.post(url, data=data, headers={'Authorization' : 'Basic ZWdvdi11c2VyLWNsaWVudDo=', 'Content-Type' : 'application/x-www-form-urlencoded'})
     response = r.json()
     logging.info(response)
@@ -157,10 +161,10 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
         "authToken": access_token,
         "userInfo": user_info
         },
-        "Data": json.loads(payload)
+        "Data": payload
 
     }
-    # data = "grant_type=password&scope=read&username=amr001&password=eGov@123&tenantId=pb.amritsar&userType=EMPLOYEE"
+
     log(module, 'Info', json.dumps(data), BaseHook.get_connection('qa-punjab-kibana'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
@@ -178,12 +182,12 @@ def load(**kwargs):
     module = kwargs['module']
 
     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
-    # logging.info('>>>>>>this is the payload')
     logging.info(payload)
+    payload_obj = json.loads(payload)
     if access_token and refresh_token:
-        call_ingest_api(connection, access_token, user_info, payload, module)
-    # national-dashboard/metric/_ingest
-    #/user/oauth/token
+        for i in range(0, len(payload_obj), batch_size):
+            logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
+            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module)
     return None
 
 def transform(**kwargs):
@@ -256,6 +260,27 @@ load_ws = PythonOperator(
     op_kwargs={ 'module' : 'WS'},
     dag=dag)
 
+extract_ws_digit = PythonOperator(
+    task_id='elastic_search_extract_ws_digit',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'WS_DIGIT'},
+    dag=dag)
+
+transform_ws_digit = PythonOperator(
+    task_id='nudb_transform_ws_digit',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_ws_digit = PythonOperator(
+    task_id='nudb_ingest_load_ws_digit',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'WS_DIGIT'},
+    dag=dag)
+
 
 extract_pt = PythonOperator(
     task_id='elastic_search_extract_pt',
@@ -278,31 +303,53 @@ load_pt = PythonOperator(
     op_kwargs={ 'module' : 'PT'},
     dag=dag)
 
+extract_firenoc = PythonOperator(
+    task_id='elastic_search_extract_firenoc',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'FIRENOC'},
+    dag=dag)
 
-# curl --location --request POST 'https://dev.digit.org/user/oauth/token' \
-# --header 'Authorization: Basic ZWdvdi11c2VyLWNsaWVudDo=' \
-# --header 'Content-Type: application/x-www-form-urlencoded' \
-# --data-urlencode 'grant_type=password' \
-# --data-urlencode 'scope=read' \
-# --data-urlencode 'username=amr001' \
-# --data-urlencode 'password=eGov@123' \
-# --data-urlencode 'tenantId=pb.amritsar' \
-# --data-urlencode 'userType=EMPLOYEE'
-# load = SimpleHttpOperator(
-#         task_id="auth",
-#         http_conn_id="digit-auth",
-#         method="POST",
-#         endpoint="/user/oauth/token",
-#         data="grant_type=password&scope=read&username=amr001&password=eGov@123&tenantId=pb.amritsar&userType=EMPLOYEE",
-#         headers={"Content-Type": "application/x-www-form-urlencoded", "Authorization" : "Basic ZWdvdi11c2VyLWNsaWVudDo="},
-#         dag=dag,
-#         do_xcom_push=True
-#     )
+transform_firenoc = PythonOperator(
+    task_id='nudb_transform_firenoc',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_firenoc = PythonOperator(
+    task_id='nudb_ingest_load_firenoc',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'FIRENOC'},
+    dag=dag)
 
 
+extract_mcollect = PythonOperator(
+    task_id='elastic_search_extract_mcollect',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'MCOLLECT'},
+    dag=dag)
 
+transform_mcollect = PythonOperator(
+    task_id='nudb_transform_mcollect',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_mcollect = PythonOperator(
+    task_id='nudb_ingest_load_mcollect',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'MCOLLECT'},
+    dag=dag)
 
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
+extract_ws_digit >> transform_ws_digit >> load_ws_digit
 extract_pt >> transform_pt >> load_pt
+extract_firenoc >> transform_firenoc >> load_firenoc
+extract_mcollect >> transform_mcollect >> load_mcollect

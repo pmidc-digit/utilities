@@ -89,44 +89,51 @@ tl_collection_adhoc_penalty = {
     'lambda': extract_tl_collection_adhoc_penalty,
     'query': """
 {{
-  "size" :0,
+  "size": 0,
   "query": {{
     "bool": {{
-          "filter": [
-            {{
-              "term": {{
-                "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": "TL_ADHOC_PENALTY"
-              }}
-            }}
-          ],
-          "must": [
-            {{
-                "range": {{
-                    "dataObject.paymentDetails.receiptDate": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}
-          ]
+      "filter": [
+        {{
+          "term": {{
+            "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": "TL_ADHOC_PENALTY"
+          }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "dataObject.paymentDetails.receiptDate": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
+      ],
+      "must_not": [
+        {{
+          "term": {{
+            "domainobject.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ]
+    }}
   }},
-    "aggs": {{
-        "ward": {{
-          "terms": {{
-            "field": "domainObject.ward.name.keyword"
-          }},
-                "aggs": {{
-        "ulb" :{{
-          "terms": {{
-            "field": "domainObject.tenantId.keyword"
-          }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "domainObject.ward.name.keyword"
+      }},
       "aggs": {{
-         "region": {{
-            "terms": {{
-              "field": "dataObject.tenantData.city.districtName.keyword"
-            }},
+        "ulb": {{
+          "terms": {{
+            "field": "dataObject.tenantId.keyword"
+          }},
+          "aggs": {{
+            "region": {{
+              "terms": {{
+                "field": "dataObject.tenantData.city.districtName.keyword"
+              }},
               "aggs": {{
                 "adhocPenalty": {{
                   "sum": {{
@@ -139,8 +146,8 @@ tl_collection_adhoc_penalty = {
         }}
       }}
     }}
-      }}
   }}
+}}
 
 
 
@@ -180,13 +187,20 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
                 }}
               }}
             }}
-          ]
+          ],
+      "must_not": [
+        {{
+          "term": {{
+            "domainobject.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ]
         }}
       }},
   "aggs": {{
         "ward": {{
           "terms": {{
-            "field": "domainObject.ward.name.keyword"
+            "field": "dataObject.tenantId.keyword"
           }},
                 "aggs": {{
         "ulb" :{{
@@ -212,8 +226,6 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
     }}
       }}
   }}
-
-
 
 	
 """
@@ -252,7 +264,14 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
                 }}
               }}
             }}
-          ]
+          ],
+      "must_not": [
+        {{
+          "term": {{
+            "domainobject.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ]
         }}
       }},
     "aggs": {{
@@ -263,7 +282,7 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
                 "aggs": {{
         "ulb" :{{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword"
           }},
       "aggs": {{
          "region": {{
@@ -405,6 +424,11 @@ tl_total_transactions = {'path': 'dss-collection_v2/_search',
           ],
         "must": [
             {{
+              "term": {{
+                "dataObject.paymentDetails.businessService.keyword": "TL"
+              }}
+            }},
+            {{
                 "range": {{
                     "dataObject.paymentDetails.receiptDate": {{
                     "gte": {0},
@@ -424,7 +448,7 @@ tl_total_transactions = {'path': 'dss-collection_v2/_search',
                             "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "domainObject.tenantId.keyword"
+                "field": "dataObject.tenantId.keyword"
               }},
         "aggs": {{
          "region": {{
@@ -817,8 +841,7 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
                                  }
 
 
-# tl_queries = [tl_license_issued_by_boundary, tl_collection_adhoc_penalty, tl_collection_adhoc_rebate, tl_collection_tax, tl_todays_trade_licenses, tl_total_transactions]
-# , tl_applications_moved_today, tl_collections_by_trade_category, tl_license_issued_within_sla
+
 tl_queries = [tl_license_issued_by_boundary, tl_collection_adhoc_penalty,
               tl_collection_adhoc_rebate, tl_collection_tax, tl_todays_trade_licenses, tl_total_transactions, tl_license_issued_within_sla, tl_todays_collection_by_trade_type]
 
@@ -839,7 +862,6 @@ def empty_tl_payload(region, ulb, ward, date):
             "adhocRebate": 0,
 
             "todaysLicenseIssuedWithinSLA": 0,
-            # "todaysLicenseIssued": 0,
             "todaysCollection": [
                   {
                       "groupBy": "tradeType",
@@ -877,17 +899,3 @@ def empty_tl_payload(region, ulb, ward, date):
             ]
         }
     }
-
-
-#  {
-#                             "name": "FIELDINSPECTION",
-#                             "value": 1000
-#                         },
-#                         {
-#                             "name": "INITIATED",
-#                             "value": 4000
-#                         },
-#                         {
-#                             "name": "REJECTED",
-#                             "value": 3000
-#                         }
