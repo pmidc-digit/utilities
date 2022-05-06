@@ -1,0 +1,116 @@
+---
+# Source: airflow/templates/scheduler/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-scheduler
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-8.1.3
+    app.kubernetes.io/instance: {{ .Chart.Name }}
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: scheduler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Chart.Name }}
+      app.kubernetes.io/component: scheduler
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-8.1.3
+        app.kubernetes.io/instance: {{ .Chart.Name }}
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: scheduler
+      annotations:
+        checksum/configmap: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    spec:
+      
+      priorityClassName: ""
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: default
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: {{ .Chart.Name }}
+                    app.kubernetes.io/instance: {{ .Chart.Name }}
+                    app.kubernetes.io/component: scheduler
+                namespaces:
+                  - {{ .Values.namespace }}
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      initContainers:
+        
+      containers:
+        
+        - name: {{ .Chart.Name }}-scheduler
+          image: "docker.io/bitnami/airflow-scheduler:2.0.1-debian-10-r35"
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          env:
+            - name: AIRFLOW_EXECUTOR
+              value: CeleryExecutor
+            - name: AIRFLOW_FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: airflow
+                  key: airflow-fernetKey
+            - name: AIRFLOW_LOAD_EXAMPLES
+              value: "no"
+            - name: AIRFLOW_DATABASE_NAME
+              value: "bitnami_airflow"
+            - name: AIRFLOW_DATABASE_USERNAME
+              value: "bn_airflow"
+            - name: AIRFLOW_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-postgresql
+                  key: postgresql-password
+            - name: AIRFLOW_DATABASE_HOST
+              value: "airflow-postgresql"
+            - name: AIRFLOW_DATABASE_PORT_NUMBER
+              value: "5432"
+            
+            - name: REDIS_HOST
+              value: "airflow-redis-master"
+            - name: REDIS_PORT_NUMBER
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-redis
+                  key: redis-password
+            
+            - name: AIRFLOW_WEBSERVER_HOST
+              value: airflow
+            - name: AIRFLOW_WEBSERVER_PORT_NUMBER
+              value: "8080"
+          envFrom:
+          ports:
+            - name: task-logs
+              containerPort: 8793
+          volumeMounts:
+            - name: custom-configuration-file
+              mountPath: /opt/bitnami/airflow/airflow.cfg
+              subPath: airflow.cfg
+            
+          resources:
+            limits: {}
+            requests: {}
+      volumes:
+        - name: custom-configuration-file
+          configMap:
+            name: custom-configuration-file

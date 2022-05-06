@@ -5,13 +5,16 @@ from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
 from airflow.hooks.base import BaseHook
-from airflow.models import Variable
 import logging
 import json
 from queries.tl import *
 from queries.pgr import *
 from queries.ws import *
+from queries.ws_digit import *
 from queries.pt import *
+from queries.firenoc import *
+from queries.mcollect import *
+from queries.obps import *
 from utils.utils import log
 from pytz import timezone
 
@@ -24,19 +27,22 @@ default_args = {
 
 }
 
-#query map for modules
 module_map = {
     'TL' : (tl_queries, empty_tl_payload),
     'PGR' : (pgr_queries, empty_pgr_payload),
     'WS' : (ws_queries, empty_ws_payload),
-    'PT' : (pt_queries, empty_pt_payload)
+    'WS_DIGIT' : (ws_digit_queries, empty_ws_digit_payload),
+    'PT' : (pt_queries, empty_pt_payload),
+    'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
+    'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
+    'OBPS' : (obps_queries, empty_obps_payload),
 }
 
 
 dag = DAG('national_dashboard_template', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
+batch_size = 50
 
-#running queries on dss elasticsearch
 def dump_kibana(**kwargs):
     connection = BaseHook.get_connection('qa-punjab-kibana')
     endpoint = 'kibana/api/console/proxy'
@@ -44,7 +50,6 @@ def dump_kibana(**kwargs):
     module_config = module_map.get(module)
     queries = module_config[0]
     date = kwargs['dag_run'].conf.get('date')
-    #coverting the time zone to IST
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
@@ -63,7 +68,7 @@ def dump_kibana(**kwargs):
     kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
     return json.dumps(ward_list)
 
-#transformation of the result for ingest API
+
 def transform_response_sample(merged_document, date, module):
     module_config = module_map.get(module)
     queries = module_config[0]
@@ -76,7 +81,10 @@ def transform_response_sample(merged_document, date, module):
     ward_list = [ward_map[k] for k in ward_map.keys()]
     logging.info(json.dumps(ward_list))
     return ward_list
-#transformation of the result at ward level
+
+def get_key(ward, ulb):
+    return '{0}|{1}'.format(ward, ulb)
+
 def transform_single(single_document, ward_map, date, lambda_function, module):
     module_config = module_map.get(module)
     empty_lambda = module_config[1]
@@ -99,30 +107,46 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
                 metrics = ward_payload.get('metrics')
                 metrics = lambda_function(metrics, region_bucket)
                 ward_payload['metrics'] = metrics
-                ward_map[ward] = ward_payload 
+                ward_map[get_key(ward, ulb)] = ward_payload
+    
     return ward_map
 
-#call to the ingest API for auth token
+
+
+
+
+
+def dump(**kwargs):
+    ds = kwargs['ds']
+    hook = ElasticHook('GET', 'test-es')
+    resp = hook.search('/dss-collection_v2', {
+        'size': 10000,
+         "query": {
+            "term": {
+            "dataObject.paymentDetails.businessService.keyword": "TL" 
+            }
+        }
+    })
+    return resp['hits']['hits']
+
 def get_auth_token(connection):
     endpoint = 'user/oauth/token'
     url = '{0}://{1}/{2}'.format('https', connection.host, endpoint)
-    password = Variable.get("password")
-    username = Variable.get("username")
     data = {
         'grant_type' : 'password',
         'scope' : 'read',
-        'username' : username,
-        'password' : password,
+        'username' : 'amr001',
+        'password' : 'eGov@123',
         'tenantId' : 'pb.amritsar',
         'userType' : 'EMPLOYEE'
     }
-    
-    r = requests.post(url, data=data, headers={'Authorization' : 'Basic ' + Variable("token"), 'Content-Type' : 'application/x-www-form-urlencoded'})
+
+    r = requests.post(url, data=data, headers={'Authorization' : 'Basic ZWdvdi11c2VyLWNsaWVudDo=', 'Content-Type' : 'application/x-www-form-urlencoded'})
     response = r.json()
     logging.info(response)
     return (response.get('access_token'), response.get('refresh_token'), response.get('UserRequest'))
 
-#call to ingest API 
+
 def call_ingest_api(connection, access_token, user_info, payload, module):
     endpoint = 'national-dashboard/metric/_ingest'
     url = '{0}://{1}/{2}'.format('https', connection.host, endpoint)
@@ -138,10 +162,10 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
         "authToken": access_token,
         "userInfo": user_info
         },
-        "Data": json.loads(payload)
+        "Data": payload
 
     }
-  
+
     log(module, 'Info', json.dumps(data), BaseHook.get_connection('qa-punjab-kibana'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
@@ -152,16 +176,19 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
 
 
-#call to ingest API to load the metrics
-def load(**kwargs): 
+
+def load(**kwargs):
     connection = BaseHook.get_connection('digit-auth')
     (access_token, refresh_token, user_info) = get_auth_token(connection)
     module = kwargs['module']
 
     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
     logging.info(payload)
+    payload_obj = json.loads(payload)
     if access_token and refresh_token:
-        call_ingest_api(connection, access_token, user_info, payload, module)
+        for i in range(0, len(payload_obj), batch_size):
+            logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
+            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module)
     return None
 
 def transform(**kwargs):
@@ -169,7 +196,7 @@ def transform(**kwargs):
     return 'Post Transformed Data'
 
 
-#extraction of data for TL module
+
 extract_tl = PythonOperator(
     task_id='elastic_search_extract_tl',
     python_callable=dump_kibana,
@@ -178,14 +205,12 @@ extract_tl = PythonOperator(
     op_kwargs={ 'module' : 'TL'},
     dag=dag)
 
-#transformation of data for TL module
 transform_tl = PythonOperator(
     task_id='nudb_transform_tl',
     python_callable=transform,
     provide_context=True,
     dag=dag)
 
-#loading of data for TL module
 load_tl = PythonOperator(
     task_id='nudb_ingest_load_tl',
     python_callable=load,
@@ -193,7 +218,7 @@ load_tl = PythonOperator(
     op_kwargs={ 'module' : 'TL'},
     dag=dag)
 
-#extraction of data for PGR module
+
 extract_pgr = PythonOperator(
     task_id='elastic_search_extract_pgr',
     python_callable=dump_kibana,
@@ -202,14 +227,12 @@ extract_pgr = PythonOperator(
     op_kwargs={ 'module' : 'PGR'},
     dag=dag)
 
-#transformation of data for PGR module
 transform_pgr = PythonOperator(
     task_id='nudb_transform_pgr',
     python_callable=transform,
     provide_context=True,
     dag=dag)
 
-#loading of data for PGR module
 load_pgr = PythonOperator(
     task_id='nudb_ingest_load_pgr',
     python_callable=load,
@@ -217,7 +240,6 @@ load_pgr = PythonOperator(
     op_kwargs={ 'module' : 'PGR'},
     dag=dag)
 
-#extraction of data for WS module
 extract_ws = PythonOperator(
     task_id='elastic_search_extract_ws',
     python_callable=dump_kibana,
@@ -226,14 +248,12 @@ extract_ws = PythonOperator(
     op_kwargs={ 'module' : 'WS'},
     dag=dag)
 
-#transformation of data for WS module
 transform_ws = PythonOperator(
     task_id='nudb_transform_ws',
     python_callable=transform,
     provide_context=True,
     dag=dag)
 
-#loading of data for WS module
 load_ws = PythonOperator(
     task_id='nudb_ingest_load_ws',
     python_callable=load,
@@ -241,7 +261,28 @@ load_ws = PythonOperator(
     op_kwargs={ 'module' : 'WS'},
     dag=dag)
 
-#extraction of data for PT module
+extract_ws_digit = PythonOperator(
+    task_id='elastic_search_extract_ws_digit',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'WS_DIGIT'},
+    dag=dag)
+
+transform_ws_digit = PythonOperator(
+    task_id='nudb_transform_ws_digit',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_ws_digit = PythonOperator(
+    task_id='nudb_ingest_load_ws_digit',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'WS_DIGIT'},
+    dag=dag)
+
+
 extract_pt = PythonOperator(
     task_id='elastic_search_extract_pt',
     python_callable=dump_kibana,
@@ -250,14 +291,12 @@ extract_pt = PythonOperator(
     op_kwargs={ 'module' : 'PT'},
     dag=dag)
 
-#transformation of data for PT module
 transform_pt = PythonOperator(
     task_id='nudb_transform_pt',
     python_callable=transform,
     provide_context=True,
     dag=dag)
 
-#loading of data for PT module
 load_pt = PythonOperator(
     task_id='nudb_ingest_load_pt',
     python_callable=load,
@@ -265,8 +304,76 @@ load_pt = PythonOperator(
     op_kwargs={ 'module' : 'PT'},
     dag=dag)
 
-#sequecing of the DAG   
+extract_firenoc = PythonOperator(
+    task_id='elastic_search_extract_firenoc',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'FIRENOC'},
+    dag=dag)
+
+transform_firenoc = PythonOperator(
+    task_id='nudb_transform_firenoc',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_firenoc = PythonOperator(
+    task_id='nudb_ingest_load_firenoc',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'FIRENOC'},
+    dag=dag)
+
+
+extract_mcollect = PythonOperator(
+    task_id='elastic_search_extract_mcollect',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'MCOLLECT'},
+    dag=dag)
+
+transform_mcollect = PythonOperator(
+    task_id='nudb_transform_mcollect',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_mcollect = PythonOperator(
+    task_id='nudb_ingest_load_mcollect',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'MCOLLECT'},
+    dag=dag)
+
+
+extract_obps = PythonOperator(
+    task_id='elastic_search_extract_obps',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'OBPS'},
+    dag=dag)
+
+transform_obps = PythonOperator(
+    task_id='nudb_transform_obps',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_obps = PythonOperator(
+    task_id='nudb_ingest_load_obps',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'OBPS'},
+    dag=dag)
+
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
+extract_ws_digit >> transform_ws_digit >> load_ws_digit
 extract_pt >> transform_pt >> load_pt
+extract_firenoc >> transform_firenoc >> load_firenoc
+extract_mcollect >> transform_mcollect >> load_mcollect
+extract_obps >> transform_obps >> load_obps

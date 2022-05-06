@@ -1,0 +1,39 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1beta1","kind":"Ingress","metadata":{"annotations":{"kubernetes.io/ingress.class":"nginx","meta.helm.sh/release-name":"airflow","meta.helm.sh/release-namespace":"default","nginx.ingress.kubernetes.io/use-regex":"true"},"creationTimestamp":"2022-03-11T10:58:58Z","generation":10,"labels":{"app":"airflow","app.kubernetes.io/managed-by":"Helm"},"name":"airflow","namespace":"egov","resourceVersion":"161051174","selfLink":"/apis/networking.k8s.io/v1beta1/namespaces/egov/ingresses/airflow","uid":"9b32ffa0-a4ef-4b94-8d23-a06dd857cedb"},"spec":{"rules":[{"host":"airflow.mseva-qa.lgpunjab.gov.in","http":{"paths":[{"backend":{"serviceName":"airflow","servicePort":8080},"path":"/"}]}}],"tls":[{"hosts":["airflow.mseva-qa.lgpunjab.gov.in"],"secretName":"mseva-qa.lgpunjab.gov.in-tls-certs"}]},"status":{"loadBalancer":{"ingress":[{}]}}}
+    kubernetes.io/ingress.class: nginx
+    meta.helm.sh/release-name: airflow
+    meta.helm.sh/release-namespace: default
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  generation: 3
+  labels:
+    app: airflow
+    app.kubernetes.io/managed-by: Helm
+  name: airflow
+  namespace: airflow
+spec:
+  rules:
+  - host: airflow.mseva-qa.lgpunjab.gov.in
+    http:
+      paths:
+      - backend:
+          serviceName: airflow-webserver 
+          servicePort: 8080
+        path: /
+  tls:
+  - hosts:
+    - airflow.mseva-qa.lgpunjab.gov.in
+    secretName: airflow.mseva-qa.lgpunjab.gov.in-tls-certs
+status:
+  loadBalancer:
+    ingress:
+    - {}
+

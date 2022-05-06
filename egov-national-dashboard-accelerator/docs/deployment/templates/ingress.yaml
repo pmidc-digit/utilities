@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+  name: {{ .Chart.Name }}
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+{{- if .Values.ingress.zuul }}          
+          serviceName: zuul
+          servicePort: 8080
+{{ else }}
+          serviceName: {{ .Chart.Name }}
+          servicePort: {{ .Values.ingress.servicePort }}
+{{- end }}
+        path: /{{ .Values.ingress.context }}
+    host: {{ .Values.ingress.hostName }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.hostName }} 
+    secretName: {{ .Values.ingress.secretName }}-tls-prod 
