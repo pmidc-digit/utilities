@@ -38,7 +38,7 @@ def dump():
     ]
     }, headers=headers)
     data = r.json()
-    logging.info("response"+data)
+    logging.info(data)
 
 
 curl_execute  = PythonOperator(
