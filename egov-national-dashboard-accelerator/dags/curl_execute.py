@@ -24,8 +24,7 @@ def dump():
     headers = {"content-type": "application/json", "Accept-Charset": "UTF-8"}
     logging.info(headers)
 
-    r = requests.post(url, data={
-    "size": 10,
+    json = {"size": 10,
     "query": {
         "match_all": {}
     },
@@ -36,8 +35,12 @@ def dump():
         }
         }
     ]
-    }, headers=headers)
-    data = r.json()
+    }
+
+    json_object = json.dumps(json, indent = 4)
+    print(json_object)
+    response = requests.post(url, data=json_object, headers=headers)
+    data = response.json()
     logging.info(data)
 
 
@@ -49,6 +52,3 @@ curl_execute  = PythonOperator(
     dag=dag)
 
 curl_execute  
-
-
-
