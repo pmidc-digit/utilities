@@ -1,6 +1,7 @@
 import json
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from hooks.elastic_hook import ElasticHook
 from datetime import datetime, timedelta
 import requests 
 import logging
@@ -18,6 +19,26 @@ default_args = {
 dag = DAG('curl_execute', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
+
+
+def elastic_dump():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('/property-services', {
+        "size": 10,
+        "query": {
+        "match_all": {}
+         },
+        "sort": [
+        {
+        "Data.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ]
+    })
+    logging.info(resp)
+    logging.info(resp['hits']['hits'])
+    return resp['hits']['hits']
 
 def dump():
     url = "http://elasticsearch-data-v1.es-cluster:9200/property-services/_search"
@@ -47,7 +68,7 @@ def dump():
 
 curl_execute  = PythonOperator(
     task_id='curl_execute',
-    python_callable=dump,
+    python_callable=elastic_dump,
     provide_context=True,
     do_xcom_push=True,
     dag=dag)
