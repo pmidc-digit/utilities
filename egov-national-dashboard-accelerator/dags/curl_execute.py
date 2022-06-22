@@ -1,3 +1,4 @@
+import json
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
@@ -24,7 +25,7 @@ def dump():
     headers = {"content-type": "application/json", "Accept-Charset": "UTF-8"}
     logging.info(headers)
 
-    json = {"size": 10,
+    dict_data = {"size": 10,
     "query": {
         "match_all": {}
     },
@@ -37,7 +38,7 @@ def dump():
     ]
     }
 
-    json_object = json.dumps(json, indent = 4)
+    json_object = json.dumps(dict_data, indent = 4)
     print(json_object)
     response = requests.post(url, data=json_object, headers=headers)
     data = response.json()
