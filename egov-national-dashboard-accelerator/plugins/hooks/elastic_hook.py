@@ -11,6 +11,7 @@ class ElasticHook(HttpHook):
         session = self.get_conn({})
 
         url = self.base_url + index_and_type + '/_search'
+        logging.info(url)
 
         req = requests.Request('GET', url, json=args)
         prep_req = session.prepare_request(req)
