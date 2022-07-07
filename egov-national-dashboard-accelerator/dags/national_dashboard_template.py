@@ -1,10 +1,10 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
-from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta, timezone
 from hooks.elastic_hook import ElasticHook
+from hooks.postgres_hook import PostgresHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
 from airflow.hooks.base import BaseHook
@@ -211,15 +211,15 @@ def transform(**kwargs):
 
 def get_count():
     sql_stmt = "select count(*) from eg_user where type = 'CITIZEN'"
-    pg_hook = PostgresHook(
-        postgres_conn_id='postgres_default',
-        schema='postgres_default'
-    )
+    pg_hook = PostgresHook(postgres_conn_id='postgres_default',schema='egov_prod_db')
     pg_conn = pg_hook.get_conn()
     cursor = pg_conn.cursor()
     cursor.execute(sql_stmt)
+    sources = cursor.fetchall()
     logging.info(sql_stmt)
-    return cursor.fetchall()
+    for source in sources:
+    	print("Count: {0}".format(source[0]))
+    return sources
 
 extract_tl = PythonOperator(
     task_id='elastic_search_extract_tl',
@@ -432,6 +432,5 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 extract_obps >> transform_obps >> load_obps
-extract_common >> transform_common >> load_common
 select_data
 
