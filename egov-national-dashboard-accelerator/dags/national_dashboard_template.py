@@ -419,7 +419,7 @@ select_data = PythonOperator(
 	task_id='get_count',
 	python_callable=get_count,
 	do_xcom_push=True,
-	dag = dag_psql
+	dag = dag
 )
 
 
