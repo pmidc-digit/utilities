@@ -4,7 +4,6 @@ from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta, timezone
 from hooks.elastic_hook import ElasticHook
-from hooks.postgres_hook import PostgresHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
 from airflow.hooks.base import BaseHook
@@ -48,14 +47,9 @@ dag = DAG('national_dashboard_template', default_args=default_args, schedule_int
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
-dag_psql = DAG(
-    dag_id = "postgresoperator_demo",
-    default_args=default_args,
-    schedule_interval=None
-)
 
 select_sql_query = """
- select count(*) from eg_user where type = 'CITIZEN';"""
+ select count(*) from eg_user where type = 'CITIZEN'"""
 
 def dump_kibana(**kwargs):
     connection = BaseHook.get_connection('qa-punjab-kibana')
@@ -209,17 +203,6 @@ def transform(**kwargs):
     logging.info('Your transformations go here')
     return 'Post Transformed Data'
 
-def get_count():
-    sql_stmt = "select count(*) from eg_user where type = 'CITIZEN'"
-    pg_hook = PostgresHook(postgres_conn_id='postgres_default',schema='egov_prod_db')
-    pg_conn = pg_hook.get_conn()
-    cursor = pg_conn.cursor()
-    cursor.execute(sql_stmt)
-    sources = cursor.fetchall()
-    logging.info(sql_stmt)
-    for source in sources:
-    	print("Count: {0}".format(source[0]))
-    return sources
 
 extract_tl = PythonOperator(
     task_id='elastic_search_extract_tl',
@@ -415,12 +398,11 @@ load_common = PythonOperator(
     dag=dag)
 
 
-select_data = PythonOperator(
-	task_id='get_count',
-	python_callable=get_count,
-	do_xcom_push=True,
-	dag = dag
-)
+select_data = PostgresOperator(
+	task_id='get_citizen_count',
+	postgres_conn_id="postgres_default",
+	sql="select count(*) from eg_user where type = 'CITIZEN'",
+	dag = dag)
 
 
 
@@ -432,5 +414,6 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 extract_obps >> transform_obps >> load_obps
+extract_common >> transform_common >> load_common
 select_data
 
