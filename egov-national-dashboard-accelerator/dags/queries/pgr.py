@@ -1,9 +1,21 @@
 
-def extract_pgr_closed_complaints(metrics, region_bucket):
-    metrics['closedComplaints'] = region_bucket.get('closedComplaints').get(
-        'value') if region_bucket.get('closedComplaints') else 0
-    return metrics
+import logging
 
+def extract_pgr_closed_complaints(metrics, region_bucket):
+  department_agg = region_bucket.get('department')
+  department_buckets = department_agg.get('buckets')
+  todaysClosedComplaints = { 'groupBy' : 'department', 'buckets' : []}
+   
+
+  for department_bucket in department_buckets:
+    department_name = department_bucket.get('key')
+    todaysClosedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('closedComplaints').get('value') if department_bucket.get('closedComplaints') else 0})
+   
+    metrics['todaysClosedComplaints'] = [todaysClosedComplaints]
+    
+
+  return metrics
+   
 
 pgr_closed_complaints = {
   'path': 'pgrindex-v1-enriched/_search',
@@ -36,7 +48,6 @@ pgr_closed_complaints = {
               "terms": {{
                 "Data.status.keyword": [
                     "closed",
-                    "resolved",
                     "rejected"
                 ]
               }}
@@ -58,6 +69,11 @@ pgr_closed_complaints = {
                 "terms": {{
                   "field": "Data.tenantData.city.districtName.keyword"
                 }},
+                            "aggs": {{
+              "department": {{
+                "terms": {{
+                  "field": "Data.department.keyword"
+                }},
                        "aggs": {{
                           	"closedComplaints": {{
                             "value_count": {{
@@ -73,15 +89,28 @@ pgr_closed_complaints = {
         }}
         }}
         }}
+        }}
+        }}
+
 
     """
 }
 
 
 def extract_pgr_resolved_complaints(metrics, region_bucket):
-    metrics['resolvedComplaints'] = region_bucket.get('resolvedComplaints').get(
-        'value') if region_bucket.get('resolvedComplaints') else 0
-    return metrics
+  department_agg = region_bucket.get('department')
+  department_buckets = department_agg.get('buckets')
+  todaysResolvedComplaints = { 'groupBy' : 'department', 'buckets' : []}
+   
+
+  for department_bucket in department_buckets:
+    department_name = department_bucket.get('key')
+    todaysResolvedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('resolvedComplaints').get('value') if department_bucket.get('resolvedComplaints') else 0})
+   
+    metrics['todaysResolvedComplaints'] = [todaysResolvedComplaints]
+    
+
+  return metrics
 
 
 pgr_resolved_complaints = {
@@ -89,65 +118,75 @@ pgr_resolved_complaints = {
     'name': 'pgr_resolved_complaints',
     'lambda': extract_pgr_resolved_complaints,
     'query': """
-  {{
+ {{
   "size": 0,
-    "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ],
-          "must":[
-            {{
-               "range": {{
-                    "Data.dateOfComplaint": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}],
-          "filter" :{{
-              "terms": {{
-                "Data.status.keyword": [
-                  "resolved"
-                ]
-              }}
+  "query": {{
+    "bool": {{
+      "must_not": [
+        {{
+          "term": {{
+            "Data.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.dateOfComplaint": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
             }}
           }}
+        }}
+      ],
+      "filter": {{
+        "terms": {{
+          "Data.status.keyword": [
+            "resolved"
+          ]
+        }}
+      }}
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "Data.complaintWard.name.keyword"
       }},
       "aggs": {{
-        "ward": {{
+        "ulb": {{
           "terms": {{
-            "field": "Data.complaintWard.name.keyword"
+            "field": "Data.tenantId.keyword"
           }},
-       "aggs": {{
-            "ulb": {{
+          "aggs": {{
+            "region": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantData.city.districtName.keyword"
               }},
-        "aggs": {{
-          "region": {{
-            "terms": {{
-              "field": "Data.tenantData.city.districtName.keyword"
-            }},
-                "aggs": {{
-                  "resolvedComplaints": {{
-                        "value_count": {{
-                          "field": "Data.dateOfComplaint"
-                        }}
+              "aggs": {{
+                "department": {{
+                  "terms": {{
+                    "field": "Data.department.keyword"
+                  }},
+                  "aggs": {{
+                    "resolvedComplaints": {{
+                      "value_count": {{
+                        "field": "Data.dateOfComplaint"
                       }}
                     }}
                   }}
                 }}
+              }}
+            }}
+          }}
+        }}
+      }}
     }}
   }}
 }}
-}}
-}}
+
+
 
 
     """
@@ -155,6 +194,7 @@ pgr_resolved_complaints = {
 
 
 def extract_pgr_unique_citizens(metrics, region_bucket):
+ # metrics['todaysLicenseIssued'] = region_bucket.get('todaysLicenseIssued').get('value') if region_bucket.get('todaysLicenseIssued') else 0
     metrics['uniqueCitizens'] = region_bucket.get('uniqueCitizens').get(
         'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
     return metrics
@@ -225,16 +265,28 @@ pgr_unique_citizens = {
 
 
 def extract_pgr_sla_achieved(metrics, region_bucket):
-    sla_agg = region_bucket.get('slaAchievement')
-    sla_achievement = 0
+  department_agg = region_bucket.get('department')
+  department_buckets = department_agg.get('buckets')
+  slaAchievement = { 'groupBy' : 'department', 'buckets' : []}
+   
+
+  for department_bucket in department_buckets:
+    department_name = department_bucket.get('key')
+    value = 0
+    sla_agg = department_bucket.get('slaAchievement')
     if sla_agg:
       sla_buckets = sla_agg.get('buckets')
       for sla_bucket in sla_buckets:
-         sla_achievement = sla_bucket.get('slaAchievement').get(
+         value = sla_bucket.get('slaAchievement').get(
                               'value') if sla_bucket.get('slaAchievement')  else 0
-    metrics['slaAchievement'] = sla_achievement
+
+    slaAchievement['buckets'].append( { 'name' : department_name, 'value' :value})
+   
+  metrics['slaAchievement'] = [slaAchievement]
     
-    return metrics
+
+  return metrics
+
 
 
 pgr_sla_achieved = {
@@ -245,64 +297,76 @@ pgr_sla_achieved = {
     'query': """
  {{
   "size": 0,
-    "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ],
-      "must":[
-            {{
-               "range": {{
-                    "Data.dateOfComplaint": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}]
+  "query": {{
+    "bool": {{
+      "must_not": [
+        {{
+          "term": {{
+            "Data.tenantId.keyword": "pb.testing"
+          }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.dateOfComplaint": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
+      ]
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "Data.complaintWard.name.keyword"
       }},
-       "aggs": {{
-            "ward": {{
+      "aggs": {{
+        "ulb": {{
+          "terms": {{
+            "field": "Data.tenantId.keyword"
+          }},
+          "aggs": {{
+            "region": {{
               "terms": {{
-                "field": "Data.complaintWard.name.keyword"
-              }},
-           "aggs": {{
-            "ulb": {{
-              "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantData.city.districtName.keyword"
               }},
               "aggs": {{
-                "region": {{
+                "department": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.department.keyword"
                   }},
-              "aggs":{{
-                  "slaAchievement": {{
-                    "range": {{
-                      "field": "Data.slaHours", 
-                      "ranges": [
-                       {{ "from": 0 ,"to": 360}}
-                      
-                      ]
-                    }},
-                    "aggs": {{
+                  "aggs": {{
+                    "slaAchievement": {{
+                      "range": {{
+                        "field": "Data.slaHours",
+                        "ranges": [
+                          {{
+                            "from": 0,
+                            "to": 360
+                          }}
+                        ]
+                      }},
+                      "aggs": {{
                         "slaAchievement": {{
-                          "value_count": {{ "field": "Data.slaHours" }}
+                          "value_count": {{
+                            "field": "Data.slaHours"
+                          }}
                         }}
+                      }}
+                    }}
                   }}
                 }}
+              }}
+            }}
+          }}
+        }}
+      }}
     }}
   }}
-}}
-}}
-}}
-}}
-}}
 }}
 
 
@@ -312,114 +376,127 @@ pgr_sla_achieved = {
 
 
 def extract_pgr_completion_rate(metrics, region_bucket):
-  completion_rate_value = 0
-  completion_rate = region_bucket.get('completionRate')
+  department_agg = region_bucket.get('department')
+  department_buckets = department_agg.get('buckets')
+  completionRate = { 'groupBy' : 'department', 'buckets' : []}
+   
 
-  if completion_rate:
-    completion_rate_buckets = completion_rate.get('buckets')
-    if completion_rate_buckets and completion_rate_buckets.get('all'):
-      all_bucket = completion_rate_buckets.get('all')
-      if all_bucket:
-        completion_rate_value = all_bucket.get('completionRate').get('value') if all_bucket.get('completionRate') else 0
+  for department_bucket in department_buckets:
+    department_name = department_bucket.get('key')
+    value = 0
+    if department_bucket.get('all_matching_docs') and department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate'):
+      value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') if department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') else 0
+    completionRate['buckets'].append( { 'name' : department_name, 'value' : value})
+   
+    metrics['completionRate'] = [completionRate]
+    
 
-  metrics['completionRate'] = completion_rate_value
   return metrics
 
 
 pgr_completion_rate = {
     'path': 'pgrindex-v1-enriched/_search',
+
     'name': 'pgr_completion_rate',
     'lambda': extract_pgr_completion_rate,
     'query': """
  {{
   "size": 0,
-   "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ],
-        "must":[
-            {{
-               "range": {{
-                    "Data.dateOfComplaint": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}]
+  "query": {{
+    "bool": {{
+      "must_not": [
+        {{
+          "term": {{
+            "Data.tenantId.keyword": "pb.testing"
+          }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.dateOfComplaint": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
+      ]
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "Data.complaintWard.name.keyword"
       }},
       "aggs": {{
-        "ward": {{
+        "ulb": {{
           "terms": {{
-            "field": "Data.complaintWard.name.keyword"
+            "field": "Data.tenantId.keyword"
           }},
-       "aggs": {{
-            "ulb": {{
+          "aggs": {{
+            "region": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantData.city.districtName.keyword"
               }},
-        "aggs": {{
-          "region": {{
-            "terms": {{
-              "field": "Data.tenantData.city.districtName.keyword"
-            }},
-  "aggs": {{
-    "completionRate": {{
-      "filters": {{
-        "filters": {{
-          "all": {{
-            "match_all": {{}}
-          }}
-        }}
-      }},
-    "aggs": {{
-        "totalComplaints": {{
-          "value_count": {{
-             "field": "Data.dateOfComplaint"
-          }}
-        }},
-    "closedComplaints": {{
-      "filter": {{
-        "terms": {{
-          "Data.status.keyword": [
-            "closed",
-            "resolved",
-            "rejected"
-          ]
-        }}
-      }},
-       "aggs": {{
-            "complaints": {{
-              "value_count": {{
-                "field": "Data.dateOfComplaint"
+              "aggs": {{
+                "department": {{
+                  "terms": {{
+                    "field": "Data.department.keyword"
+                  }},
+                  "aggs": {{
+                    "all_matching_docs": {{
+                      "filters": {{
+                        "filters": {{
+                          "all": {{
+                            "match_all": {{   }}
+                          }}
+                        }}
+                      }},
+                      "aggs": {{
+                        "totalComplaints": {{
+                          "value_count": {{
+                            "field": "Data.dateOfComplaint"
+                          }}
+                        }},
+                        "closedComplaints": {{
+                          "filter": {{
+                            "terms": {{
+                              "Data.status.keyword": [
+                                "closed",
+                                "resolved",
+                                "rejected"
+                              ]
+                            }}
+                          }},
+                          "aggs": {{
+                            "complaints": {{
+                              "value_count": {{
+                                "field": "Data.dateOfComplaint"
+                              }}
+                            }}
+                          }}
+                        }},
+                        "completionRate": {{
+                          "bucket_script": {{
+                            "buckets_path": {{
+                              "closed": "closedComplaints>complaints",
+                              "total": "totalComplaints"
+                            }},
+                            "script": "params.closed / params.total * 100"
+                          }}
+                        }}
+                      }}
+                    }}
+                  }}
+                }}
               }}
             }}
-          }}
-        }},
-        "completionRate": {{
-          "bucket_script": {{
-            "buckets_path": {{
-              "closed": "closedComplaints>complaints",
-              "total": "totalComplaints"
-            }},
-            "script": "params.closed / params.total * 100"
           }}
         }}
       }}
     }}
   }}
-}}
-}}
-}}
-}}
-}}
-}}
 }}
 
 
@@ -581,14 +658,15 @@ pgr_todays_complaints = {
 
 
 def extract_pgr_status(metrics, region_bucket):
-    department_agg = region_bucket.get('Department')
-    department_buckets = department_agg.get('buckets')
+    department_agg = region_bucket.get('department')
+
+    department_buckets = department_agg.get('buckets') if department_agg.get('buckets') else []
     todaysReopenedComplaints = { 'groupBy' : 'department', 'buckets' : []}
     todaysOpenComplaints = { 'groupBy' : 'department', 'buckets' : []}
     todaysAssignedComplaints = { 'groupBy' : 'department', 'buckets' : []}
     todaysRejectedComplaints = { 'groupBy' : 'department', 'buckets' : []}
     todaysReassignedComplaints = { 'groupBy' : 'department', 'buckets' : []}
-
+    todaysReassignRequestedComplaints = { 'groupBy' : 'department', 'buckets' : []}
     for department_bucket in department_buckets:
       department_name = department_bucket.get('key')
       todaysReopenedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysReopenedComplaints').get('todaysReopenedComplaints').get('value') if department_bucket.get('todaysReopenedComplaints') else 0})
@@ -596,6 +674,7 @@ def extract_pgr_status(metrics, region_bucket):
       todaysAssignedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysAssignedComplaints').get('todaysAssignedComplaints').get('value') if department_bucket.get('todaysAssignedComplaints') else 0})
       todaysRejectedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysRejectedComplaints').get('todaysRejectedComplaints').get('value') if department_bucket.get('todaysRejectedComplaints') else 0})
       todaysReassignedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysReassignedComplaints').get('todaysReassignedComplaints').get('value') if department_bucket.get('todaysReassignedComplaints') else 0})
+      todaysReassignRequestedComplaints['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysReassignRequestedComplaints').get('todaysReassignRequestedComplaints').get('value') if department_bucket.get('todaysReassignRequestedComplaints') else 0})
 
 
     metrics['todaysReopenedComplaints'] = [todaysReopenedComplaints]
@@ -603,6 +682,7 @@ def extract_pgr_status(metrics, region_bucket):
     metrics['todaysAssignedComplaints'] = [todaysAssignedComplaints]
     metrics['todaysRejectedComplaints'] = [todaysRejectedComplaints]
     metrics['todaysReassignedComplaints'] = [todaysReassignedComplaints]
+    metrics['todaysReassignRequestedComplaints'] = [todaysReassignRequestedComplaints]
     
 
     return metrics
@@ -617,139 +697,156 @@ pgr_status = {
     'query': """
   {{
   "size": 0,
-    "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ],
-        "must":[
-            {{
-               "range": {{
-                    "Data.dateOfComplaint": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}]
+  "query": {{
+    "bool": {{
+      "must_not": [
+        {{
+          "term": {{
+            "Data.tenantId.keyword": "pb.testing"
+          }}
         }}
-    }},
-       "aggs": {{
-            "ward": {{
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.dateOfComplaint": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
+      ]
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "Data.complaintWard.name.keyword"
+      }},
+      "aggs": {{
+        "ulb": {{
+          "terms": {{
+            "field": "Data.tenantId.keyword"
+          }},
+          "aggs": {{
+            "region": {{
               "terms": {{
-                "field": "Data.complaintWard.name.keyword"
-              }},
-           "aggs": {{
-            "ulb": {{
-              "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantData.city.districtName.keyword"
               }},
               "aggs": {{
-                "region": {{
+                "department": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.department.keyword"
                   }},
-                    "aggs": {{
-                        "Department": {{
-                          "terms": {{
-                            "field": "Data.department.keyword"
-                          }},
-                          "aggs": {{
-                            "todaysRejectedComplaints": {{
-                              "filter": {{
-                                "terms": {{
-                                  "Data.status.keyword": [
-                                    "rejected"
-                                  ]
-                                }}
-                              }},
-                              "aggs": {{
-                                "todaysRejectedComplaints": {{
-                                  "value_count": {{
-                                    "field": "Data.tenantId.keyword"
-                                  }}
-                                }}
-                              }}
-                }},
-                            "todaysOpenComplaints": {{
-                              "filter": {{
-                                "terms": {{
-                                  "Data.status.keyword": [
-                                    "open"
-                                  ]
-                                }}
-                              }},
-                              "aggs": {{
-                                "todaysOpenComplaints": {{
-                                  "value_count": {{
-                                    "field": "Data.tenantId.keyword"
-                                  }}
-                                }}
-                              }}
-                }},
-                            "todaysAssignedComplaints": {{
-                              "filter": {{
-                                "terms": {{
-                                  "Data.status.keyword": [
-                                    "assign",
-		                              	"assigned"
-                                  ]
-                                }}
-                              }},
-                              "aggs": {{
-                                "todaysAssignedComplaints": {{
-                                  "value_count": {{
-                                    "field": "Data.tenantId.keyword"
-                                  }}
-                                }}
-                              }}
-                }},
-                            "todaysReopenedComplaints": {{
-                              "filter": {{
-                                "terms": {{
-                                  "Data.actionHistory.actions.action.keyword": [
-                                    "reopen"
-                                  ]
-                                }}
-                              }},
-                              "aggs": {{
-                                "todaysReopenedComplaints": {{
-                                  "value_count": {{
-                                    "field": "Data.tenantId.keyword"
-                                  }}
-                                }}
-                              }}
-                }},
-                            "todaysReassignedComplaints": {{
-                              "filter": {{
-                                "terms": {{
-                                  "Data.status.keyword": [
-                                    "reassignrequested"  
-                                  ]
-                                }}
-                              }},
-                              "aggs": {{
-                                "todaysReassignedComplaints": {{
-                                  "value_count": {{
-                                    "field": "Data.tenantId.keyword"
-                                  }}
-                                }}
-                              }}
-                }}
+                  "aggs": {{
+                    "todaysRejectedComplaints": {{
+                      "filter": {{
+                        "terms": {{
+                          "Data.status.keyword": [
+                            "rejected"
+                          ]
+                        }}
+                      }},
+                      "aggs": {{
+                        "todaysRejectedComplaints": {{
+                          "value_count": {{
+                            "field": "Data.tenantId.keyword"
+                          }}
+                        }}
+                      }}
+                    }},
+                    "todaysOpenComplaints": {{
+                      "filter": {{
+                        "terms": {{
+                          "Data.status.keyword": [
+                            "open"
+                          ]
+                        }}
+                      }},
+                      "aggs": {{
+                        "todaysOpenComplaints": {{
+                          "value_count": {{
+                            "field": "Data.tenantId.keyword"
+                          }}
+                        }}
+                      }}
+                    }},
+                    "todaysAssignedComplaints": {{
+                      "filter": {{
+                        "terms": {{
+                          "Data.status.keyword": [
+                            "assign",
+                            "assigned"
+                          ]
+                        }}
+                      }},
+                      "aggs": {{
+                        "todaysAssignedComplaints": {{
+                          "value_count": {{
+                            "field": "Data.tenantId.keyword"
+                          }}
+                        }}
+                      }}
+                    }},
+                    "todaysReopenedComplaints": {{
+                      "filter": {{
+                        "terms": {{
+                          "Data.actionHistory.actions.action.keyword": [
+                            "reopen"
+                          ]
+                        }}
+                      }},
+                      "aggs": {{
+                        "todaysReopenedComplaints": {{
+                          "value_count": {{
+                            "field": "Data.tenantId.keyword"
+                          }}
+                        }}
+                      }}
+                    }},
+                    "todaysReassignRequestedComplaints": {{
+                      "filter": {{
+                        "terms": {{
+                          "Data.status.keyword": [
+                            "reassignrequested"
+                          ]
+                        }}
+                      }},
+                      "aggs": {{
+                        "todaysReassignRequestedComplaints": {{
+                          "value_count": {{
+                            "field": "Data.tenantId.keyword"
+                          }}
+                        }}
+                      }}
+                    }},
+                    "todaysReassignedComplaints": {{
+                      "filter": {{
+                        "terms": {{
+                          "Data.status.keyword": [
+                            "reassign"
+                          ]
+                        }}
+                      }},
+                      "aggs": {{
+                        "todaysReassignedComplaints": {{
+                          "value_count": {{
+                            "field": "Data.tenantId.keyword"
                           }}
                         }}
                       }}
                     }}
                   }}
-               }}
-             }}  
+                }}
+              }}
+            }}
           }}
         }}
       }}
+    }}
+  }}
+}}
 
 
 
@@ -757,8 +854,8 @@ pgr_status = {
 }
 
 def extract_pgr_avg_solution_time(metrics, region_bucket):
-    department_agg = region_bucket.get('Department')
-    department_buckets = department_agg.get('buckets')
+    department_agg = region_bucket.get('department')
+    department_buckets = department_agg.get('buckets') if department_agg.get('buckets') else []
     averageSolutionTime = { 'groupBy' : 'department', 'buckets' : []}
   
     for department_bucket in department_buckets:
@@ -778,7 +875,7 @@ pgr_avg_solution_time = {
     'name': 'pgr_avg_solution_time',
     'lambda': extract_pgr_avg_solution_time,
     'query': """
-    {{
+   {{
     "size":0,
     "query": {{
           "bool": {{
@@ -817,12 +914,12 @@ pgr_avg_solution_time = {
                     "field": "Data.tenantData.city.districtName.keyword"
                   }},
                   "aggs":{{
-                     "Department": {{
+                     "department": {{
                        "terms": {{
                       "field": "Data.department.keyword"
                        }}, 
                           "aggs": {{
-                            "average_time": {{
+                            "averageSolutionTime": {{
                             "avg": {{
                               "script": {{
                                 "source": "(doc['Data.addressDetail.auditDetails.lastModifiedTime'].value - doc['Data.addressDetail.auditDetails.createdTime'].value)/(3600*1000)"
@@ -842,12 +939,13 @@ pgr_avg_solution_time = {
 
 
 
+
     """
 }
 
 pgr_queries = [pgr_closed_complaints, pgr_resolved_complaints, pgr_unique_citizens, pgr_sla_achieved, pgr_completion_rate, pgr_todays_complaints, pgr_status, pgr_avg_solution_time]
 
-#the default payload for PGR
+
 def empty_pgr_payload(region, ulb, ward, date):
     return {
         "date": date,
@@ -857,146 +955,28 @@ def empty_pgr_payload(region, ulb, ward, date):
         "region": region,
         "state": "Punjab",
         "metrics":  {
-            "closedComplaints": 0,
-            "slaAchievement": 0,
-                  "completionRate": 0,
-                  "uniqueCitizens": 0,
-                  "resolvedComplaints": 0,
-                  "todaysComplaints": [
-                      {
-                          "groupBy": "status",
-                          "buckets": [
-                              {
-                                  "name": "reopened",
-                                  "value": 20
-                              },
-                              {
-                                  "name": "open",
-                                  "value": 23
-                              },
-                              {
-                                  "name": "assigned",
-                                  "value": 20
-                              },
-                              {
-                                  "name": "rejected",
-                                  "value": 18
-                              },
-                              {
-                                  "name": "reassign",
-                                  "value": 12
-                              }
-                          ]
-                      },
-                      {
-                          "groupBy": "channel",
-                          "buckets": [
-                              {
-                                  "name": "MOBILE",
-                                  "value": 40
-                              },
-                              {
-                                  "name": "WEB",
-                                  "value": 70
-                              }
+            "todaysClosedComplaints": [
 
-                          ]
-                      },
-                      {
-                          "groupBy": "department",
-                          "buckets": [
-                              {
-                                  "name": "DEPT1",
-                                  "value": 35
-                              },
-                              {
-                                  "name": "DEPT2",
-                                  "value": 55
-                              },
-                              {
-                                  "name": "DEPT3",
-                                  "value": 40
-                              }
-                          ]
-                      },
-                      {
-                          "groupBy": "category",
-                          "buckets": [
-                              {
-                                  "name": "Street Lights",
-                                  "value": 25
-                              },
-                              {
-                                  "name": "Road Repair",
-                                  "value": 45
-                              },
-                              {
-                                  "name": "Garbage Cleaning",
-                                  "value": 24
-                              },
-                              {
-                                  "name": "Drainage Issue",
-                                  "value": 15
-                              }
-                          ]
-                      }
+            ],
+            "todaysResolvedComplaints": [
+
+            ],
+            "slaAchievement": [],
+                  "completionRate": [
+
+                  ],
+                  "uniqueCitizens": 0,
+                  "todaysComplaints": [
+                    
                   ],
             "todaysReopenedComplaints": [
-                      {
-                          "groupBy": "department",
-                          "buckets": [
-                              {
-                                  "name": "DEPT1",
-                                  "value": 25
-                              },
-                              {
-                                  "name": "DEPT2",
-                                  "value": 24
-                              },
-                              {
-                                  "name": "DEPT3",
-                                  "value": 25
-                              }
-                          ]
-                      }
+                    
                   ],
             "todaysOpenComplaints": [
-                      {
-                          "groupBy": "department",
-                          "buckets": [
-                              {
-                                  "name": "DEPT1",
-                                  "value": 55
-                              },
-                              {
-                                  "name": "DEPT2",
-                                  "value": 70
-                              },
-                              {
-                                  "name": "DEPT3",
-                                  "value": 110
-                              }
-                          ]
-                      }
+                    
                   ],
             "todaysAssignedComplaints": [
-                      {
-                          "groupBy": "department",
-                          "buckets": [
-                              {
-                                  "name": "DEPT1",
-                                  "value": 10
-                              },
-                              {
-                                  "name": "DEPT2",
-                                  "value": 5
-                              },
-                              {
-                                  "name": "DEPT3",
-                                  "value": 8
-                              }
-                          ]
-                      }
+                    
                   ],
             "averageSolutionTime": [
                       {
@@ -1018,42 +998,12 @@ def empty_pgr_payload(region, ulb, ward, date):
                       }
                   ],
             "todaysRejectedComplaints": [
-                      {
-                          "groupBy": "department",
-                          "buckets": [
-                              {
-                                  "name": "DEPT1",
-                                  "value": 7
-                              },
-                              {
-                                  "name": "DEPT2",
-                                  "value": 10
-                              },
-                              {
-                                  "name": "DEPT3",
-                                  "value": 0
-                              }
-                          ]
-                      }
+                    
                   ],
             "todaysReassignedComplaints": [
-                      {
-                          "groupBy": "department",
-                          "buckets": [
-                              {
-                                  "name": "DEPT1",
-                                  "value": 8
-                              },
-                              {
-                                  "name": "DEPT2",
-                                  "value": 5
-                              },
-                              {
-                                  "name": "DEPT3",
-                                  "value": 9
-                              }
-                          ]
-                      }
-                  ]
+                     
+                  ],
+            "todaysReassignRequestedComplaints" : [
+                ]
         }
     }
