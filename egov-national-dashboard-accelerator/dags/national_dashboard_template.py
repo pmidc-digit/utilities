@@ -50,7 +50,7 @@ batch_size = 50
 
 dag_psql = DAG(
     dag_id = "postgresoperator_demo",
-    default_args=default_,
+    default_args=default_args,
     schedule_interval=None
 )
 
