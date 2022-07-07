@@ -94,7 +94,7 @@ def readulb():
 
 
 curl_execute  = PythonOperator(
-    task_id='curl_execute',
+    task_id='elastic_dump',
     python_callable=readulb,
     provide_context=True,
     do_xcom_push=True,
