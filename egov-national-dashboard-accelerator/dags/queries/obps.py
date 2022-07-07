@@ -896,7 +896,7 @@ obps_applicationsWithDeviation = {
                 "applicationsWithDeviation": {{
                   "avg": {{
                     "script": {{
-                      "source": " Math.round(((doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)*100)/(doc['Data.plotArea'].value))"
+                      "source": "Math.round(((doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)*100)/(doc['Data.plotArea'].value))"
                     }}
                   }}
                 }}
@@ -1089,7 +1089,7 @@ obps_averageDeviation = {
                 "deviation": {{
                   "avg": {{
                     "script": {{
-                      "source": " Math.round(((doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)*100)/(doc['Data.plotArea'].value))"
+                      "source": "Math.round(((doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)*100)/(doc['Data.plotArea'].value))"
                     }}
                   }}
                 }}
