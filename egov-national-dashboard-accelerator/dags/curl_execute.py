@@ -66,13 +66,31 @@ GET /property-services/_search
 
 
 def elastic_dump():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('/property-services', {
+        "size": 10,
+        "query": {
+        "match_all": {}
+         },
+        "sort": [
+        {
+        "Data.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ]
+    })
+    logging.info(resp)
+    logging.info(resp['hits']['hits'])
+    return resp['hits']['hits']
+
+def dump():
     url = "http://elasticsearch-data-v1.es-cluster:9200/property-services/_search"
     logging.info(url)
     headers = {"content-type": "application/json", "Accept-Charset": "UTF-8"}
     logging.info(headers)
 
-    r = requests.post(url, data={
-    "size": 10,
+    dict_data = {"size": 10,
     "query": {
         "match_all": {}
     },
@@ -83,10 +101,7 @@ def elastic_dump():
         }
         }
     ]
-    }, headers=headers)
-    data = r.json()
-    logging.info(data['hits']['hits'])
-    
+    }
 
 def readulb():
     ulbs = []
@@ -103,5 +118,14 @@ curl_execute  = PythonOperator(
     provide_context=True,
     do_xcom_push=True,
     dag=dag)
+    
+es_execute  = PythonOperator(
+    task_id='es_dump',
+    python_callable=dump,
+    provide_context=True,
+    do_xcom_push=True,
+    dag=dag)
 
-curl_execute  
+curl_execute
+es_execute
+

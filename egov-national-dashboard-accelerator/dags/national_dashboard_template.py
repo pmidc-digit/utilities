@@ -145,6 +145,7 @@ def get_auth_token(connection):
     response = r.json()
     logging.info(response)
     return (response.get('access_token'), response.get('refresh_token'), response.get('UserRequest'))
+    
 
 
 def call_ingest_api(connection, access_token, user_info, payload, module):
