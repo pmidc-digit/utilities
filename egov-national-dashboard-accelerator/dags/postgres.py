@@ -32,13 +32,20 @@ dag_psql = DAG(
 
 
 
-select_sql_query = """
- select count(*) from eg_user where type = 'CITIZEN';"""
+def get_citizen_count():
+    sql_stmt = "select count(*) from eg_user where type = 'CITIZEN'"
+    pg_hook = PostgresHook(
+        postgres_conn_id='postgres_qa',
+        schema='egov_prod_db'
+    )
+    pg_conn = pg_hook.get_conn()
+    cursor = pg_conn.cursor()
+    cursor.execute(sql_stmt)
+    return cursor.fetchall()
 
 select_data = PostgresOperator(
-sql = select_sql_query,
 task_id = "select_table_task",
-postgres_conn_id = "postgres_qa",
+python_callable=get_citizen_count,
 dag = dag_psql
 )
 
