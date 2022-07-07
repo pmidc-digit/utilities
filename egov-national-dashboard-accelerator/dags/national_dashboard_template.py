@@ -432,5 +432,6 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 extract_obps >> transform_obps >> load_obps
-extract_common >> transform_common >> load_common >> select_data
+extract_common >> transform_common >> load_common
+select_data
 
