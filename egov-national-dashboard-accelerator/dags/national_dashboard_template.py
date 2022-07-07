@@ -57,13 +57,6 @@ dag_psql = DAG(
 select_sql_query = """
  select count(*) from eg_user where type = 'CITIZEN';"""
 
-select_data = PostgresOperator(
-sql = select_sql_query,
-task_id = "select_table_task",
-postgres_conn_id = "postgres_default",
-dag = dag_psql
-)
-
 def dump_kibana(**kwargs):
     connection = BaseHook.get_connection('qa-punjab-kibana')
     #hook = ElasticHook('GET', 'es_conn')
@@ -411,6 +404,26 @@ load_common = PythonOperator(
     op_kwargs={ 'module' : 'COMMON'},
     dag=dag)
 
+
+select_data = PythonOperator(
+	task_id='get_count',
+	python_callable=get_count,
+	do_xcom_push=True,
+	dag = dag_psql
+)
+
+def get_count():
+    sql_stmt = "select count(*) from eg_user where type = 'CITIZEN'"
+    pg_hook = PostgresHook(
+        postgres_conn_id='postgres_default',
+        schema='postgres_default'
+    )
+    pg_conn = pg_hook.get_conn()
+    cursor = pg_conn.cursor()
+    cursor.execute(sql_stmt)
+    logging.info(sql_stmt)
+    return cursor.fetchall()
+
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
@@ -419,5 +432,5 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 extract_obps >> transform_obps >> load_obps
-extract_common >> transform_common >> load_common
-select_data
+extract_common >> transform_common >> load_common >> select_data
+
