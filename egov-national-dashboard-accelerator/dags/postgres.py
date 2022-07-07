@@ -44,9 +44,11 @@ def get_citizen_count():
     return cursor.fetchall()
 
 select_data = PostgresOperator(
-task_id = "select_table_task",
+task_id = "get_citizen_count",
 python_callable=get_citizen_count,
 dag = dag_psql
 )
+
+select_data
 
 
