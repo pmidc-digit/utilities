@@ -50,12 +50,8 @@ batch_size = 50
 
 dag_psql = DAG(
     dag_id = "postgresoperator_demo",
-    default_args=default_args,
-    # schedule_interval='0 0 * * *',
-    schedule_interval='@once',	
-    dagrun_timeout=timedelta(minutes=60),
-    description='use case of psql operator in airflow',
-    start_date = airflow.utils.dates.days_ago(1)
+    default_args=default_,
+    schedule_interval=None
 )
 
 select_sql_query = """
