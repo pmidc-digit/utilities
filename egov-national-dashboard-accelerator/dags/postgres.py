@@ -26,6 +26,7 @@ select_data = PostgresOperator(
     task_id="get_citizen_count",
     postgres_conn_id="postgres_qa",
     sql="select count(*) from eg_user where type = 'CITIZEN';",
+    dag = dag_psql
 )
 
 select_data
