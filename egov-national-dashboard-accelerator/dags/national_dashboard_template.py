@@ -209,7 +209,17 @@ def transform(**kwargs):
     logging.info('Your transformations go here')
     return 'Post Transformed Data'
 
-
+def get_count():
+    sql_stmt = "select count(*) from eg_user where type = 'CITIZEN'"
+    pg_hook = PostgresHook(
+        postgres_conn_id='postgres_default',
+        schema='postgres_default'
+    )
+    pg_conn = pg_hook.get_conn()
+    cursor = pg_conn.cursor()
+    cursor.execute(sql_stmt)
+    logging.info(sql_stmt)
+    return cursor.fetchall()
 
 extract_tl = PythonOperator(
     task_id='elastic_search_extract_tl',
@@ -412,17 +422,7 @@ select_data = PythonOperator(
 	dag = dag_psql
 )
 
-def get_count():
-    sql_stmt = "select count(*) from eg_user where type = 'CITIZEN'"
-    pg_hook = PostgresHook(
-        postgres_conn_id='postgres_default',
-        schema='postgres_default'
-    )
-    pg_conn = pg_hook.get_conn()
-    cursor = pg_conn.cursor()
-    cursor.execute(sql_stmt)
-    logging.info(sql_stmt)
-    return cursor.fetchall()
+
 
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
