@@ -76,6 +76,7 @@ def transform_response_sample(merged_document, date, module):
     ward_list = [ward_map[k] for k in ward_map.keys()]
     logging.info(json.dumps(ward_list))
     return ward_list
+    
 #transformation of the result at ward level
 def transform_single(single_document, ward_map, date, lambda_function, module):
     module_config = module_map.get(module)
@@ -106,23 +107,21 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
 def get_auth_token(connection):
     endpoint = 'user/oauth/token'
     url = '{0}://{1}/{2}'.format('https', connection.host, endpoint)
-    password = Variable.get("password")
-    username = Variable.get("username")
     data = {
         'grant_type' : 'password',
         'scope' : 'read',
-        'username' : username,
-        'password' : password,
+        'username' : 'amr001',
+        'password' : 'eGov@123',
         'tenantId' : 'pb.amritsar',
         'userType' : 'EMPLOYEE'
     }
-    
-    r = requests.post(url, data=data, headers={'Authorization' : 'Basic ' + Variable("token"), 'Content-Type' : 'application/x-www-form-urlencoded'})
+
+    r = requests.post(url, data=data, headers={'Authorization' : 'Basic ZWdvdi11c2VyLWNsaWVudDo=', 'Content-Type' : 'application/x-www-form-urlencoded'})
     response = r.json()
     logging.info(response)
     return (response.get('access_token'), response.get('refresh_token'), response.get('UserRequest'))
 
-#call to ingest API 
+
 def call_ingest_api(connection, access_token, user_info, payload, module):
     endpoint = 'national-dashboard/metric/_ingest'
     url = '{0}://{1}/{2}'.format('https', connection.host, endpoint)
@@ -138,10 +137,10 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
         "authToken": access_token,
         "userInfo": user_info
         },
-        "Data": json.loads(payload)
+        "Data": payload
 
     }
-  
+
     log(module, 'Info', json.dumps(data), BaseHook.get_connection('qa-punjab-kibana'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
