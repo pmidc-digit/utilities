@@ -78,8 +78,66 @@ def dump_kibana(**kwargs):
         #url = '{0}://{1}/{2}?path={3}&method=POST'.format('https', connection.host, endpoint, query.get('path'))
         q = query.get('query').format(start,end)
         logging.info(q)          
-        #logging.info(url)
-        resp = hook.search(query.get('path'),q)
+        resp = hook.search(query.get('path'),{
+  "size": 0,
+    "query": {
+        "bool": {
+          "must_not": [
+            {
+              "term": {
+                "Data.tradelicense.tenantId.keyword": "pb.testing"
+              }
+            }
+          ],
+          "must": [
+            {
+              "range": {
+                "Data.tradelicense.@timestamp": {
+                "gte": 1577817000000,
+                "lte": 1577901960000,
+                "format": "epoch_millis"
+      }
+    }
+            }
+          ]
+        }
+      },
+    "aggs": {   
+      "ward": {
+                  "terms": {
+                    "field": "Data.ward.name.keyword"
+                  },
+
+          "aggs": {
+            "ulb": {
+              "terms": {
+                "field": "Data.tradelicense.tenantId.keyword"
+              },
+              	       "aggs": {
+         "region": {
+          "terms": {
+          "field": "Data.tenantData.city.districtName.keyword"
+          },
+
+                    "aggs": {
+                      "todaysApplications": {
+                        "value_count": {
+                          "field": "Data.tradelicense.applicationNumber.keyword"
+                          }
+                      },
+                     "todaysLicenseIssued": {
+                            "value_count": {
+                              "field": "Data.tradelicense.licenseNumber.keyword"
+                            }
+                          }
+                        }
+                      }
+              	       }
+                       }
+                       }
+                       }
+                       }
+                       })
         response = resp.json()
         #r = requests.post(url, data=q, headers={'kbn-xsrf' : 'true', 'Content-Type' : 'application/json'}, auth=(connection.login, connection.password))
         #response = r.json()
