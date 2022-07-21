@@ -10,7 +10,8 @@ class ElasticHook(HttpHook):
     def search(self, index_and_type, args):
         session = self.get_conn({})
 
-        url = self.base_url + index_and_type + '/_search'
+        url = self.base_url + '/'+ index_and_type
+        logging.info(url)
 
         req = requests.Request('GET', url, json=args)
         prep_req = session.prepare_request(req)
