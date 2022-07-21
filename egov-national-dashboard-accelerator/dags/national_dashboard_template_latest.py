@@ -80,54 +80,12 @@ def dump_kibana(**kwargs):
         logging.info(q)    
         response = hook.search(query.get('path'),json.loads(q))
         logging.info(response)
+        logging.info(query.get('name'))
         merged_document[query.get('name')] = response
-        logging.info(json.dumps(response))
-
-        # if module == 'COMMON' :
-        #     transform_response_common(merged_document,query.get('name'),query.get('module')) 
-
-
-    # if module == 'COMMON':
-    #     common_metrics = {}
-    #     module_ulbs = []
-    #     for tenantid in ulbs:
-    #         if len(ulbs[tenantid]) >= 2:
-    #             live_ulbs +=1
-    #             for md in ulbs[tenantid]:
-    #                 if md in modules:
-    #                     modules[md].append(tenantid)
-    #                 else:
-    #                     modules[md] = [tenantid]
-
-    #     if live_ulbs >= total_ulbs/2:
-    #         isStateLive = "Live"
-
-    #     for md in modules:
-    #         module_ulbs.append({'name': md, 'value': len(modules[md])})
-
-    #     common_metrics['totalLiveUlbsCount'] = live_ulbs
-    #     common_metrics['status']  = isStateLive  
-    #     common_metrics['onboardedUlbsCount'] = 0
-    #     common_metrics['totalCitizensCount'] = 0
-    #     common_metrics['slaAchievement'] = 0
-    #     common_metrics['totalUlbCount'] = total_ulbs
-    #     common_metrics['liveUlbsCount'] = [{'groupBy': 'serviceModuleCode', 'buckets': module_ulbs}]
-    #     common_metrics['totalApplications'] = totalApplications
-    #     common_metrics['totalApplicationsWithinSLA'] = totalApplicationWithinSLA
-    #     logging.info(json.dumps(common_metrics))
-        
-    #     empty_lambda =  module_config[1]
-    #     common_list = []
-    #     common_payload = empty_lambda('N/A', 'pb.amritsar', 'N/A', date)
-    #     common_payload['metrics'] = common_metrics
-    #     common_list.append(common_payload)
-    #     kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(common_list))
-    #     return json.dumps(common_list)
-    # else:
-        logging.info(module)
-        ward_list = transform_response_sample(merged_document, date, module)
-        kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
-        return json.dumps(ward_list)
+        logging.info(json.dumps(response))  
+    ward_list = transform_response_sample(merged_document, date, module)
+    kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
+    return json.dumps(ward_list)
 
 
 # def readulb(**kwargs):
