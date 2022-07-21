@@ -10,66 +10,66 @@ tl_license_issued_by_boundary = {'path': 'tlindex-v1-enriched/_search',
                                  'lambda': extract_tl_license_issued_by_boundary,
                                  'query':
                                  """
-{{
+{
   "size": 0,
-    "query": {{
-        "bool": {{
+    "query": {
+        "bool": {
           "must_not": [
-            {{
-              "term": {{
+            {
+              "term": {
                 "Data.tradelicense.tenantId.keyword": "pb.testing"
-              }}
-            }}
+              }
+            }
           ],
           "must": [
-            {{
-              "range": {{
-                "Data.tradelicense.@timestamp": {{
+            {
+              "range": {
+                "Data.tradelicense.@timestamp": {
                 "gte": {0},
                 "lte": {1},
                 "format": "epoch_millis"
-      }}
-    }}
-            }}
+      }
+    }
+            }
           ]
-        }}
-      }},
-    "aggs": {{   
-      "ward": {{
-                  "terms": {{
+        }
+      },
+    "aggs": { 
+      "ward": {
+                  "terms": {
                     "field": "Data.ward.name.keyword"
-                  }},
+                  },
 
-          "aggs": {{
-            "ulb": {{
-              "terms": {{
+          "aggs": {
+            "ulb": {
+              "terms": {
                 "field": "Data.tradelicense.tenantId.keyword"
-              }},
-              	       "aggs": {{
-         "region": {{
-          "terms": {{
+              },
+              	       "aggs": {
+         "region": {
+          "terms": {
           "field": "Data.tenantData.city.districtName.keyword"
-          }},
+          },
 
-                    "aggs": {{
-                      "todaysApplications": {{
-                        "value_count": {{
+                    "aggs": {
+                      "todaysApplications": {
+                        "value_count": {
                           "field": "Data.tradelicense.applicationNumber.keyword"
-                          }}
-                      }},
-                     "todaysLicenseIssued": {{
-                            "value_count": {{
+                          }
+                      },
+                     "todaysLicenseIssued": {
+                            "value_count": {
                               "field": "Data.tradelicense.licenseNumber.keyword"
-                            }}
-                          }}
-                        }}
-                      }}
-              	       }}
-                       }}
-                       }}
-                       }}
-                       }}
-                       }}  
+                            }
+                          }
+                        }
+                      }
+              	       }
+                       }
+                       }
+                       }
+                       }
+                       }
 """
                                  }
 
