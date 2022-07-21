@@ -23,7 +23,7 @@ batch_size = 50
 
 def elastic_dump():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('/property-services', {
+    resp = hook.search('property-services/_search', {
         "size": 10,
         "query": {
         "match_all": {}
