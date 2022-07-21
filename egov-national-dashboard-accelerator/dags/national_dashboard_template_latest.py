@@ -78,7 +78,7 @@ def dump_kibana(**kwargs):
         #url = '{0}://{1}/{2}?path={3}&method=POST'.format('https', connection.host, endpoint, query.get('path'))
         q = query.get('query').format(start,end)
         logging.info(q)          
-        resp = hook.search(query.get('path'),{
+        response = hook.search(query.get('path'),{
   "size": 0,
     "query": {
         "bool": {
@@ -138,7 +138,7 @@ def dump_kibana(**kwargs):
                        }
                        }
                        })
-        response = resp.json()
+        logging.info(response)
         #r = requests.post(url, data=q, headers={'kbn-xsrf' : 'true', 'Content-Type' : 'application/json'}, auth=(connection.login, connection.password))
         #response = r.json()
         merged_document[query.get('name')] = response
