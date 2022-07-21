@@ -24,19 +24,19 @@ batch_size = 50
 def elastic_dump():
     hook = ElasticHook('GET', 'es_conn')
     q = """
-    {{
+    {
         "size": 10,
-        "query": {{
-        "match_all": {{  }}
-         }},
+        "query": {
+        "match_all": {   }
+         },
         "sort": [
-        {{
-        "Data.@timestamp": {{
+        {
+        "Data.@timestamp": {
             "order": "desc"
-        }}
-        }}
+        }
+        }
     ]
-    }}
+    }
     """
     logging.info(q)
     resp = hook.search('property-services/_search', q )
