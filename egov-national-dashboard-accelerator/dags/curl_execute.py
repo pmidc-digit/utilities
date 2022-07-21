@@ -23,11 +23,10 @@ batch_size = 50
 
 def elastic_dump():
     hook = ElasticHook('GET', 'es_conn')
-    q = """
-    {
+    resp = hook.search('property-services/_search', {
         "size": 10,
         "query": {
-        "match_all": {   }
+        "match_all": {}
          },
         "sort": [
         {
@@ -36,10 +35,7 @@ def elastic_dump():
         }
         }
     ]
-    }
-    """
-    logging.info(q)
-    resp = hook.search('property-services/_search', q )
+    })
     logging.info(resp)
     logging.info(resp['hits']['hits'])
     return resp['hits']['hits']
