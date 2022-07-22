@@ -1,3 +1,4 @@
+from numpy import sinc
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
@@ -9,6 +10,7 @@ import requests
 from airflow.hooks.base import BaseHook
 import logging
 import json
+import urllib
 from queries.tl import *
 from queries.pgr import *
 from queries.ws import *
@@ -17,9 +19,10 @@ from queries.pt import *
 from queries.firenoc import *
 from queries.mcollect import *
 from queries.obps import *
-#from queries.common import *
+from queries.common import *
 from utils.utils import log
 from pytz import timezone
+from airflow.models import Variable
 
 default_args = {
     'owner': 'airflow',
@@ -39,13 +42,19 @@ module_map = {
     'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
     'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
     'OBPS' : (obps_queries, empty_obps_payload),
-   # 'COMMON' : (common_queries, empty_common_payload),
+    'COMMON' : (common_queries, empty_common_payload),
 }
 
 
 dag = DAG('national_dashboard_template', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
+
+ulbs = {}
+modules = {}
+total_ulbs = 0 
+totalApplications = 0 
+totalApplicationWithinSLA = 0
 
 
 select_sql_query = """
@@ -65,33 +74,128 @@ def dump_kibana(**kwargs):
     end = start + (24 * 60 * 59 * 1000)
 
     merged_document = {}
+    live_ulbs = 0
+
+    isStateLive = "N/A"
     for query in queries:
         url = '{0}://{1}/{2}?path={3}&method=POST'.format('https', connection.host, endpoint, query.get('path'))
         q = query.get('query').format(start,end)
+        logging.info(q)          
+        logging.info(url)
         #resp = hook.search(query.get('path'),q)
         #response = resp.json()
-        logging.info(url)
-        logging.info(q)
         r = requests.post(url, data=q, headers={'kbn-xsrf' : 'true', 'Content-Type' : 'application/json'}, auth=(connection.login, connection.password))
         response = r.json()
         merged_document[query.get('name')] = response
         logging.info(json.dumps(response))
-    ward_list = transform_response_sample(merged_document, date, module)
-    kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
-    return json.dumps(ward_list)
+        if module == 'COMMON' :
+            transform_response_common(merged_document,query.get('name'),query.get('module')) 
+
+
+    if module == 'COMMON':
+        common_metrics = {}
+        module_ulbs = []
+        for tenantid in ulbs:
+            if len(ulbs[tenantid]) >= 2:
+                live_ulbs +=1
+                for md in ulbs[tenantid]:
+                    if md in modules:
+                        modules[md].append(tenantid)
+                    else:
+                        modules[md] = [tenantid]
+
+        if live_ulbs >= total_ulbs/2:
+            isStateLive = "Live"
+
+        for md in modules:
+            module_ulbs.append({'name': md, 'value': len(modules[md])})
+
+        common_metrics['totalLiveUlbsCount'] = live_ulbs
+        common_metrics['status']  = isStateLive  
+        common_metrics['onboardedUlbsCount'] = 0
+        common_metrics['totalCitizensCount'] = 0
+        common_metrics['slaAchievement'] = 0
+        common_metrics['totalUlbCount'] = total_ulbs
+        common_metrics['liveUlbsCount'] = [{'groupBy': 'serviceModuleCode', 'buckets': module_ulbs}]
+        common_metrics['totalApplications'] = totalApplications
+        common_metrics['totalApplicationsWithinSLA'] = totalApplicationWithinSLA
+        logging.info(json.dumps(common_metrics))
+        
+        empty_lambda =  module_config[1]
+        common_list = []
+        common_payload = empty_lambda('N/A', 'pb.amritsar', 'N/A', date)
+        common_payload['metrics'] = common_metrics
+        common_list.append(common_payload)
+        kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(common_list))
+        return json.dumps(common_list)
+    else:
+        logging.info(module)
+        ward_list = transform_response_sample(merged_document, date, module)
+        kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
+        return json.dumps(ward_list)
+
+
+def readulb(**kwargs):
+    ulbs = []
+    url = Variable.get['totalulb_url']
+    logging.info(url)
+    url = 'https://raw.githubusercontent.com/egovernments/punjab-mdms-data/master/data/pb/tenant/tenants.json'
+    json_data = requests.get(url)
+    json_data = json.loads(json_data.text)
+    tenants_array=json_data["tenants"]
+    for tenant in tenants_array:
+        ulbs.append(tenant["code"])
+    total_ulbs = len(ulbs)
+    return total_ulbs
+
+    # url = 'https://raw.githubusercontent.com/egovernments/punjab-mdms-data/master/data/pb/tenant/tenants.json'
+    # logging.info(url)
+    # ulb_json = requests.get(url)
+    # ulb_json = json.loads(ulb_json.text)
+    # tenants_array=ulb_json["tenants"]
+    # for tenant in tenants_array:
+    #     ulbs.append(tenant["code"])
+    # total_ulbs = len(ulbs)
+    # kwargs['ti'].xcom_push(key='total_ulb', value=total_ulbs)
+    # return total_ulbs
+                
+   
+def transform_response_common(merged_document,query_name,query_module):
+    logging.info(query_name)
+    single_document = merged_document[query_name]
+    single_document = single_document.get('aggregations')  
+    transform_single_common(single_document,query_module)
+    
+def transform_single_common(single_document,query_module):
+    global totalApplicationWithinSLA,totalApplications
+    sla =  single_document.get('applicationsIssuedWithinSLA').get('withinsla').get('value')
+    total =  single_document.get('totalApplications').get('value')
+    totalApplications+=total
+    totalApplicationWithinSLA+=sla
+
+
+    ulb_agg = single_document.get('ulbs')
+    ulb_buckets = ulb_agg.get('buckets')
+    for ulb_bucket in ulb_buckets:
+        tenantid = ulb_bucket['key']
+        if tenantid in ulbs:
+            ulbs[tenantid].append(query_module)
+        else:
+            ulbs[tenantid] = [query_module]
+
 
 
 def transform_response_sample(merged_document, date, module):
     module_config = module_map.get(module)
     queries = module_config[0]
     ward_map = {}
+    ward_list = []
     for query in queries:
         single_document = merged_document[query.get('name')]
         single_document = single_document.get('aggregations')
         lambda_function = query.get('lambda')
         ward_map = transform_single(single_document, ward_map, date, lambda_function, module)
     ward_list = [ward_map[k] for k in ward_map.keys()]
-    logging.info(json.dumps(ward_list))
     return ward_list
 
 def get_key(ward, ulb):
@@ -112,15 +216,14 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
             region_buckets = region_agg.get('buckets')
             for region_bucket in region_buckets:
                 region = region_bucket.get('key')
-                if ward_map.get(ward):
-                    ward_payload = ward_map.get(ward)
+                if ward_map.get(get_key(ward,ulb)):
+                    ward_payload = ward_map.get(get_key(ward,ulb))
                 else:
-                    ward_payload = empty_lambda(region, ulb, ward, date)
+                    ward_payload = empty_lambda(region, ulb, ward, date)         
                 metrics = ward_payload.get('metrics')
                 metrics = lambda_function(metrics, region_bucket)
                 ward_payload['metrics'] = metrics
                 ward_map[get_key(ward, ulb)] = ward_payload
-    
     return ward_map
 
 
@@ -143,13 +246,13 @@ def get_auth_token(connection):
     data = {
         'grant_type' : 'password',
         'scope' : 'read',
-        'username' : 'amr001',
-        'password' : 'eGov@123',
-        'tenantId' : 'pb.amritsar',
-        'userType' : 'EMPLOYEE'
+        'username' : Variable.get('username'),
+        'password' : Variable.get('password'),
+        'tenantId' : Variable.get('tenantid'),
+        'userType' : Variable.get('usertype')
     }
 
-    r = requests.post(url, data=data, headers={'Authorization' : 'Basic ZWdvdi11c2VyLWNsaWVudDo=', 'Content-Type' : 'application/x-www-form-urlencoded'})
+    r = requests.post(url, data=data, headers={'Authorization' : 'Basic {0}'.format(Variable.get('token')), 'Content-Type' : 'application/x-www-form-urlencoded'})
     response = r.json()
     logging.info(response)
     return (response.get('access_token'), response.get('refresh_token'), response.get('UserRequest'))
@@ -184,13 +287,13 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
 
 
-
 def load(**kwargs):
     connection = BaseHook.get_connection('digit-auth')
     (access_token, refresh_token, user_info) = get_auth_token(connection)
     module = kwargs['module']
 
     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
+    logging.info(module)
     logging.info(payload)
     payload_obj = json.loads(payload)
     if access_token and refresh_token:
@@ -404,6 +507,13 @@ select_data = PostgresOperator(
 	sql="select count(*) from eg_user where type = 'CITIZEN'",
 	dag = dag)
 
+read_ulbs = PythonOperator(
+    task_id='nudb_read_ulbs',
+    python_callable=readulb,
+    provide_context=True,
+    op_kwargs={ 'module' : 'COMMON'},
+    dag=dag)
+
 
 
 extract_tl >> transform_tl >> load_tl
@@ -414,6 +524,7 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 extract_obps >> transform_obps >> load_obps
-extract_common >> transform_common >> load_common
-select_data
+#read_ulbs
+#extract_common >> transform_common >> load_common
+#select_data
 

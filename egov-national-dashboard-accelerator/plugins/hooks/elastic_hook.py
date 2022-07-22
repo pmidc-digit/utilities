@@ -11,10 +11,10 @@ class ElasticHook(HttpHook):
         session = self.get_conn({})
 
         url = self.base_url + '/'+ index_and_type
-        logging.info(url)
-
+ 
         req = requests.Request('GET', url, json=args)
         prep_req = session.prepare_request(req)
+        logging.info(prep_req)
 
         resp = session.send(prep_req)
         try:

@@ -61,6 +61,7 @@ pgr_closed_complaints = {
           }},
            "aggs": {{
             "ulb": {{
+              n
             "terms": {{
               "field": "Data.tenantId.keyword"
             }},

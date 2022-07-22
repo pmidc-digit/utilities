@@ -1,5 +1,5 @@
 
-
+import logging
 def extract_firenoc_bundle_metrics(metrics, region_bucket):
   department_agg = region_bucket.get('department')
   department_buckets = department_agg.get('buckets')
@@ -14,14 +14,16 @@ def extract_firenoc_bundle_metrics(metrics, region_bucket):
 
 
   for department_bucket in department_buckets:
+    val = 0
     department_name = department_bucket.get('key')   
-
     actualNOCIssued['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('actualNOCIssued').get('actualNOCIssued').get('value') if department_bucket.get('actualNOCIssued') else 0})
     provisionalNOCIssued['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('provisionalNOCIssued').get('provisionalNOCIssued').get('value') if department_bucket.get('provisionalNOCIssued') else 0})
     slaComplianceProvisional['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('slaComplianceProvisional').get('slaComplianceProvisional').get('value') if department_bucket.get('slaComplianceProvisional') else 0})
     slaComplianceActual['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('slaComplianceActual').get('slaComplianceActual').get('value') if department_bucket.get('slaComplianceActual') else 0})
-    avgDaysToIssueActualNOC['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('avgDaysToIssueActualNOC').get('avgDaysToIssueActualNOC').get('value') if department_bucket.get('avgDaysToIssueActualNOC') else 0})
-    avgDaysToIssueProvisionalNOC['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('avgDaysToIssueProvisionalNOC').get('avgDaysToIssueProvisionalNOC').get('value') if department_bucket.get('avgDaysToIssueProvisionalNOC') else 0})
+    val = 0 if  department_bucket.get('avgDaysToIssueActualNOC').get('avgDaysToIssueActualNOC').get('value') == None else department_bucket.get('avgDaysToIssueActualNOC').get('avgDaysToIssueActualNOC').get('value')
+    avgDaysToIssueActualNOC['buckets'].append( { 'name' : department_name, 'value' : val if department_bucket.get('avgDaysToIssueActualNOC') else 0})
+    val = 0 if  department_bucket.get('avgDaysToIssueProvisionalNOC').get('avgDaysToIssueProvisionalNOC').get('value') == None else department_bucket.get('avgDaysToIssueProvisionalNOC').get('avgDaysToIssueProvisionalNOC').get('value')
+    avgDaysToIssueProvisionalNOC['buckets'].append( { 'name' : department_name, 'value' : val if department_bucket.get('avgDaysToIssueProvisionalNOC') else 0})
     todaysApplications['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysApplications').get('value') if department_bucket.get('todaysApplications') else 0})
     
   
@@ -652,8 +654,8 @@ firenoc_applications_closed = {
 
 
 def extract_firenoc_applications_completed_within_sla(metrics, region_bucket):
-  metrics['todaysCompletedApplicationsWithinSLA'] = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
-        'value') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
+  val = 0 if  region_bucket.get('todaysCompletedApplicationsWithinSLA').get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
+  metrics['todaysCompletedApplicationsWithinSLA'] = val if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
   return metrics
    
 firenoc_applications_completed_within_sla = {

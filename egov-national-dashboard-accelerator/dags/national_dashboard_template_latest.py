@@ -201,8 +201,8 @@ def get_auth_token(connection):
         'scope' : 'read',
         'username' : Variable.get('username'),
         'password' : Variable.get('password'),
-        'tenantId' : 'pb.amritsar',
-        'userType' : 'EMPLOYEE'
+        'tenantId' : Variable.get('tenantid'),
+        'userType' : Variable.get('usertype')
     }
 
     r = requests.post(url, data=data, headers={'Authorization' : 'Basic {0}'.format(Variable.get('token')), 'Content-Type' : 'application/x-www-form-urlencoded'})

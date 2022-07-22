@@ -862,21 +862,6 @@ ws_sewerage_todays_closed_applications = {
 
 
 def extract_ws_water_pending_connections(metrics, region_bucket):
-  # groupby_duration = []
-  # collection = []
-  # duration_buckets = ['0to3Days', '3to7Days', '7to15Days', 'MoreThan15Days' ]
-  # for duration_bucket in duration_buckets:
-  #   if region_bucket.get(duration_bucket):
-  #     inner_buckets = region_bucket.get(duration_bucket).get('buckets')
-  #     value = inner_buckets[0].get('doc_count') if inner_buckets and len(inner_buckets) > 0 else 0
-  #     groupby_duration.append({ 'name' : duration_bucket, 'value' : value})
-
-  # collection.append({ 'groupBy': 'duration', 'buckets' : groupby_duration})
-  # metrics['pendingConnections'] = collection
-  
-  # return metrics
-
-
   all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
 
   #get new metrics from region_bucket
@@ -974,7 +959,6 @@ def extract_ws_water_pending_connections(metrics, region_bucket):
 
     metrics['pendingConnections'] = all_dims
     return metrics
-
 
 ws_water_pending_connections = {
                          'path': 'water-services-enriched/_search',
@@ -1091,19 +1075,103 @@ ws_water_pending_connections = {
 
 
 def extract_ws_sewerage_pending_connections(metrics, region_bucket):
-  groupby_duration = []
-  collection = []
-  duration_buckets = ['0to3Days', '3to7Days', '7to15Days', 'MoreThan15Days' ]
-  for duration_bucket in duration_buckets:
-    if region_bucket.get(duration_bucket):
-      inner_buckets = region_bucket.get(duration_bucket).get('buckets')
-      value = inner_buckets[0].get('doc_count') if inner_buckets and len(inner_buckets) > 0 else 0
-      groupby_duration.append({ 'name' : duration_bucket, 'value' : value})
+  all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
 
-  collection.append({ 'groupBy': 'duration', 'buckets' : groupby_duration})
-  metrics['pendingConnections'] = collection
+  #get new metrics from region_bucket
+  duration_agg = region_bucket.get('0to3Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_0to3= {}
+  for duration_bucket in duration_buckets:
+      grouped_by_0to3['0to3Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+
   
-  return metrics
+  duration_agg = region_bucket.get('3to7Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_3to7 = {}
+  for duration_bucket in duration_buckets:
+      grouped_by_3to7['3to7Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+
+  duration_agg = region_bucket.get('7to15Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_7to15 = {}
+  for duration_bucket in duration_buckets:
+      grouped_by_7to15['7to15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+
+  duration_agg = region_bucket.get('MoreThan15Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_MoreThan15 = {}
+  for duration_bucket in duration_buckets:
+      grouped_by_MoreThan15['MoreThan15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+
+  for dim in all_dims:
+    if dim and dim.get('groupBy') == '0to3Days':
+      buckets = dim.get('buckets')
+      if buckets and len(buckets) > 0:
+        for bucket in buckets:
+          if bucket.get('nvalueame') and grouped_by_0to3.get(bucket.get('name')):
+            grouped_by_0to3[bucket.get('name')] = grouped_by_0to3[bucket.get(
+                'name')] + bucket.get('doc_count')
+          else:
+            grouped_by_0to3[bucket.get('name')] = bucket.get('doc_count')
+
+    if dim and dim.get('gro]upBy') == '3to7Days':
+      buckets = dim.get('buckets')
+      if buckets and len(buckets) > 0:
+        for bucket in buckets:
+          if bucket.get('name') and grouped_by_3to7.get(bucket.get('name')):
+            grouped_by_3to7[bucket.get('name')] = grouped_by_3to7[bucket.get(
+                'name')] + bucket.get('doc_count')
+          else:
+            grouped_by_3to7[bucket.get('name')] = bucket.get('doc_count')
+
+    if dim and dim.get('groupBy') == '7to15Days':
+      buckets = dim.get('buckets')
+      if buckets and len(buckets) > 0:
+        for bucket in buckets:
+          if bucket.get('name') and grouped_by_7to15.get(bucket.get('name')):
+            grouped_by_7to15[bucket.get('name')] = grouped_by_7to15[bucket.get(
+                'name')] + bucket.get('doc_count')
+          else:
+            grouped_by_7to15[bucket.get('name')] = bucket.get('doc_count')
+    
+
+    if dim and dim.get('gro]upBy') == 'MoreThan15Days':
+      buckets = dim.get('buckets')
+      if buckets and len(buckets) > 0:
+        for bucket in buckets:
+          if bucket.get('name') and grouped_by_MoreThan15.get(bucket.get('name')):
+            grouped_by_MoreThan15[bucket.get('name')] = grouped_by_MoreThan15[bucket.get(
+                'name')] + bucket.get('doc_count')
+          else:
+            grouped_by_MoreThan15[bucket.get('name')] = bucket.get('doc_count')
+
+
+    all_dims = []
+    buckets = []
+    for k in grouped_by_0to3.keys():
+      buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
+
+    all_dims.append({ 'groupBy' : '0to3Days', 'buckets' : buckets}) 
+
+    buckets = []
+    for k in grouped_by_3to7.keys():
+      buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
+    all_dims.append({ 'groupBy' : '3to7Days', 'buckets' : buckets}) 
+
+    buckets = []
+    for k in grouped_by_7to15.keys():
+      buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
+  
+    all_dims.append({ 'groupBy' : '7to15Days', 'buckets' : buckets}) 
+      
+    buckets = []
+    for k in grouped_by_MoreThan15.keys():
+      buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
+  
+    all_dims.append({ 'groupBy' : 'MoreThan15Days', 'buckets' : buckets}) 
+
+    metrics['pendingConnections'] = all_dims
+    return metrics
 
 ws_sewerage_pending_connections = {
                          'path': 'sewerage-services-enriched/_search',
@@ -1910,9 +1978,10 @@ ws_sewerage_connections = {
 
 
 ws_digit_queries = [ws_collection_by_payment_channel_type, ws_water_connectioncreated__by_channel_and_connection_type,ws_sewerage_connectioncreated_by_channel_and_connection_type,
-              ws_water_todays_applications, ws_sewerage_todays_application, ws_water_todays_closed_applications, ws_sewerage_todays_closed_applications, ws_water_pending_connections, ws_sewerage_pending_connections,
+              ws_water_todays_applications, ws_sewerage_todays_application, ws_water_todays_closed_applications, ws_sewerage_todays_closed_applications, 
+              ws_water_pending_connections, ws_sewerage_pending_connections,
               ws_water_todays_completed_application_withinSLA, ws_sewerage_todays_completed_application_withinSLA,ws_water_sla_compliance, ws_sewerage_sla_compliance, ws_water_connections,
-              ws_sewerage_connections]
+              ws_sewerage_connections,ws_total_transactions]
 
 
 def empty_ws_digit_payload(region, ulb, ward, date):
