@@ -61,7 +61,6 @@ pgr_closed_complaints = {
           }},
            "aggs": {{
             "ulb": {{
-              n
             "terms": {{
               "field": "Data.tenantId.keyword"
             }},
@@ -195,7 +194,6 @@ pgr_resolved_complaints = {
 
 
 def extract_pgr_unique_citizens(metrics, region_bucket):
- # metrics['todaysLicenseIssued'] = region_bucket.get('todaysLicenseIssued').get('value') if region_bucket.get('todaysLicenseIssued') else 0
     metrics['uniqueCitizens'] = region_bucket.get('uniqueCitizens').get(
         'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
     return metrics

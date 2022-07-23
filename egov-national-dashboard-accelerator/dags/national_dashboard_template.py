@@ -137,27 +137,18 @@ def dump_kibana(**kwargs):
 
 def readulb(**kwargs):
     ulbs = []
-    url = Variable.get['totalulb_url']
-    logging.info(url)
+    url = Variable.get('totalulb_url')
+    logging.info("variable " + Variable.get('totalulb_url'))
     url = 'https://raw.githubusercontent.com/egovernments/punjab-mdms-data/master/data/pb/tenant/tenants.json'
     json_data = requests.get(url)
+    logging.info(json_data)
+    logging.info(json_data.json())
     json_data = json.loads(json_data.text)
     tenants_array=json_data["tenants"]
     for tenant in tenants_array:
         ulbs.append(tenant["code"])
     total_ulbs = len(ulbs)
     return total_ulbs
-
-    # url = 'https://raw.githubusercontent.com/egovernments/punjab-mdms-data/master/data/pb/tenant/tenants.json'
-    # logging.info(url)
-    # ulb_json = requests.get(url)
-    # ulb_json = json.loads(ulb_json.text)
-    # tenants_array=ulb_json["tenants"]
-    # for tenant in tenants_array:
-    #     ulbs.append(tenant["code"])
-    # total_ulbs = len(ulbs)
-    # kwargs['ti'].xcom_push(key='total_ulb', value=total_ulbs)
-    # return total_ulbs
                 
    
 def transform_response_common(merged_document,query_name,query_module):
@@ -458,26 +449,26 @@ load_mcollect = PythonOperator(
     dag=dag)
 
 
-extract_obps = PythonOperator(
-    task_id='elastic_search_extract_obps',
-    python_callable=dump_kibana,
-    provide_context=True,
-    do_xcom_push=True,
-    op_kwargs={ 'module' : 'OBPS'},
-    dag=dag)
+# extract_obps = PythonOperator(
+#     task_id='elastic_search_extract_obps',
+#     python_callable=dump_kibana,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     op_kwargs={ 'module' : 'OBPS'},
+#     dag=dag)
 
-transform_obps = PythonOperator(
-    task_id='nudb_transform_obps',
-    python_callable=transform,
-    provide_context=True,
-    dag=dag)
+# transform_obps = PythonOperator(
+#     task_id='nudb_transform_obps',
+#     python_callable=transform,
+#     provide_context=True,
+#     dag=dag)
 
-load_obps = PythonOperator(
-    task_id='nudb_ingest_load_obps',
-    python_callable=load,
-    provide_context=True,
-    op_kwargs={ 'module' : 'OBPS'},
-    dag=dag)
+# load_obps = PythonOperator(
+#     task_id='nudb_ingest_load_obps',
+#     python_callable=load,
+#     provide_context=True,
+#     op_kwargs={ 'module' : 'OBPS'},
+#     dag=dag)
 
 extract_common = PythonOperator(
     task_id='elastic_search_extract_common',
@@ -500,13 +491,6 @@ load_common = PythonOperator(
     op_kwargs={ 'module' : 'COMMON'},
     dag=dag)
 
-
-select_data = PostgresOperator(
-	task_id='get_citizen_count',
-	postgres_conn_id="postgres_default",
-	sql="select count(*) from eg_user where type = 'CITIZEN'",
-	dag = dag)
-
 read_ulbs = PythonOperator(
     task_id='nudb_read_ulbs',
     python_callable=readulb,
@@ -523,8 +507,8 @@ extract_ws_digit >> transform_ws_digit >> load_ws_digit
 extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
-extract_obps >> transform_obps >> load_obps
-#read_ulbs
-#extract_common >> transform_common >> load_common
-#select_data
+#extract_obps >> transform_obps >> load_obps
+read_ulbs
+extract_common >> transform_common >> load_common
+
 

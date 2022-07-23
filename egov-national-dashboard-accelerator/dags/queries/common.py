@@ -506,7 +506,7 @@ wsapplications = {
 }
 
 #water remove for QA as not there in Punjab
-# common_queries = [tl, pt,sw, pgr,ws,firenoc,wsapplications]
+common_queries = [tl, pt,sw, pgr,ws,firenoc,wsapplications]
 
 def empty_common_payload(region, ulb, ward, date):
     return {
