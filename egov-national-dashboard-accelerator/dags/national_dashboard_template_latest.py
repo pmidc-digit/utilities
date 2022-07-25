@@ -71,13 +71,12 @@ def dump_kibana(**kwargs):
         startdate = kwargs['dag_run'].conf.get('startdate')
         if kwargs['dag_run'].conf.get('enddate') == None:
             logging.error('enddate should also be provided')
-        enddate = kwargs['dag_run'].conf.get('enddate')
+        enddate = kwargs['dag_run'].conf.get('enddate')       
         start = int(localtz.localize(datetime.strptime(startdate, "%d-%m-%Y")).timestamp() * 1000)
-        end = int(localtz.localize(datetime.strptime(enddate, "%d-%m-%Y")).timestamp() * 1000)
+        end = int(localtz.localize(datetime.strptime(enddate, "%d-%m-%Y")).timestamp() * 1000) + (24 * 60 * 59 * 1000)
         date = kwargs['dag_run'].conf.get('startdate')
         if module == 'COMMON':
             actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
-            end = start + (24 * 60 * 59 * 1000)
             start = actualstart
     else:
         date = kwargs['dag_run'].conf.get('date')
@@ -86,7 +85,6 @@ def dump_kibana(**kwargs):
         end =  start + (24 * 60 * 59 * 1000)
         if module == 'COMMON':
             actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
-            end = start + (24 * 60 * 59 * 1000)
             start = actualstart
 
 
