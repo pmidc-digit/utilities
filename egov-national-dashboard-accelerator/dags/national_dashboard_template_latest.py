@@ -61,7 +61,6 @@ totalApplicationWithinSLA = 0
 
 def dump_kibana(**kwargs):
     hook = ElasticHook('GET', 'es_conn')
-    endpoint = 'kibana/api/console/proxy'
     module = kwargs['module']
     module_config = module_map.get(module)
     queries = module_config[0]
@@ -263,10 +262,10 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
     }
 
-    log(module, 'Info', json.dumps(data), ElasticHook('GET', 'es_conn'), log_endpoint)
+    #log(module, 'Info', json.dumps(data), ElasticHook('GET', 'es_conn'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
-    log(module, 'Info', json.dumps(response), ElasticHook('GET', 'es_conn'), log_endpoint)
+    #log(module, 'Info', json.dumps(response), ElasticHook('GET', 'es_conn'), log_endpoint)
     logging.info(json.dumps(data))
     logging.info(response)
     return response
