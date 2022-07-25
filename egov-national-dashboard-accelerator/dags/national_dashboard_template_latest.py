@@ -1,3 +1,4 @@
+
 from numpy import sinc
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -19,7 +20,7 @@ from queries.pt import *
 from queries.firenoc import *
 from queries.mcollect import *
 from queries.obps import *
-#from queries.common import *
+from queries.common import *
 from utils.utils import log
 from pytz import timezone
 from airflow.models import Variable
@@ -79,27 +80,66 @@ def dump_kibana(**kwargs):
         logging.info(q)    
         response = hook.search(query.get('path'),json.loads(q))
         logging.info(response)
-        logging.info(query.get('name'))
         merged_document[query.get('name')] = response
-        logging.info(json.dumps(response))  
-    ward_list = transform_response_sample(merged_document, date, module)
-    kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
-    return json.dumps(ward_list)
+        logging.info(json.dumps(response))
+        if module == 'COMMON' :
+            transform_response_common(merged_document,query.get('name'),query.get('module')) 
+
+
+    if module == 'COMMON':
+        common_metrics = {}
+        module_ulbs = []
+        for tenantid in ulbs:
+            if len(ulbs[tenantid]) >= 2:
+                live_ulbs +=1
+                for md in ulbs[tenantid]:
+                    if md in modules:
+                        modules[md].append(tenantid)
+                    else:
+                        modules[md] = [tenantid]
+
+        if live_ulbs >= total_ulbs/2:
+            isStateLive = "Live"
+
+        for md in modules:
+            module_ulbs.append({'name': md, 'value': len(modules[md])})
+
+        common_metrics['totalLiveUlbsCount'] = live_ulbs
+        common_metrics['status']  = isStateLive  
+        common_metrics['onboardedUlbsCount'] = 0
+        common_metrics['totalCitizensCount'] = 0
+        common_metrics['slaAchievement'] = 0
+        common_metrics['totalUlbCount'] = total_ulbs
+        common_metrics['liveUlbsCount'] = [{'groupBy': 'serviceModuleCode', 'buckets': module_ulbs}]
+        common_metrics['totalApplications'] = totalApplications
+        common_metrics['totalApplicationsWithinSLA'] = totalApplicationWithinSLA
+        logging.info(json.dumps(common_metrics))
+        
+        empty_lambda =  module_config[1]
+        common_list = []
+        common_payload = empty_lambda('N/A', 'pb.amritsar', 'N/A', date)
+        common_payload['metrics'] = common_metrics
+        common_list.append(common_payload)
+        kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(common_list))
+        return json.dumps(common_list)
+    else:
+        logging.info(module)
+        ward_list = transform_response_sample(merged_document, date, module)
+        kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
+        return json.dumps(ward_list)
 
 
 def readulb(**kwargs):
-    ulbs = []
-    url1 = Variable.get['totalulb_url']
-    logging.info(url1)
     url = 'https://raw.githubusercontent.com/egovernments/punjab-mdms-data/master/data/pb/tenant/tenants.json'
-    json_data = requests.get(url1)
-    json_data = json.loads(json_data.text)
-    tenants_array=json_data["tenants"]
+    logging.info(url)
+    ulb_json = requests.get(url)
+    ulb_json = json.loads(ulb_json.text)
+    tenants_array=ulb_json["tenants"]
     for tenant in tenants_array:
         ulbs.append(tenant["code"])
     total_ulbs = len(ulbs)
+    kwargs['ti'].xcom_push(key='total_ulb', value=total_ulbs)
     return total_ulbs
-
                 
    
 def transform_response_common(merged_document,query_name,query_module):
@@ -399,26 +439,26 @@ load_mcollect = PythonOperator(
     dag=dag)
 
 
-# extract_obps = PythonOperator(
-#     task_id='elastic_search_extract_obps',
-#     python_callable=dump_kibana,
-#     provide_context=True,
-#     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'OBPS'},
-#     dag=dag)
+extract_obps = PythonOperator(
+    task_id='elastic_search_extract_obps',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'OBPS'},
+    dag=dag)
 
-# transform_obps = PythonOperator(
-#     task_id='nudb_transform_obps',
-#     python_callable=transform,
-#     provide_context=True,
-#     dag=dag)
+transform_obps = PythonOperator(
+    task_id='nudb_transform_obps',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
 
-# load_obps = PythonOperator(
-#     task_id='nudb_ingest_load_obps',
-#     python_callable=load,
-#     provide_context=True,
-#     op_kwargs={ 'module' : 'OBPS'},
-#     dag=dag)
+load_obps = PythonOperator(
+    task_id='nudb_ingest_load_obps',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'OBPS'},
+    dag=dag)
 
 extract_common = PythonOperator(
     task_id='elastic_search_extract_common',
@@ -441,20 +481,12 @@ load_common = PythonOperator(
     op_kwargs={ 'module' : 'COMMON'},
     dag=dag)
 
-
-select_data = PostgresOperator(
-	task_id='get_citizen_count',
-	postgres_conn_id="postgres_default",
-	sql="select count(*) from eg_user where type = 'CITIZEN'",
-	dag = dag)
-
 read_ulbs = PythonOperator(
     task_id='nudb_read_ulbs',
     python_callable=readulb,
     provide_context=True,
     op_kwargs={ 'module' : 'COMMON'},
     dag=dag)
-
 
 
 extract_tl >> transform_tl >> load_tl
@@ -464,6 +496,6 @@ extract_ws_digit >> transform_ws_digit >> load_ws_digit
 extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
-#extract_obps >> transform_obps >> load_obps - commented for Punjab
+extract_obps >> transform_obps >> load_obps
 read_ulbs
 extract_common >> transform_common >> load_common
