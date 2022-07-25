@@ -66,13 +66,29 @@ def dump_kibana(**kwargs):
     queries = module_config[0]
     date = kwargs['dag_run'].conf.get('date')
     localtz = timezone('Asia/Kolkata')
-    dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
-    start = int(dt_aware.timestamp() * 1000)
-    end =  start + (24 * 60 * 59 * 1000)
-    if module == 'COMMON':
-        start1 = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
-        end = start + (24 * 60 * 59 * 1000)
-        start = start1
+    if kwargs['dag_run'].conf.get('date') == None:
+        logging.info('date is empty')
+        startdate = kwargs['dag_run'].conf.get('startdate')
+        if kwargs['dag_run'].conf.get('enddate') == None:
+            logging.error('enddate should also be provided')
+        enddate = kwargs['dag_run'].conf.get('enddate')
+        start = int(localtz.localize(datetime.strptime(startdate, "%d-%m-%Y")).timestamp() * 1000)
+        end = int(localtz.localize(datetime.strptime(enddate, "%d-%m-%Y")).timestamp() * 1000)
+        date = kwargs['dag_run'].conf.get('startdate')
+        if module == 'COMMON':
+            actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
+            end = start + (24 * 60 * 59 * 1000)
+            start = actualstart
+    else:
+        date = kwargs['dag_run'].conf.get('date')
+        dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
+        start = int(dt_aware.timestamp() * 1000)
+        end =  start + (24 * 60 * 59 * 1000)
+        if module == 'COMMON':
+            actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
+            end = start + (24 * 60 * 59 * 1000)
+            start = actualstart
+
 
     merged_document = {}
     live_ulbs = 0
@@ -80,10 +96,8 @@ def dump_kibana(**kwargs):
     isStateLive = "N/A"
     for query in queries:
         q = query.get('query').format(start,end)
-        logging.info(type(json.loads(q)))
         logging.info(q)    
         response = hook.search(query.get('path'),json.loads(q))
-        logging.info(response)
         merged_document[query.get('name')] = response
         logging.info(json.dumps(response))
         if module == 'COMMON' :
@@ -126,7 +140,6 @@ def dump_kibana(**kwargs):
         kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(common_list))
         return json.dumps(common_list)
     else:
-        logging.info(module)
         ward_list = transform_response_sample(merged_document, date, module)
         kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
         return json.dumps(ward_list)
@@ -146,7 +159,6 @@ def readulb(**kwargs):
                 
    
 def transform_response_common(merged_document,query_name,query_module):
-    logging.info(query_name)
     single_document = merged_document[query_name]
     single_document = single_document.get('aggregations')  
     transform_single_common(single_document,query_module)

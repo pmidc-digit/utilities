@@ -1,14 +1,9 @@
 #ulb counts
 #TL
-def extract_tl(metrics, region_bucket):
-    metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-    return metrics
-
 tl = {
     'module' : 'TL',
     'path': 'tlindex-v1-enriched/_search',
     'name': 'tl_ulbs',
-    'lambda': extract_tl,
     'query': """
 {{
   "size": 0,
@@ -80,15 +75,10 @@ tl = {
 }
 
 #PT
-def extract_pt(metrics, region_bucket):
-    metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-    return metrics
-
 pt = {
     'module' : 'PT',
     'path': 'property-services/_search',
     'name': 'pt_ulbs',
-    'lambda': extract_pt,
     'query': """
  {{
   "size": 0,
@@ -161,15 +151,10 @@ pt = {
 }
 
 #FIRENOC
-def extract_firenoc(metrics, region_bucket):
-    metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-    return metrics
-
 firenoc = {
     'module' : 'FIRENOC',
     'path': 'firenoc-services/_search',
     'name': 'firenoc_ulbs',
-    'lambda': extract_firenoc,
     'query': """
 {{
   "size": 0,
@@ -251,15 +236,10 @@ firenoc = {
 }
 
 #PGR
-def extract_pgr(metrics,region_bucket):
-  metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-  return metrics
-
 pgr = {
     'module' : 'PGR',
     'path': 'pgrindex-v1-enriched/_search',
     'name': 'pgr_ulbs',
-    'lambda': extract_pgr,
     'query': """
 {{
   "size": 0,
@@ -330,15 +310,10 @@ pgr = {
 }
 
 #WS
-def extract_ws(metrics, region_bucket): 
-  metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-  return metrics
-
 ws = {
     'module' : 'WS',
     'path': 'water-services-enriched/_search',
     'name': 'ws_ulbs',
-    'lambda': extract_ws,
     'query': """
 {{
   "size": 0,
@@ -418,15 +393,10 @@ ws = {
 }
 
 #SW
-def extract_sw(metrics, region_bucket): 
-  metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-  return metrics
-
 sw = {
     'module' : 'SW',
     'path': 'sewerage-services-enriched/_search',
     'name': 'sw_ulbs',
-    'lambda': extract_sw,
     'query': """
 {{
   "size": 0,
@@ -507,15 +477,10 @@ sw = {
 }
 
 #wsapplication
-def extract_wsapplications(metrics, region_bucket): 
-  metrics['ulbs'] = region_bucket.get('ulbs').get('value') if region_bucket.get('ulbs') else 0
-  return metrics
-
 wsapplications = {
     'module' : 'WSAPPLICATIONS',
     'path': 'wsapplications/_search',
     'name': 'wsapplications_ulbs',
-    'lambda': extract_wsapplications,
     'query': """
 {{
   "size": 0,
