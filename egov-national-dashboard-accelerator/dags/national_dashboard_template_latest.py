@@ -263,10 +263,10 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
     }
 
-    log(module, 'Info', json.dumps(data), BaseHook.get_connection('qa-punjab-kibana'), log_endpoint)
+    log(module, 'Info', json.dumps(data), ElasticHook('GET', 'es_conn'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
-    log(module, 'Info', json.dumps(response), BaseHook.get_connection('qa-punjab-kibana'), log_endpoint)
+    log(module, 'Info', json.dumps(response), ElasticHook('GET', 'es_conn'), log_endpoint)
     logging.info(json.dumps(data))
     logging.info(response)
     return response
