@@ -20,6 +20,17 @@ tl = {
             "Data.tenantId.keyword": "pb.testing"
           }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.tradelicense.@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
       ]
     }}
   }},
@@ -87,6 +98,17 @@ pt = {
         {{
           "term": {{
             "Data.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
           }}
         }}
       ]
@@ -157,6 +179,17 @@ firenoc = {
         {{
           "term": {{
             "Data.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
           }}
         }}
       ]
@@ -238,6 +271,17 @@ pgr = {
             "Data.addressDetail.auditDetails.createdBy": "pb.testing"
           }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
       ]
     }}
   }},
@@ -304,6 +348,17 @@ ws = {
         {{
           "term": {{
             "Data.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
           }}
         }}
       ]
@@ -381,6 +436,17 @@ sw = {
         {{
           "term": {{
             "Data.tenantId.keyword": "pb.testing"
+          }}
+        }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
           }}
         }}
       ]
@@ -461,6 +527,17 @@ wsapplications = {
             "Data.tenantId.keyword": "pb.testing"
           }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "@timestamp": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
       ]
     }}
   }},
@@ -518,43 +595,40 @@ def empty_common_payload(region, ulb, ward, date):
         "uuid":"11b0e02b-0145-4de2-bc42-c97b96264807",
         "state": "Punjab",
         "metrics": {
-            "status":"Live",
-            "onboardedUlbsCount":0,
-            "totalCitizensCount":0,
-            "totalLiveUlbsCount":0,
-            "totalUlbCount":0,
-            "slaAchievement":0,
-            "totalApplications":0,
-            "totalApplicationWithinSLA":0,
-            "liveUlbsCount":[
-              {
-                    "groupBy": "serviceModuleCode",
-                    "buckets"
-: [
-                        {
-                            "name": "PT",
-                            "value": 0
-                        },
-                        {
-                            "name": "TL",
-                            "value": 0
-                        },
-                        {
-                            "name": "FIRENOC",
-                            "value": 0
-                        },
-                        {
-                            "name": "PGR",
-                            "value": 0
-                        },
-                        {
-                            "name": "WS",
-                            "value": 0
+                    "status":"Live",
+                    "onboardedUlbsCount":0,
+                    "totalCitizensCount":0,
+                    "totalLiveUlbsCount":0,
+                    "totalUlbCount":0,
+                    "slaAchievement":0,
+                    "liveUlbsCount":[
+                      {
+                            "groupBy": "serviceModuleCode",
+                            "buckets": [
+                                {
+                                    "name": "PT",
+                                    "value": 0
+                                },
+                                {
+                                    "name": "TL",
+                                    "value": 0
+                                },
+                                {
+                                    "name": "FIRENOC",
+                                    "value": 0
+                                },
+                                {
+                                    "name": "PGR",
+                                    "value": 0
+                                },
+                                {
+                                    "name": "WS",
+                                    "value": 0
+                                }
+                            ]
                         }
                     ]
                 }
-            ]
-        }
       }
         
 

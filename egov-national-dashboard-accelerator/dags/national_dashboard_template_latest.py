@@ -42,7 +42,8 @@ module_map = {
     'PT' : (pt_queries, empty_pt_payload),
     'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
     'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
-    'OBPS' : (obps_queries, empty_obps_payload)
+    'OBPS' : (obps_queries, empty_obps_payload),
+    'COMMON' : (common_queries,empty_common_payload)
 }
 
 
@@ -68,7 +69,11 @@ def dump_kibana(**kwargs):
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
-    end = start + (24 * 60 * 59 * 1000)
+    end =  start + (24 * 60 * 59 * 1000)
+    if module == 'COMMON':
+        start1 = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
+        end = start + (24 * 60 * 59 * 1000)
+        start = start1
 
     merged_document = {}
     live_ulbs = 0
@@ -87,6 +92,7 @@ def dump_kibana(**kwargs):
 
 
     if module == 'COMMON':
+        total_ulbs = readulb()
         common_metrics = {}
         module_ulbs = []
         for tenantid in ulbs:
@@ -108,11 +114,9 @@ def dump_kibana(**kwargs):
         common_metrics['status']  = isStateLive  
         common_metrics['onboardedUlbsCount'] = 0
         common_metrics['totalCitizensCount'] = 0
-        common_metrics['slaAchievement'] = 0
+        common_metrics['slaAchievement'] = (totalApplicationWithinSLA/totalApplications) * 100
         common_metrics['totalUlbCount'] = total_ulbs
         common_metrics['liveUlbsCount'] = [{'groupBy': 'serviceModuleCode', 'buckets': module_ulbs}]
-        common_metrics['totalApplications'] = totalApplications
-        common_metrics['totalApplicationsWithinSLA'] = totalApplicationWithinSLA
         logging.info(json.dumps(common_metrics))
         
         empty_lambda =  module_config[1]
@@ -439,26 +443,26 @@ load_mcollect = PythonOperator(
     dag=dag)
 
 
-extract_obps = PythonOperator(
-    task_id='elastic_search_extract_obps',
-    python_callable=dump_kibana,
-    provide_context=True,
-    do_xcom_push=True,
-    op_kwargs={ 'module' : 'OBPS'},
-    dag=dag)
+# extract_obps = PythonOperator(
+#     task_id='elastic_search_extract_obps',
+#     python_callable=dump_kibana,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     op_kwargs={ 'module' : 'OBPS'},
+#     dag=dag)
 
-transform_obps = PythonOperator(
-    task_id='nudb_transform_obps',
-    python_callable=transform,
-    provide_context=True,
-    dag=dag)
+# transform_obps = PythonOperator(
+#     task_id='nudb_transform_obps',
+#     python_callable=transform,
+#     provide_context=True,
+#     dag=dag)
 
-load_obps = PythonOperator(
-    task_id='nudb_ingest_load_obps',
-    python_callable=load,
-    provide_context=True,
-    op_kwargs={ 'module' : 'OBPS'},
-    dag=dag)
+# load_obps = PythonOperator(
+#     task_id='nudb_ingest_load_obps',
+#     python_callable=load,
+#     provide_context=True,
+#     op_kwargs={ 'module' : 'OBPS'},
+#     dag=dag)
 
 extract_common = PythonOperator(
     task_id='elastic_search_extract_common',
@@ -481,13 +485,6 @@ load_common = PythonOperator(
     op_kwargs={ 'module' : 'COMMON'},
     dag=dag)
 
-read_ulbs = PythonOperator(
-    task_id='nudb_read_ulbs',
-    python_callable=readulb,
-    provide_context=True,
-    op_kwargs={ 'module' : 'COMMON'},
-    dag=dag)
-
 
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
@@ -496,6 +493,5 @@ extract_ws_digit >> transform_ws_digit >> load_ws_digit
 extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
-extract_obps >> transform_obps >> load_obps
-read_ulbs
+#extract_obps >> transform_obps >> load_obps
 extract_common >> transform_common >> load_common
