@@ -134,15 +134,15 @@ def dump_kibana(**kwargs):
 
 
 def readulb(**kwargs):
+    ulbs = []
+    url = Variable.get('totalulb_url')
     url = 'https://raw.githubusercontent.com/egovernments/punjab-mdms-data/master/data/pb/tenant/tenants.json'
-    logging.info(url)
-    ulb_json = requests.get(url)
-    ulb_json = json.loads(ulb_json.text)
-    tenants_array=ulb_json["tenants"]
+    json_data = requests.get(url)
+    json_data = json.loads(json_data.text)
+    tenants_array=json_data["tenants"]
     for tenant in tenants_array:
         ulbs.append(tenant["code"])
     total_ulbs = len(ulbs)
-    kwargs['ti'].xcom_push(key='total_ulb', value=total_ulbs)
     return total_ulbs
                 
    
