@@ -1,4 +1,7 @@
 
+import logging
+
+
 def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   all_dims = []
   grouped_by = []
@@ -1075,7 +1078,10 @@ ws_water_pending_connections = {
 
 
 def extract_ws_sewerage_pending_connections(metrics, region_bucket):
-  all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
+  if metrics['pendingConnections'] == None
+      all_dis = []
+  else:
+      all_dims = metrics['pendingConnections'] :
 
   #get new metrics from region_bucket
   duration_agg = region_bucket.get('0to3Days')
@@ -1291,8 +1297,12 @@ ws_sewerage_pending_connections = {
 def extract_ws_water_todays_completed_application_withinSLA(metrics, region_bucket):
   todaysCompletedApplicationsWithinSLA = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
         'doc_count') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
-
-  metrics['todaysCompletedApplicationsWithinSLA'] =  metrics['todaysCompletedApplicationsWithinSLA']  + todaysCompletedApplicationsWithinSLA if  metrics['todaysCompletedApplicationsWithinSLA'] else todaysCompletedApplicationsWithinSLA 
+  
+  if metrics['todaysCompletedApplicationsWithinSLA'] == None:
+     logging.info('None')
+     metrics['todaysCompletedApplicationsWithinSLA'] =   todaysCompletedApplicationsWithinSLA 
+  else:
+     metrics['todaysCompletedApplicationsWithinSLA'] =  metrics['todaysCompletedApplicationsWithinSLA']  + todaysCompletedApplicationsWithinSLA if  metrics['todaysCompletedApplicationsWithinSLA'] else todaysCompletedApplicationsWithinSLA
   
   return metrics
 
