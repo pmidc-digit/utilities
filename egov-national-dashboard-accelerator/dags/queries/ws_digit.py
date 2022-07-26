@@ -1723,34 +1723,37 @@ ws_sewerage_sla_compliance = {
 def extract_ws_water_connections(metrics, region_bucket):
   all_dims = []
   grouped_by = []
-
-  channel_agg = region_bucket.get('byMeterType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:  
-    grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
-            'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
-    all_dims.append(
-        {'groupBy': 'meterType', 'buckets': grouped_by})
+  
+  channel_agg = region_bucket.get('byMeterType') 
+  if channel_agg != None:
+    channel_buckets = channel_agg.get('buckets')
+    grouped_by = []
+    for channel_bucket in channel_buckets:  
+      grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
+              'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
+      all_dims.append(
+          {'groupBy': 'meterType', 'buckets': grouped_by})
 
   channel_agg = region_bucket.get('byChannelType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:
-    key = channel_bucket.get('key') if channel_bucket.get('key') == "" else " "
-    grouped_by.append({'name': key, 'value': channel_bucket.get(
-            'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
-    all_dims.append(
-        {'groupBy': 'channelType', 'buckets': grouped_by})
+  if channel_agg != None:
+    channel_buckets = channel_agg.get('buckets')
+    grouped_by = []
+    for channel_bucket in channel_buckets:
+      key = channel_bucket.get('key') if channel_bucket.get('key') == "" else " "
+      grouped_by.append({'name': key, 'value': channel_bucket.get(
+              'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
+      all_dims.append(
+          {'groupBy': 'channelType', 'buckets': grouped_by})
 
-  channel_agg = region_bucket.get('byUsageType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:  
-    grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
-            'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
-    all_dims.append(
-        {'groupBy': 'usageType', 'buckets': grouped_by})
+  channel_agg = region_bucket.get('byUsageType') 
+  if channel_agg != None: 
+    channel_buckets = channel_agg.get('buckets')
+    grouped_by = []
+    for channel_bucket in channel_buckets:  
+      grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
+              'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
+      all_dims.append(
+          {'groupBy': 'usageType', 'buckets': grouped_by})
 
 
   metrics['waterConnections'] = all_dims

@@ -66,27 +66,9 @@ def dump_kibana(**kwargs):
     queries = module_config[0]
     date = kwargs['dag_run'].conf.get('date')
     localtz = timezone('Asia/Kolkata')
-    if kwargs['dag_run'].conf.get('date') == None:
-        logging.info('date is empty')
-        startdate = kwargs['dag_run'].conf.get('startdate')
-        if kwargs['dag_run'].conf.get('enddate') == None:
-            logging.error('enddate should also be provided')
-        enddate = kwargs['dag_run'].conf.get('enddate')       
-        start = int(localtz.localize(datetime.strptime(startdate, "%d-%m-%Y")).timestamp() * 1000)
-        end = int(localtz.localize(datetime.strptime(enddate, "%d-%m-%Y")).timestamp() * 1000) + (24 * 60 * 59 * 1000)
-        date = kwargs['dag_run'].conf.get('startdate')
-        if module == 'COMMON':
-            actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
-            start = actualstart
-    else:
-        date = kwargs['dag_run'].conf.get('date')
-        dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
-        start = int(dt_aware.timestamp() * 1000)
-        end =  start + (24 * 60 * 59 * 1000)
-        if module == 'COMMON':
-            actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
-            start = actualstart
-
+    dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
+    start = int(dt_aware.timestamp() * 1000)
+    end = start + (24 * 60 * 59 * 1000)
 
     merged_document = {}
     live_ulbs = 0
@@ -289,6 +271,7 @@ def load(**kwargs):
 
     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
     logging.info(payload)
+    logging.info("payload length {0} {1}".format(len(payload_obj)),module)
     payload_obj = json.loads(payload)
     if access_token and refresh_token:
         for i in range(0, len(payload_obj), batch_size):

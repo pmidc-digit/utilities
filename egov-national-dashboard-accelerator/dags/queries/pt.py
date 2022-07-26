@@ -205,7 +205,14 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
                     "format": "epoch_millis"
                    }}
             }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "PT"
             }}
+          }}
+        }}
             ]
         }}
       }},
@@ -330,7 +337,14 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                    "format": "epoch_millis"
                    }}
             }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "PT"
             }}
+          }}
+        }}
             ]
       }}
     }},
@@ -516,7 +530,14 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
                    "format": "epoch_millis"
                    }}
             }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "PT"
             }}
+          }}
+        }}
             ]
       }}
     }},

@@ -106,7 +106,14 @@ tl_collection_adhoc_penalty = {
                     "format": "epoch_millis"
                 }}
               }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "TL"
             }}
+          }}
+        }}
           ]
     }}
     }},
@@ -192,7 +199,14 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
                     "format": "epoch_millis"
                 }}
               }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "TL"
             }}
+          }}
+        }}
           ]
     }}
     }},
@@ -284,7 +298,14 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
                     "format": "epoch_millis"
                 }}
               }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "TL"
             }}
+          }}
+        }}
           ]
     }}
     }},
@@ -461,7 +482,14 @@ tl_total_transactions = {'path': 'dss-collection_v2/_search',
                     "format": "epoch_millis"
                 }}
               }}
+            }},
+            {{
+          "term": {{
+            "dataObject.paymentDetails.businessService.keyword": {{
+              "value": "TL"
             }}
+          }}
+        }}
           ]
         }}
         }},
