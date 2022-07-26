@@ -1078,10 +1078,10 @@ ws_water_pending_connections = {
 
 
 def extract_ws_sewerage_pending_connections(metrics, region_bucket):
-  if metrics['pendingConnections'] == None
-      all_dis = []
+  if metrics['pendingConnections'] == None:
+      all_dims = []
   else:
-      all_dims = metrics['pendingConnections'] :
+      all_dims = metrics['pendingConnections']
 
   #get new metrics from region_bucket
   duration_agg = region_bucket.get('0to3Days')
