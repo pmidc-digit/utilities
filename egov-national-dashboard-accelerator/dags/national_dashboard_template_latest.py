@@ -272,7 +272,7 @@ def load(**kwargs):
     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
     logging.info(payload)
     payload_obj = json.loads(payload)
-    logging.info("payload length {0} {1}".format(len(payload_obj)),module)
+    logging.info("payload length {0} {1}".format(len(payload_obj),module))
     if access_token and refresh_token:
         for i in range(0, len(payload_obj), batch_size):
             logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
