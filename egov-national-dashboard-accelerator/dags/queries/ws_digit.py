@@ -1292,7 +1292,7 @@ def extract_ws_water_todays_completed_application_withinSLA(metrics, region_buck
   todaysCompletedApplicationsWithinSLA = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
         'doc_count') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
 
-  metrics['todaysCompletedApplicationsWithinSLA'] =  metrics['todaysCompletedApplicationsWithinSLA']  + todaysCompletedApplicationsWithinSLA if  metrics.get('todaysCompletedApplicationsWithinSLA') else todaysCompletedApplicationsWithinSLA 
+  metrics['todaysCompletedApplicationsWithinSLA'] =  metrics['todaysCompletedApplicationsWithinSLA']  + todaysCompletedApplicationsWithinSLA if  metrics['todaysCompletedApplicationsWithinSLA'] else todaysCompletedApplicationsWithinSLA 
   
   return metrics
 
@@ -1387,7 +1387,7 @@ def extract_ws_sewearge_todays_completed_application_withinSLA(metrics, region_b
   todaysCompletedApplicationsWithinSLA = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
         'doc_count') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
 
-  metrics['todaysCompletedApplicationsWithinSLA'] =  metrics['todaysCompletedApplicationsWithinSLA']  + todaysCompletedApplicationsWithinSLA if  metrics.get('todaysCompletedApplicationsWithinSLA') else todaysCompletedApplicationsWithinSLA 
+  metrics['todaysCompletedApplicationsWithinSLA'] =  metrics['todaysCompletedApplicationsWithinSLA']  + todaysCompletedApplicationsWithinSLA if  metrics['todaysCompletedApplicationsWithinSLA'] else todaysCompletedApplicationsWithinSLA 
   
   return metrics
 
@@ -1723,8 +1723,9 @@ def extract_ws_water_connections(metrics, region_bucket):
   channel_agg = region_bucket.get('byChannelType')  
   channel_buckets = channel_agg.get('buckets')
   grouped_by = []
-  for channel_bucket in channel_buckets:  
-    grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
+  for channel_bucket in channel_buckets:
+    key = channel_bucket.get('key') if channel_bucket.get('key') == "" else " "
+    grouped_by.append({'name': key, 'value': channel_bucket.get(
             'waterConnections').get('value') if channel_bucket.get('waterConnections') else 0})
     all_dims.append(
         {'groupBy': 'channelType', 'buckets': grouped_by})
@@ -1938,7 +1939,7 @@ ws_sewerage_connections = {
                     "field": "Data.channel.keyword"
                   }},
                   "aggs": {{
-                    "waterConnections": {{
+                    "sewerageConnections": {{
                       "value_count": {{
                         "field": "Data.applicationNo.keyword"
                       }}
@@ -1950,7 +1951,7 @@ ws_sewerage_connections = {
                     "field": "Data.propertyUsageType.keyword"
                   }},
                   "aggs": {{
-                    "waterConnections": {{
+                    "sewerageConnections": {{
                       "value_count": {{
                         "field": "Data.applicationNo.keyword"
                       }}

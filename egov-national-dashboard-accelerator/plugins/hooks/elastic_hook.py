@@ -14,7 +14,7 @@ class ElasticHook(HttpHook):
  
         req = requests.Request('GET', url, json=args)
         prep_req = session.prepare_request(req)
-        logging.info(prep_req)
+
 
         resp = session.send(prep_req)
         try:
