@@ -68,7 +68,7 @@ def dump_kibana(**kwargs):
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
-    end = start + (24 * 60 * 59 * 1000)
+    end = start + (24 * 60 * 60 * 1000) - 1000
 
     merged_document = {}
     live_ulbs = 0
