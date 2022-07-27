@@ -69,6 +69,10 @@ def dump_kibana(**kwargs):
     dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
     end = start + (24 * 60 * 60 * 1000) - 1000
+    if module == 'COMMON':
+        actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
+        end = start + (24 * 60 * 60 * 1000) - 1000
+        start = actualstart
 
     merged_document = {}
     live_ulbs = 0
@@ -103,6 +107,8 @@ def dump_kibana(**kwargs):
         for md in modules:
             module_ulbs.append({'name': md, 'value': len(modules[md])})
 
+        logging.info(totalApplications)
+        logging.info(totalApplicationWithinSLA)
         common_metrics['totalLiveUlbsCount'] = live_ulbs
         common_metrics['status']  = isStateLive  
         common_metrics['onboardedUlbsCount'] = 0
