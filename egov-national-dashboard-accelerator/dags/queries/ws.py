@@ -1215,8 +1215,8 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
 
 
 def extract_ws_todays_completed_applications_withinSLA(metrics, region_bucket):
-    metrics['todaysCompletedApplicationsWithinSLA'] = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
-        'value') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
+    val = 0 if region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
+    metrics['todaysCompletedApplicationsWithinSLA'] = val
     return metrics
 
 ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
