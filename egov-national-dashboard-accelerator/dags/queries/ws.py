@@ -71,7 +71,7 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "regionname.keyword"
+                    "field": "districtname.keyword"
                      }},
                    "aggs": {{
                       "byUsageType": {{
@@ -178,7 +178,7 @@ ws_collection_by_tax_head_connection_type = {
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "regionname.keyword"
+                "field": "districtname.keyword"
               }},
               "aggs": {{
                 "LATE.CHARGES": {{
@@ -421,7 +421,7 @@ ws_pending_connections = {'path': 'wsapplications/_search',
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword"
                     }},
                     "aggs": {{
         "0to3Days": {{
@@ -567,7 +567,7 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "regionname.keyword"
+                    "field": "districtname.keyword"
                   }},
                   "aggs": {{
                     "sewerageConnectionsbyChannelType": {{
@@ -701,7 +701,7 @@ ws_water_connections = {'path': 'wsapplications/_search',
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword"
                     }},
                     "aggs": {{
                       "waterConnectionsbyChannelType": {{
@@ -796,7 +796,7 @@ ws_todays_applications = {'path': 'wsapplications/_search',
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "regionname.keyword"
+                  "field": "districtname.keyword"
                 }},
                 "aggs": {{
                   "todaysTotalApplications": {{
@@ -865,7 +865,7 @@ ws_closed_applications = {'path': 'wsapplications/_search',
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword"
                     }},
                     "aggs": {{
                       "todaysClosedApplications": {{
@@ -960,7 +960,7 @@ ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword"
                     }},
                     "aggs": {{
                       "meteredconnectionCreated": {{
@@ -1097,7 +1097,7 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword"
                     }},
                     "aggs": {{
                       "channelType": {{
@@ -1261,7 +1261,7 @@ ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "regionname.keyword"
+                "field": "districtname.keyword"
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -1337,7 +1337,7 @@ ws_todays_sla_compliance = {'path': 'wsapplications/_search',
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "regionname.keyword"
+                "field": "districtname.keyword"
               }},
               "aggs": {{
                 "TotalApplication": {{
