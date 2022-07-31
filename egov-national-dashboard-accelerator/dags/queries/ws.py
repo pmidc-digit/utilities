@@ -557,17 +557,20 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
     "aggs": {{
               "ward": {{
                 "terms": {{
-                  "field": "block.keyword"
+                  "field": "block.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "ulb": {{
                 "terms": {{
-                  "field": "cityname.keyword"
+                  "field": "cityname.keyword",
+                  "size":10000
                 }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "districtname.keyword"
+                    "field": "districtname.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                     "sewerageConnectionsbyChannelType": {{
@@ -584,7 +587,8 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
                     }},
                     "sewerageConnectionsbyUsageType": {{
                       "terms": {{
-                        "field": "usage.keyword"
+                        "field": "usage.keyword",
+                        "size":10000
                       }},
                     "aggs": {{
                         "sewerageConnectionsbyUsageType": {{
