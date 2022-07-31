@@ -2077,5 +2077,3 @@ def empty_ws_digit_payload(region, ulb, ward, date):
              "todaysCompletedApplicationsWithinSLA": 0 
         }
     }
-
-thin
