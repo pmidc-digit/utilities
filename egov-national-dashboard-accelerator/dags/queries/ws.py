@@ -508,7 +508,7 @@ def extract_ws_sewerage_connections(metrics, region_bucket):
   collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   metrics['sewerageConnections'] = collection
   
-  
+ 
   return metrics
 
 ws_sewerage_connections = {'path': 'wsapplications/_search',
@@ -517,7 +517,7 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
 
                      'query': """
 {{
-  "size": 0,
+  "size": 20,
     "query": {{
         "bool": {{
           "must_not": [
@@ -651,7 +651,7 @@ ws_water_connections = {'path': 'wsapplications/_search',
                             'query': """
 
  {{
-    "size": 0,
+    "size": 20,
       "query": {{
           "bool": {{
             "must_not": [
@@ -1216,6 +1216,7 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
 
 def extract_ws_todays_completed_applications_withinSLA(metrics, region_bucket):
     val = 0 if region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
+    metrics['todaysCompletedApplicationsWithinSLA'] = val
     metrics['todaysCompletedApplicationsWithinSLA'] = val
     return metrics
 
