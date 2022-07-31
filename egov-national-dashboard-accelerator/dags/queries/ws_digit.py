@@ -95,17 +95,20 @@ ws_collection_by_payment_channel_type = {'path': 'dss-collection_v2/_search',
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "byUsageType": {{
@@ -366,17 +369,20 @@ ws_water_connectioncreated__by_channel_and_connection_type = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "channelType": {{
@@ -515,17 +521,20 @@ ws_sewerage_connectioncreated_by_channel_and_connection_type = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "channelType": {{
@@ -603,17 +612,20 @@ ws_water_todays_applications = {
     "aggs": {{
       "ward": {{
         "terms": {{
-          "field": "Data.ward.name.keyword"
+          "field": "Data.ward.name.keyword",
+          "size":10000
         }},
         "aggs": {{
           "ulb": {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
              }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                  }},
                   "aggs": {{
                     "todaysTotalApplications": {{
@@ -674,17 +686,20 @@ ws_sewerage_todays_application = {
     "aggs": {{
       "ward": {{
         "terms": {{
-          "field": "Data.ward.name.keyword"
+          "field": "Data.ward.name.keyword",
+          "size":10000
         }},
         "aggs": {{
           "ulb": {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
              }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                  }},
                   "aggs": {{
                     "todaysTotalApplications": {{
@@ -753,17 +768,20 @@ ws_water_todays_closed_applications = {
     "aggs": {{
       "ward": {{
         "terms": {{
-          "field": "Data.ward.name.keyword"
+          "field": "Data.ward.name.keyword",
+          "size":10000
         }},
         "aggs": {{
           "ulb": {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
             }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                 }},
                   "aggs": {{
                     "todaysClosedApplications": {{
@@ -833,17 +851,20 @@ ws_sewerage_todays_closed_applications = {
     "aggs": {{
       "ward": {{
         "terms": {{
-          "field": "Data.ward.name.keyword"
+          "field": "Data.ward.name.keyword",
+          "size":10000
         }},
         "aggs": {{
           "ulb": {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
             }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                 }},
                   "aggs": {{
                     "todaysClosedApplications": {{
@@ -1006,17 +1027,20 @@ ws_water_pending_connections = {
   "aggs":  {{
     "ward":  {{
       "terms":  {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs":  {{
         "ulb":  {{
           "terms":  {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs":  {{
             "region":  {{
               "terms":  {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs":  {{
                 "0to3Days":  {{
@@ -1223,17 +1247,20 @@ ws_sewerage_pending_connections = {
   "aggs":  {{
     "ward":  {{
       "terms":  {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs":  {{
         "ulb":  {{
           "terms":  {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs":  {{
             "region":  {{
               "terms":  {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs":  {{
                 "0to3Days":  {{
@@ -1342,17 +1369,20 @@ ws_water_todays_completed_application_withinSLA = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -1438,17 +1468,20 @@ ws_sewerage_todays_completed_application_withinSLA = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -1530,17 +1563,20 @@ ws_water_sla_compliance = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "TotalApplication": {{
@@ -1646,17 +1682,20 @@ ws_sewerage_sla_compliance = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "TotalApplication": {{
@@ -1802,17 +1841,20 @@ ws_water_connections = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                     "byChannelType": {{
@@ -1937,17 +1979,20 @@ ws_sewerage_connections = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "byChannelType": {{
@@ -2033,3 +2078,4 @@ def empty_ws_digit_payload(region, ulb, ward, date):
         }
     }
 
+thin

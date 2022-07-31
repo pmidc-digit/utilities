@@ -67,17 +67,20 @@ mcollect_total_by_categories = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size:10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size:10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size:10000
               }},
               "aggs": {{
                 "numberOfCategories": {{
@@ -193,17 +196,20 @@ mcollect_todays_collection = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size:10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size:10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size:10000
               }},
               "aggs": {{
                 "bypaymentMode": {{
@@ -352,17 +358,20 @@ mcollect_receipts = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size:10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size:10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size:10000
               }},
               "aggs": {{
                 "byPaymentMode": {{
@@ -504,17 +513,20 @@ mcollect_challans = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size:10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size:10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size:10000
               }},
               "aggs": {{
                 "bychallanStatus": {{

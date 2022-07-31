@@ -48,17 +48,20 @@ pt_closed_applications = {'path': 'property-services/_search',
     "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "Data.ward.name.keyword"
+              "field": "Data.ward.name.keyword",
+              "size":10000
             }},
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "Data.tenantId.keyword"
+                    "field": "Data.tenantId.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "Data.tenantData.city.districtName.keyword"
+                      "field": "Data.tenantData.city.districtName.keyword",
+                      "size":10000
                     }},
                               "aggs": {{
                                 "todaysClosedApplications": {{
@@ -115,17 +118,20 @@ pt_total_applications = {'path': 'property-services/_search',
     "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "Data.ward.name.keyword"
+              "field": "Data.ward.name.keyword",
+              "size":10000
             }},
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "Data.tenantId.keyword"
+                    "field": "Data.tenantId.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "Data.tenantData.city.districtName.keyword"
+                      "field": "Data.tenantData.city.districtName.keyword",
+                      "size":10000
                     }},
                     "aggs": {{
                       "todaysTotalApplications" : {{
@@ -219,17 +225,20 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
      "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "domainObject.ward.name.keyword"
+              "field": "domainObject.ward.name.keyword",
+              "size":10000
             }},
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "domainObject.tenantId.keyword"
+                    "field": "domainObject.tenantId.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "dataObject.tenantData.city.districtName.keyword"
+                      "field": "dataObject.tenantData.city.districtName.keyword",
+                      "size":10000
                     }},
 
                   "aggs": {{
@@ -351,17 +360,20 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
     "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "domainObject.ward.name.keyword"
+              "field": "domainObject.ward.name.keyword",
+              "size":10000
             }},
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "domainObject.tenantId.keyword"
+                    "field": "domainObject.tenantId.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "dataObject.tenantData.city.districtName.keyword"
+                      "field": "dataObject.tenantData.city.districtName.keyword",
+                      "size":10000
                     }},
                      "aggs": {{
                       "byUsageType":{{
@@ -544,17 +556,20 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
     "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "domainObject.ward.name.keyword"
-            }},
+              "field": "domainObject.ward.name.keyword",
+              "size":10000
+            },
             "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "domainObject.tenantId.keyword"
+                    "field": "domainObject.tenantId.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "dataObject.tenantData.city.districtName.keyword"
+                      "field": "dataObject.tenantData.city.districtName.keyword",
+                      "size":10000
                     }},
                    "aggs": {{
                     "byUsageType": {{
@@ -694,17 +709,20 @@ pt_assessed_properties = {'path':'property-services/_search',
    "aggs" : {{
             "ward": {{
               "terms": {{
-                "field": "Data.ward.name.keyword"
+                "field": "Data.ward.name.keyword",
+                "size":10000
               }},
         "aggs": {{
           "ulb": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantId.keyword",
+                "size":10000
               }},
                 "aggs": {{
                "region": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.tenantData.city.districtName.keyword",
+                    "size":10000
                 }},
                 "aggs": {{
                     "byUsageType": {{
@@ -784,17 +802,20 @@ pt_properties_registered_by_year = {'path': 'property-assessments/_search',
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.name.keyword"
+                "field": "Data.tenantData.city.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "financialYear": {{
@@ -866,17 +887,20 @@ pt_properties_assessments = {'path': 'property-assessments/_search',
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.name.keyword"
+                "field": "Data.tenantData.city.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "assesments": {{

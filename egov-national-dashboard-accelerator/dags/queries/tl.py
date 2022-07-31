@@ -38,18 +38,21 @@ tl_license_issued_by_boundary = {'path': 'tlindex-v1-enriched/_search',
     "aggs": {{   
       "ward": {{
                   "terms": {{
-                    "field": "Data.ward.name.keyword"
+                    "field": "Data.ward.name.keyword",
+                    "size":10000
                   }},
 
           "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "Data.tradelicense.tenantId.keyword"
+                "field": "Data.tradelicense.tenantId.keyword",
+                "size":10000
               }},
               	       "aggs": {{
          "region": {{
           "terms": {{
-          "field": "Data.tenantData.city.districtName.keyword"
+          "field": "Data.tenantData.city.districtName.keyword",
+          "size":10000
           }},
 
                     "aggs": {{
@@ -120,17 +123,20 @@ tl_collection_adhoc_penalty = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "domainObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "adhocPenalty": {{
@@ -213,17 +219,20 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "domainObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "adhocRebate": {{
@@ -312,17 +321,20 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "domainObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "tlTax": {{
@@ -404,17 +416,20 @@ tl_todays_trade_licenses = {'path': 'tlindex-v1-enriched/_search',
       "aggs": {{
                 "ward": {{
                   "terms": {{
-                    "field": "Data.ward.name.keyword"
+                    "field": "Data.ward.name.keyword",
+                    "size":10000
                   }},
          "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "Data.tradelicense.tenantId.keyword"
+                "field": "Data.tradelicense.tenantId.keyword",
+                "size":10000
               }},
         "aggs": {{
          "region": {{
           "terms": {{
-          "field": "Data.tenantData.city.districtName.keyword"
+          "field": "Data.tenantData.city.districtName.keyword",
+          "size":10000
           }},
             "aggs": {{
                       "Status": {{
@@ -496,17 +511,20 @@ tl_total_transactions = {'path': 'dss-collection_v2/_search',
          "aggs": {{
                 "ward": {{
                   "terms": {{
-                    "field": "domainObject.ward.name.keyword"
+                    "field": "domainObject.ward.name.keyword",
+                    "size":10000
                   }},
                             "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "domainObject.tenantId.keyword"
+                "field": "domainObject.tenantId.keyword",
+                "size":10000
               }},
         "aggs": {{
          "region": {{
             "terms": {{
-              "field": "dataObject.tenantData.city.districtName.keyword"
+              "field": "dataObject.tenantData.city.districtName.keyword",
+              "size":10000
             }},
                   "aggs": {{
                     "transactions": {{
@@ -573,18 +591,21 @@ tl_applications_moved_today = {'path': 'tlindex-v1-enriched/_search',
     "aggs": {{   
       "ward": {{
           "terms": {{
-            "field": "Data.ward.name.keyword"
+            "field": "Data.ward.name.keyword",
+            "size":10000
           }},
 
           "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "Data.tradelicense.tenantId.keyword"
+                "field": "Data.tradelicense.tenantId.keyword",
+                "size":10000
               }},
         "aggs": {{
          "region": {{
           "terms": {{
-          "field": "Data.tenantData.city.districtName.keyword"
+          "field": "Data.tenantData.city.districtName.keyword",
+          "size":10000
           }},
           "aggs": {{
             "applicationsMovedToday": {{
@@ -672,17 +693,20 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
          "aggs": {{
          "region_buckets": {{
             "terms": {{
-              "field": "dataObject.tenantData.city.districtCode.keyword"
+              "field": "dataObject.tenantData.city.districtCode.keyword",
+              "size":10000
             }},
           "aggs": {{
             "ulb_buckets": {{
               "terms": {{
-                "field": "domainObject.tenantId.keyword"
+                "field": "domainObject.tenantId.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "ward_buckets": {{
                   "terms": {{
-                    "field": "domainObject.ward.code.keyword"
+                    "field": "domainObject.ward.code.keyword",
+                    "size":10000
                   }},
                 "aggs": {{
                     "byTradeType": {{
@@ -748,17 +772,20 @@ tl_license_issued_within_sla = {'path': 'tlindex-v1-enriched/_search',
      "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "Data.ward.name.keyword"
+              "field": "Data.ward.name.keyword",
+              "size":10000
             }},
    "aggs": {{
       "ulb": {{
         "terms": {{
-          "field": "Data.tradelicense.tenantId.keyword"
+          "field": "Data.tradelicense.tenantId.keyword",
+          "size":10000
         }},
   "aggs": {{
    "region": {{
     "terms": {{
-    "field": "Data.tenantData.city.districtName.keyword"
+    "field": "Data.tenantData.city.districtName.keyword",
+    "size":10000
     }},
       "aggs": {{
             "todaysLicenseIssuedWithinSLA": {{
@@ -856,17 +883,20 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "tradeType": {{

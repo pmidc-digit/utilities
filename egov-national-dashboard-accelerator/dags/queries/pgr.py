@@ -57,17 +57,20 @@ pgr_closed_complaints = {
         "aggs": {{
         "ward": {{
           "terms": {{
-            "field": "Data.complaintWard.name.keyword"
+            "field": "Data.complaintWard.name.keyword",
+            "size":10000
           }},
            "aggs": {{
             "ulb": {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
             }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                 }},
                             "aggs": {{
               "department": {{
@@ -152,17 +155,20 @@ pgr_resolved_complaints = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -231,17 +237,20 @@ pgr_unique_citizens = {
         "aggs": {{
               "ward": {{
                 "terms": {{
-                  "field": "Data.complaintWard.name.keyword"
+                  "field": "Data.complaintWard.name.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "ulb": {{
                 "terms": {{
-                  "field": "Data.tenantId.keyword"
+                  "field": "Data.tenantId.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "uniqueCitizens": {{
@@ -321,17 +330,20 @@ pgr_sla_achieved = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -426,17 +438,20 @@ pgr_completion_rate = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -578,17 +593,20 @@ pgr_todays_complaints = {
        "aggs": {{
             "ward": {{
               "terms": {{
-                "field": "Data.complaintWard.name.keyword"
+                "field": "Data.complaintWard.name.keyword",
+                "size":10000
               }},
            "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantId.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.tenantData.city.districtName.keyword",
+                    "size":10000
                   }},
                     "aggs": {{
                     "Complaints By Status": {{
@@ -721,17 +739,20 @@ pgr_status = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -900,17 +921,20 @@ pgr_avg_solution_time = {
     "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "Data.complaintWard.name.keyword"
+              "field": "Data.complaintWard.name.keyword",
+              "size":10000
             }},
              "aggs": {{
               "ulb": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantId.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.tenantData.city.districtName.keyword",
+                    "size":10000
                   }},
                   "aggs":{{
                      "department": {{

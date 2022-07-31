@@ -47,17 +47,20 @@ obps_ocIssued = {
         "aggs": {{
             "ward": {{
             "terms": {{
-                "field": "Data.ward.name.keyword"
+                "field": "Data.ward.name.keyword",
+                "size:10000
             }},
             "aggs": {{
                 "ulb": {{
                 "terms": {{
-                    "field": "Data.tenantId.keyword"
+                    "field": "Data.tenantId.keyword",
+                    "size:10000
                 }},
                 "aggs": {{
                     "region": {{
                     "terms": {{
-                        "field": "Data.landInfo.address.locality.name.keyword"
+                        "field": "Data.landInfo.address.locality.name.keyword",
+                        "size:10000
                     }},
                     "aggs": {{
                         "ocIssued": {{
@@ -161,17 +164,20 @@ obps_permitsIssued_by_riskType_occupancyType_subOccupancyType = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "byRiskType": {{
@@ -274,17 +280,20 @@ obps_averageDaysToIssuePermit = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "averageDaysToIssuePermit": {{
@@ -357,17 +366,20 @@ obps_averageDaysToIssueOC = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "averageDaysToIssueOC": {{
@@ -442,17 +454,20 @@ obps_slaCompliancePermit = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           },
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               },
               "aggs": {{
                 "slaCompliancePermit": {{
@@ -538,17 +553,20 @@ obps_slaComplianceOC = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           },
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               },
               "aggs": {{
                 "slaCompliancePermit": {{
@@ -629,17 +647,20 @@ obps_ocSubmitted = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "ocSubmitted": {{
@@ -706,17 +727,20 @@ obps_applicationsSubmitted = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "applicationSubmitted": {{
@@ -794,17 +818,20 @@ obps_landAreaAppliedInSystemForBPA = {
     "aggs": {{
       "ward": {{
         "terms": {{
-          "field": "Data.ward.name.keyword"
+          "field": "Data.ward.name.keyword",
+          "size":10000
         }},
         "aggs": {{
           "ulb":  {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
             }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.landInfo.address.locality.name.keyword"
+                  "field": "Data.landInfo.address.locality.name.keyword",
+                  "size":10000
                 }},
                 "aggs": {{
                   "landAreaAppliedInSystemForBPA": {{
@@ -880,17 +907,20 @@ obps_applicationsWithDeviation = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "applicationsWithDeviation": {{
@@ -952,17 +982,20 @@ obps_ocWithDeviation = {
   "aggs": {{
     "ward":  {{
       "terms":  {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs":  {{
         "ulb":  {{
           "terms":  {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs":  {{
             "region":  {{
               "terms":  {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "applicationsWithDeviation":  {{
@@ -1073,17 +1106,20 @@ obps_averageDeviation = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "deviation": {{
@@ -1162,17 +1198,20 @@ obps_todaysClosedApplicationsPermit = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysClosedApplicationsPermit": {{
@@ -1247,17 +1286,20 @@ obps_todaysClosedApplicationsOC = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysClosedApplicationsPermit": {{
@@ -1343,17 +1385,20 @@ obps_todaysCompletedApplicationsWithinSLAPermit = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLAOC": {{
@@ -1439,17 +1484,20 @@ obps_todaysCompletedApplicationsWithinSLAOC= {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword"
+                "field": "Data.landInfo.address.locality.name.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLAOC": {{
@@ -1534,17 +1582,20 @@ obps_todaysCollection_by_paymentMode = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "domainObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "paymentmode": {{
