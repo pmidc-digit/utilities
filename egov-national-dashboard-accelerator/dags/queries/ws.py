@@ -62,19 +62,19 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
             "ward": {{
               "terms": {{
                 "field": "block.keyword",
-                "size:10000
+                "size":10000
               }},
         "aggs": {{
             "ulb": {{
               "terms": {{
                 "field": "cityname.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "region": {{
                   "terms": {{
                     "field": "districtname.keyword",
-                    "size:10000
+                    "size":10000
                      }},
                    "aggs": {{
                       "byUsageType": {{
@@ -172,19 +172,19 @@ ws_collection_by_tax_head_connection_type = {
     "ward": {{
       "terms": {{
         "field": "block.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "cityname.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "districtname.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "LATE.CHARGES": {{
@@ -195,7 +195,7 @@ ws_collection_by_tax_head_connection_type = {
                   }},
                   "aggs": {{
                     "todaysCollection": {{
-                      "sum": }{{
+                      "sum": {{
                         "field": "penaltycollection"
                       }}
                     }}
@@ -418,19 +418,19 @@ ws_pending_connections = {'path': 'wsapplications/_search',
               "ward": {{
                 "terms": {{
                   "field": "block.keyword",
-                  "size:10000
+                  "size":10000
                 }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
                     "field": "cityname.keyword",
-                    "size:10000
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
                       "field": "districtname.keyword",
-                      "size:10000
+                      "size":10000
                     }},
                     "aggs": {{
         "0to3Days": {{
@@ -705,19 +705,19 @@ ws_water_connections = {'path': 'wsapplications/_search',
                 "ward": {{
                   "terms": {{
                     "field": "block.keyword",
-                    "size:10000
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
                     "field": "cityname.keyword",
-                    "size:10000
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
                       "field": "districtname.keyword",
-                      "size:10000
+                      "size":10000
                     }},
                     "aggs": {{
                       "waterConnectionsbyChannelType": {{
@@ -803,19 +803,19 @@ ws_todays_applications = {'path': 'wsapplications/_search',
             "ward": {{
               "terms": {{
                 "field": "block.keyword",
-                "size:10000
+                "size":10000
               }},
           "aggs": {{
             "ulb": {{
               "terms": {{
                 "field": "cityname.keyword",
-                "size:10000
+                "size":10000
               }},
             "aggs": {{
               "region": {{
                 "terms": {{
                   "field": "districtname.keyword",
-                  "size:10000
+                  "size":10000
                 }},
                 "aggs": {{
                   "todaysTotalApplications": {{
@@ -875,19 +875,19 @@ ws_closed_applications = {'path': 'wsapplications/_search',
                 "ward": {{
                   "terms": {{
                     "field": "block.keyword",
-                    "size:10000
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
                     "field": "cityname.keyword",
-                    "size:10000
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
                       "field": "districtname.keyword",
-                      "size:10000
+                      "size":10000
                     }},
                     "aggs": {{
                       "todaysClosedApplications": {{
@@ -973,19 +973,19 @@ ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
                 "ward": {{
                   "terms": {{
                     "field": "block.keyword",
-                    "size:10000
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
                     "field": "cityname.keyword",
-                    "size:10000
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
                       "field": "districtname.keyword",
-                      "size:10000
+                      "size":10000
                     }},
                     "aggs": {{
                       "meteredconnectionCreated": {{
@@ -1113,19 +1113,19 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
                 "ward": {{
                   "terms": {{
                     "field": "block.keyword",
-                    "size:10000
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
                     "field": "cityname.keyword",
-                    "size:10000
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
                       "field": "districtname.keyword",
-                      "size:10000
+                      "size":10000
                     }},
                     "aggs": {{
                       "channelType": {{
@@ -1208,19 +1208,19 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
         "ward": {{
           "terms": {{
             "field": "domainObject.ward.name.keyword",
-            "size:10000
+            "size":10000
           }},
                 "aggs": {{
         "ulb" :{{
           "terms": {{
             "field": "domainObject.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
       "aggs": {{
          "region": {{
             "terms": {{
               "field": "dataObject.tenantData.city.districtName.keyword",
-              "size:10000
+              "size":10000
             }},
             "aggs":{{
              "transactions": {{
@@ -1284,19 +1284,19 @@ ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
     "ward": {{
       "terms": {{
         "field": "block.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "cityname.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "districtname.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -1363,19 +1363,19 @@ ws_todays_sla_compliance = {'path': 'wsapplications/_search',
     "ward": {{
       "terms": {{
         "field": "block.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "cityname.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "districtname.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "TotalApplication": {{

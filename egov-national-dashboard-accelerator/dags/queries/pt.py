@@ -558,7 +558,7 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
             "terms": {{
               "field": "domainObject.ward.name.keyword",
               "size":10000
-            },
+            }},
             "aggs": {{
                 "ulb": {{
                   "terms": {{

@@ -101,19 +101,19 @@ firenoc_bundle_metrics = {
     "ward": {{
       "terms": {{
         "field": "Data.ward.code.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "Data.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -365,19 +365,19 @@ firenoc_issued_by_usage_type = {
     "ward": {{
       "terms": {{
         "field": "Data.ward.code.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "Data.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "usageType": {{
@@ -455,19 +455,19 @@ firenoc_issued_today_by_type = {
     "ward": {{
       "terms": {{
         "field": "Data.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "Data.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "type": {{
@@ -545,19 +545,19 @@ firenoc_applications_today_by_type = {
     "ward": {{
       "terms": {{
         "field": "Data.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "Data.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "applicationType": {{
@@ -633,19 +633,19 @@ firenoc_applications_closed = {
     "ward": {{
       "terms": {{
         "field": "Data.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "Data.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "todaysClosedApplications": {{
@@ -717,19 +717,19 @@ firenoc_applications_completed_within_sla = {
     "ward": {{
       "terms": {{
         "field": "Data.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "Data.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -836,19 +836,19 @@ firenoc_collections_by_department = {
     "ward": {{
       "terms": {{
         "field": "domainObject.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "domainObject.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "dataObject.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "paymentmode": {{

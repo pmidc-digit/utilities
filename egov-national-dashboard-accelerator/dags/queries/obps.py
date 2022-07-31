@@ -48,19 +48,19 @@ obps_ocIssued = {
             "ward": {{
             "terms": {{
                 "field": "Data.ward.name.keyword",
-                "size:10000
+                "size":10000
             }},
             "aggs": {{
                 "ulb": {{
                 "terms": {{
                     "field": "Data.tenantId.keyword",
-                    "size:10000
+                    "size":10000
                 }},
                 "aggs": {{
                     "region": {{
                     "terms": {{
                         "field": "Data.landInfo.address.locality.name.keyword",
-                        "size:10000
+                        "size":10000
                     }},
                     "aggs": {{
                         "ocIssued": {{

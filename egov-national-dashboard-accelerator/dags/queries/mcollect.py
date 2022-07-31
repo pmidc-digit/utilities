@@ -68,19 +68,19 @@ mcollect_total_by_categories = {
     "ward": {{
       "terms": {{
         "field": "domainObject.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "dataObject.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "dataObject.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "numberOfCategories": {{
@@ -197,19 +197,19 @@ mcollect_todays_collection = {
     "ward": {{
       "terms": {{
         "field": "domainObject.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "dataObject.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "dataObject.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "bypaymentMode": {{
@@ -359,19 +359,19 @@ mcollect_receipts = {
     "ward": {{
       "terms": {{
         "field": "domainObject.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "dataObject.tenantId.keyword",
-            "size:10000
+              "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "dataObject.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "byPaymentMode": {{
@@ -514,19 +514,19 @@ mcollect_challans = {
     "ward": {{
       "terms": {{
         "field": "domainObject.ward.name.keyword",
-        "size:10000
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "dataObject.tenantId.keyword",
-            "size:10000
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "dataObject.tenantData.city.districtName.keyword",
-                "size:10000
+                "size":10000
               }},
               "aggs": {{
                 "bychallanStatus": {{
