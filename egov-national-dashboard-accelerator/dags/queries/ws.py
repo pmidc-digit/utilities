@@ -572,28 +572,24 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
                   "aggs": {{
                     "sewerageConnectionsbyChannelType": {{
                       "terms": {{
-                        "field": "channel.keyword",
-                        "size": 1000
+                        "field": "channel.keyword"
                       }},
                       "aggs": {{
                         "sewerageConnectionsbyChannelType": {{
                           "value_count": {{
-                            "field": "applicationnumber.keyword",
-                            "size": 1000
+                            "field": "applicationnumber.keyword"
                           }}
                         }}
                       }}
                     }},
                     "sewerageConnectionsbyUsageType": {{
                       "terms": {{
-                        "field": "usage.keyword",
-                        "size": 1000
+                        "field": "usage.keyword"
                       }},
                     "aggs": {{
                         "sewerageConnectionsbyUsageType": {{
                           "value_count": {{
-                            "field": "applicationnumber.keyword",
-                            "size": 1000
+                            "field": "applicationnumber.keyword"
                           }}
                         }}
                       }}
