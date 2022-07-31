@@ -655,7 +655,7 @@ firenoc_applications_closed = {
 
 def extract_firenoc_applications_completed_within_sla(metrics, region_bucket):
   val = 0 if  region_bucket.get('todaysCompletedApplicationsWithinSLA').get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
-  metrics['todaysCompletedApplicationsWithinSLA'] = val if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
+  metrics['todaysCompletedApplicationsWithinSLA'] = val 
   return metrics
    
 firenoc_applications_completed_within_sla = {
