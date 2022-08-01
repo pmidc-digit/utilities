@@ -25,7 +25,7 @@ tl_license_issued_by_boundary = {'path': 'tlindex-v1-enriched/_search',
           "must": [
             {{
               "range": {{
-                "Data.tradelicense.@timestamp": {{
+                "Data.tradelicense.applicationDate": {{
                 "gte": {0},
                 "lte": {1},
                 "format": "epoch_millis"
@@ -60,12 +60,7 @@ tl_license_issued_by_boundary = {'path': 'tlindex-v1-enriched/_search',
                         "value_count": {{
                           "field": "Data.tradelicense.applicationNumber.keyword"
                           }}
-                      }},
-                     "todaysLicenseIssued": {{
-                            "value_count": {{
-                              "field": "Data.tradelicense.licenseNumber.keyword"
-                            }}
-                          }}
+                      }}
                         }}
                       }}
               	       }}
