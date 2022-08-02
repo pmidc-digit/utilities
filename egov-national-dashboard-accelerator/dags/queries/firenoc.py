@@ -858,7 +858,7 @@ firenoc_collections_by_department = {
                   "aggs": {{
                     "todaysCollection": {{
                       "sum": {{
-                        "field": "dataObject.paymentDetails.totalAmountPaid.keyword"
+                        "field": "dataObject.paymentDetails.totalAmountPaid"
                       }}
                       }}
                       }}
@@ -870,7 +870,7 @@ firenoc_collections_by_department = {
                   "aggs": {{
                     "todaysCollection": {{
                       "sum": {{
-                        "field": "dataObject.paymentDetails.totalAmountPaid.keyword"
+                        "field": "dataObject.paymentDetails.totalAmountPaid"
                       }}
                     }}
                   }}

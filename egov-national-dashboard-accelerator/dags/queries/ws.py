@@ -1044,25 +1044,18 @@ ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
 
 
 def extract_ws_connections_created_by_channel_type(metrics, region_bucket):
-  groupby_channel_type = []
+  groupby_channel = []
   collection = metrics.get('connectionsCreated') if metrics.get('connectionsCreated') else []
 
-  if region_bucket.get('meteredconnectionCreated'):
-    created_buckets = region_bucket.get('meteredconnectionCreated').get('meteredconnectionCreated')
-    if created_buckets:
-      groupby_channel_type.append({'name' : 'WATER.METERED', 'value' : created_buckets.get('value') if created_buckets else 0})
+  if region_bucket.get('channelType'):
+    channel_buckets = region_bucket.get('channelType').get('buckets')
+    for channel_bucket in channel_buckets:
+      channel = channel_bucket.get('key')
+      value = channel_bucket.get('channelType').get('doc_count') if channel_bucket.get('channelType') else 0
+      groupby_channel.append({ 'name' : channel, 'value' : value})
+
   
-  if region_bucket.get('sewerageconnectionCreated'):
-    created_buckets = region_bucket.get('sewerageconnectionCreated').get('sewerageconnectionCreated')
-    if created_buckets:
-      groupby_channel_type.append({'name' : 'SEWERAGE', 'value' : created_buckets.get('value') if created_buckets else 0})
-  
-  if region_bucket.get('non-meteredconnectionCreated'):
-    created_buckets = region_bucket.get('non-meteredconnectionCreated').get('non-meteredconnectionCreated')
-    if created_buckets:
-      groupby_channel_type.append({'name' : 'WATER.NONMETERED', 'value' : created_buckets.get('value') if created_buckets else 0})
-  
-  collection.append({ 'groupBy': 'connectionType', 'buckets' : groupby_channel_type})
+  collection.append({ 'groupBy': 'connectionType', 'buckets' : groupby_channel})
   metrics['connectionsCreated'] = collection
 
   return metrics
@@ -1086,7 +1079,8 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
               {{
                 "terms": {{
                   "servicetype.keyword": [
-                    "Water Charges"
+                    "Water Charges",
+                    "Sewerage Charges"
                   ]
                 }}
               }},
