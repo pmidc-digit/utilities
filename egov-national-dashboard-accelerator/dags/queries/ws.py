@@ -1051,7 +1051,7 @@ def extract_ws_connections_created_by_channel_type(metrics, region_bucket):
     channel_buckets = region_bucket.get('channelType').get('buckets')
     for channel_bucket in channel_buckets:
       channel = channel_bucket.get('key')
-      value = channel_bucket.get('channelType').get('doc_count') if channel_bucket.get('channelType') else 0
+      value = channel_bucket.get('count').get('value') if channel_bucket.get('count') else 0
       groupby_channel.append({ 'name' : channel, 'value' : value})
 
   
@@ -1124,8 +1124,16 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
                     "aggs": {{
                       "channelType": {{
                         "terms": {{
-                          "field": "channel.keyword"
+                          "field": "channel.keyword",
+                          "size":10000
+                        }},
+                      "aggs": {{
+                        "count": {{
+                          "value_count": {{
+                            "field": "applicationnumber.keyword"
+                          }}
                         }}
+                      }}
                     }}
     }}
     }}
