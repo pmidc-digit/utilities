@@ -301,18 +301,20 @@ def extract_ws_pending_connections(metrics, region_bucket):
   for duration_bucket in duration_buckets:
       grouped_by_MoreThan15['MoreThan15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
 
+  
+
   for dim in all_dims:
     if dim and dim.get('groupBy') == '0to3Days':
       buckets = dim.get('buckets')
       if buckets and len(buckets) > 0:
         for bucket in buckets:
-          if bucket.get('nvalueame') and grouped_by_0to3.get(bucket.get('name')):
+          if bucket.get('name') and grouped_by_0to3.get(bucket.get('name')):
             grouped_by_0to3[bucket.get('name')] = grouped_by_0to3[bucket.get(
                 'name')] + bucket.get('doc_count')
           else:
             grouped_by_0to3[bucket.get('name')] = bucket.get('doc_count')
 
-    if dim and dim.get('gro]upBy') == '3to7Days':
+    if dim and dim.get('groupBy') == '3to7Days':
       buckets = dim.get('buckets')
       if buckets and len(buckets) > 0:
         for bucket in buckets:
@@ -333,7 +335,7 @@ def extract_ws_pending_connections(metrics, region_bucket):
             grouped_by_7to15[bucket.get('name')] = bucket.get('doc_count')
     
 
-    if dim and dim.get('gro]upBy') == 'MoreThan15Days':
+    if dim and dim.get('groupBy') == 'MoreThan15Days':
       buckets = dim.get('buckets')
       if buckets and len(buckets) > 0:
         for bucket in buckets:
@@ -583,7 +585,7 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
                   }},
                   "aggs": {{
                     "sewerageConnectionsbyChannelType": {{
-                      "terms": {{
+                      "terms": {{91
                         "field": "channel.keyword"
                       }},
                       "aggs": {{
@@ -786,6 +788,13 @@ ws_todays_applications = {'path': 'wsapplications/_search',
     "size": 0,
     "query":{{
       "bool": {{
+        "must_not": [
+            {{
+              "term": {{
+                "applicationstatus.keyword": "Cancelled"
+              }}
+            }}
+          ],
         "must": [
           {{
              "range": {{

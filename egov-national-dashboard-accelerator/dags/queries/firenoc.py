@@ -100,7 +100,7 @@ firenoc_bundle_metrics = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.code.keyword",
+        "field": "Data.ward.name.keyword",
         "size":10000
       }},
       "aggs": {{
@@ -364,7 +364,7 @@ firenoc_issued_by_usage_type = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.code.keyword",
+        "field": "Data.ward.name.keyword",
         "size":10000
       }},
       "aggs": {{

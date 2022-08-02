@@ -700,7 +700,7 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
               "aggs": {{
                 "ward_buckets": {{
                   "terms": {{
-                    "field": "domainObject.ward.code.keyword",
+                    "field": "domainObject.ward.name.keyword",
                     "size":10000
                   }},
                 "aggs": {{
