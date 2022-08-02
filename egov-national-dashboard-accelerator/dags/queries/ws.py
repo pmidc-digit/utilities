@@ -526,7 +526,7 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
 
                      'query': """
 {{
-  "size": 20,
+  "size": 10,
     "query": {{
         "bool": {{
           "must_not": [
@@ -1055,7 +1055,7 @@ def extract_ws_connections_created_by_channel_type(metrics, region_bucket):
       groupby_channel.append({ 'name' : channel, 'value' : value})
 
   
-  collection.append({ 'groupBy': 'connectionType', 'buckets' : groupby_channel})
+  collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   metrics['connectionsCreated'] = collection
 
   return metrics
