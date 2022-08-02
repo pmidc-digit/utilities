@@ -585,7 +585,7 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
                   }},
                   "aggs": {{
                     "sewerageConnectionsbyChannelType": {{
-                      "terms": {{91
+                      "terms": {{
                         "field": "channel.keyword"
                       }},
                       "aggs": {{
