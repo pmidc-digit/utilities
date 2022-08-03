@@ -377,8 +377,6 @@ def extract_ws_pending_connections(metrics, region_bucket):
     metrics['pendingConnections'] = all_dims
     return metrics
   
-
-
 ws_pending_connections = {'path': 'wsapplications/_search',
                               'name': 'ws_pending_connections',
                               'lambda': extract_ws_pending_connections,
@@ -779,9 +777,9 @@ ws_water_connections = {'path': 'wsapplications/_search',
 
 
 def extract_ws_todays_applications(metrics, region_bucket):
-    val = 0 if region_bucket.get('todaysTotalApplications').get('value') == None else region_bucket.get('todaysTotalApplications').get('value')
-    metrics['todaysTotalApplications'] = val
-    return metrics
+    metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get(
+        'value') if region_bucket.get('todaysTotalApplications') else 0
+    return metrics    
 
 ws_todays_applications = {'path': 'wsapplications/_search',
                          'name': 'ws_todays_applications',
@@ -791,13 +789,6 @@ ws_todays_applications = {'path': 'wsapplications/_search',
     "size": 0,
     "query":{{
       "bool": {{
-        "must_not": [
-            {{
-              "term": {{
-                "applicationstatus.keyword": "Cancelled"
-              }}
-            }}
-          ],
         "must": [
           {{
              "range": {{
@@ -1259,7 +1250,6 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
 
 def extract_ws_todays_completed_applications_withinSLA(metrics, region_bucket):
     val = 0 if region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
-    metrics['todaysCompletedApplicationsWithinSLA'] = val
     metrics['todaysCompletedApplicationsWithinSLA'] = val
     return metrics
 
