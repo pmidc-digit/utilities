@@ -274,35 +274,37 @@ ws_collection_by_tax_head_connection_type = {
 
 def extract_ws_pending_connections(metrics, region_bucket):
   all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
-
+  logging.info("before consolidation-1")
   #get new metrics from region_bucket
   duration_agg = region_bucket.get('0to3Days')
   duration_buckets = duration_agg.get('buckets')
   grouped_by_0to3= {}
   for duration_bucket in duration_buckets:
       grouped_by_0to3['0to3Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+  logging.info("value -0t03 {0}".format(duration_bucket.get('doc_count')))
 
-  
   duration_agg = region_bucket.get('3to7Days')
   duration_buckets = duration_agg.get('buckets')
   grouped_by_3to7 = {}
   for duration_bucket in duration_buckets:
       grouped_by_3to7['3to7Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+  logging.info("value -3to7 {0}".format(duration_bucket.get('doc_count')))
 
   duration_agg = region_bucket.get('7to15Days')
   duration_buckets = duration_agg.get('buckets')
   grouped_by_7to15 = {}
   for duration_bucket in duration_buckets:
       grouped_by_7to15['7to15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+  logging.info("value -7to15 {0}".format(duration_bucket.get('doc_count')))
 
   duration_agg = region_bucket.get('MoreThan15Days')
   duration_buckets = duration_agg.get('buckets')
   grouped_by_MoreThan15 = {}
   for duration_bucket in duration_buckets:
       grouped_by_MoreThan15['MoreThan15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
-
+  logging.info("value -morethan15 {0}".format(duration_bucket.get('doc_count')))
   
-
+  logging.info("before consolidation -2")
   for dim in all_dims:
     if dim and dim.get('groupBy') == '0to3Days':
       buckets = dim.get('buckets')
@@ -345,7 +347,7 @@ def extract_ws_pending_connections(metrics, region_bucket):
           else:
             grouped_by_MoreThan15[bucket.get('name')] = bucket.get('doc_count')
 
-
+    logging.info("before consolidation-3")
     all_dims = []
     buckets = []
     for k in grouped_by_0to3.keys():
