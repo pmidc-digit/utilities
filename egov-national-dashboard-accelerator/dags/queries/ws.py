@@ -349,26 +349,30 @@ def extract_ws_pending_connections(metrics, region_bucket):
     all_dims = []
     buckets = []
     for k in grouped_by_0to3.keys():
+      logging.info(grouped_by_0to3[k])
       buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
 
-    all_dims.append({ 'groupBy' : '0to3Days', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
     buckets = []
     for k in grouped_by_3to7.keys():
+      logging.info(grouped_by_3to7[k])
       buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
-    all_dims.append({ 'groupBy' : '3to7Days', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
     buckets = []
     for k in grouped_by_7to15.keys():
+      logging.info(grouped_by_7to15[k])
       buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
   
-    all_dims.append({ 'groupBy' : '7to15Days', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
       
     buckets = []
     for k in grouped_by_MoreThan15.keys():
+      logging.info(grouped_by_[k])
       buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
   
-    all_dims.append({ 'groupBy' : 'MoreThan15Days', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
     metrics['pendingConnections'] = all_dims
     return metrics
