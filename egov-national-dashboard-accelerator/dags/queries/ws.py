@@ -273,36 +273,36 @@ ws_collection_by_tax_head_connection_type = {
 
 
 def extract_ws_pending_connections(metrics, region_bucket):
-  all_dims = []
+
   all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
   logging.info("before consolidation-1")
   #get new metrics from region_bucket
   duration_agg = region_bucket.get('0to3Days')
   duration_buckets = duration_agg.get('buckets')
-  grouped_by_0to3= {}
+  grouped_by_0to3= []
   for duration_bucket in duration_buckets:
-      grouped_by_0to3['0to3Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+      grouped_by_0to3.append({ 'name' : "0to3Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0})
   logging.info("value -0t03 {0}".format(duration_bucket.get('doc_count')))
 
   duration_agg = region_bucket.get('3to7Days')
   duration_buckets = duration_agg.get('buckets')
-  grouped_by_3to7 = {}
+  grouped_by_3to7 = []
   for duration_bucket in duration_buckets:
-      grouped_by_3to7['3to7Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+      grouped_by_3to7.append({ 'name' : "3to7Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0}) 
   logging.info("value -3to7 {0}".format(duration_bucket.get('doc_count')))
 
   duration_agg = region_bucket.get('7to15Days')
   duration_buckets = duration_agg.get('buckets')
-  grouped_by_7to15 = {}
+  grouped_by_7to15 = []
   for duration_bucket in duration_buckets:
-      grouped_by_7to15['7to15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+         grouped_by_7to15.append({ 'name' : "7to15Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0})
   logging.info("value -7to15 {0}".format(duration_bucket.get('doc_count')))
 
   duration_agg = region_bucket.get('MoreThan15Days')
   duration_buckets = duration_agg.get('buckets')
-  grouped_by_MoreThan15 = {}
+  grouped_by_MoreThan15 = []
   for duration_bucket in duration_buckets:
-      grouped_by_MoreThan15['MoreThan15Days'] = duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0
+         grouped_by_MoreThan15.append({ 'name' : "MoreThan15Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0}) 
   logging.info("value -morethan15 {0}".format(duration_bucket.get('doc_count')))
   
   logging.info("before consolidation -2")
@@ -329,7 +329,7 @@ def extract_ws_pending_connections(metrics, region_bucket):
   #     buckets = dim.get('buckets')
   #     if buckets and len(buckets) > 0:
   #       for bucket in buckets:
-  #         if bucket.get('name') and grouped_by_3to7.get(bucket.get('name')):
+  #         if bucket.get('name') and gouped_by_3to7.get(bucket.get('name')):
   #           grouped_by_3to7[bucket.get('name')] = grouped_by_3to7[bucket.get(
   #               'name')] + bucket.get('doc_count')
   #         else:
