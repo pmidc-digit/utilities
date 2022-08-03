@@ -803,17 +803,10 @@ ws_todays_applications = {'path': 'wsapplications/_search',
     "size": 0,
     "query":{{
       "bool": {{
-        "must_not": [
-            {{
-              "term": {{
-                "applicationstatus.keyword": "Cancelled"
-              }}
-            }}
-          ],
         "must": [
           {{
              "range": {{
-                "createddate": {{
+                "applicationdate": {{
                 "gte": {0},
                 "lte": {1},
                 "format": "epoch_millis"
