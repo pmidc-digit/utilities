@@ -777,8 +777,11 @@ ws_water_connections = {'path': 'wsapplications/_search',
 
 
 def extract_ws_todays_applications(metrics, region_bucket):
-    metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get('value') if region_bucket.get('todaysTotalApplications') else 0
-    return metrics    
+  if (metrics['todaysTotalApplications']) == None:
+    logging("None")
+    metrics['todaysTotalApplications'] = []
+  metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get('value') if region_bucket.get('todaysTotalApplications') else 0
+  return metrics    
 
 ws_todays_applications = {'path': 'wsapplications/_search',
                          'name': 'ws_todays_applications',
