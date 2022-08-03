@@ -777,20 +777,27 @@ ws_water_connections = {'path': 'wsapplications/_search',
                             }
 
 
+
 def extract_ws_todays_applications(metrics, region_bucket):
     metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get(
         'value') if region_bucket.get('todaysTotalApplications') else 0
     return metrics
-
+    
 ws_todays_applications = {'path': 'wsapplications/_search',
                          'name': 'ws_todays_applications',
                          'lambda': extract_ws_todays_applications,
                          'query': """
-
  {{
     "size": 0,
     "query":{{
       "bool": {{
+        "must_not": [
+            {{
+              "term": {{
+                "applicationstatus.keyword": "Cancelled"
+              }}
+            }}
+          ],
         "must": [
           {{
              "range": {{
@@ -836,8 +843,6 @@ ws_todays_applications = {'path': 'wsapplications/_search',
                 }}
                 }}
                 }}
-
-
 """
                          }
 
