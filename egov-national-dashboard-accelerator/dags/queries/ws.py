@@ -349,23 +349,27 @@ def extract_ws_pending_connections(metrics, region_bucket):
     all_dims = []
     buckets = []
     for k in grouped_by_0to3.keys():
+      logging.info(grouped_by_0to3[k])
       buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
 
     all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
     buckets = []
     for k in grouped_by_3to7.keys():
+      logging.info(grouped_by_3to7[k])
       buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
     all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
     buckets = []
     for k in grouped_by_7to15.keys():
+      logging.info(grouped_by_7to15[k])
       buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
   
     all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
       
     buckets = []
     for k in grouped_by_MoreThan15.keys():
+      logging.info(grouped_by_MoreThan15[k])
       buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
   
     all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
@@ -373,8 +377,7 @@ def extract_ws_pending_connections(metrics, region_bucket):
     metrics['pendingConnections'] = all_dims
     return metrics
   
-  
-  return metrics
+
 
 ws_pending_connections = {'path': 'wsapplications/_search',
                               'name': 'ws_pending_connections',
@@ -531,6 +534,13 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
   "size": 10,
     "query": {{
         "bool": {{
+          "must_not": [
+            {{
+              "term": {{
+                "applicationstatus.keyword": "Cancelled"
+              }}
+            }}
+          ],
           "must": [
             {{
               "terms": {{
@@ -781,17 +791,10 @@ ws_todays_applications = {'path': 'wsapplications/_search',
     "size": 0,
     "query":{{
       "bool": {{
-        "must_not": [
-            {{
-              "term": {{
-                "applicationstatus.keyword": "Cancelled"
-              }}
-            }}
-          ],
         "must": [
           {{
              "range": {{
-                "createddate": {{
+                "applicationdate": {{
                 "gte": {0},
                 "lte": {1},
                 "format": "epoch_millis"
