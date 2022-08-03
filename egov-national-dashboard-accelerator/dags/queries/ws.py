@@ -273,6 +273,7 @@ ws_collection_by_tax_head_connection_type = {
 
 
 def extract_ws_pending_connections(metrics, region_bucket):
+  all_dims = []
   all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
   logging.info("before consolidation-1")
   #get new metrics from region_bucket
@@ -305,82 +306,90 @@ def extract_ws_pending_connections(metrics, region_bucket):
   logging.info("value -morethan15 {0}".format(duration_bucket.get('doc_count')))
   
   logging.info("before consolidation -2")
-  for dim in all_dims:
-    if dim and dim.get('groupBy') == '0to3Days':
-      buckets = dim.get('buckets')
-      if buckets and len(buckets) > 0:
-        for bucket in buckets:
-          if bucket.get('name') and grouped_by_0to3.get(bucket.get('name')):
-            grouped_by_0to3[bucket.get('name')] = grouped_by_0to3[bucket.get(
-                'name')] + bucket.get('doc_count')
-          else:
-            grouped_by_0to3[bucket.get('name')] = bucket.get('doc_count')
 
-    if dim and dim.get('groupBy') == '3to7Days':
-      buckets = dim.get('buckets')
-      if buckets and len(buckets) > 0:
-        for bucket in buckets:
-          if bucket.get('name') and grouped_by_3to7.get(bucket.get('name')):
-            grouped_by_3to7[bucket.get('name')] = grouped_by_3to7[bucket.get(
-                'name')] + bucket.get('doc_count')
-          else:
-            grouped_by_3to7[bucket.get('name')] = bucket.get('doc_count')
+  all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_0to3}) 
+  all_dims.append({ 'groupBy': 'duratio', 'buckets' : grouped_by_3to7})
+  all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_7to15}) 
+  all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_MoreThan15})
+  metrics['todaysCollection'] = all_dims
+  logging.info("before consolidation -4")
+  return metrics
+  # for dim in all_dims:
+  #   if dim and dim.get('groupBy') == '0to3Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_0to3.get(bucket.get('name')):
+  #           grouped_by_0to3[bucket.get('name')] = grouped_by_0to3[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_0to3[bucket.get('name')] = bucket.get('doc_count')
 
-    if dim and dim.get('groupBy') == '7to15Days':
-      buckets = dim.get('buckets')
-      if buckets and len(buckets) > 0:
-        for bucket in buckets:
-          if bucket.get('name') and grouped_by_7to15.get(bucket.get('name')):
-            grouped_by_7to15[bucket.get('name')] = grouped_by_7to15[bucket.get(
-                'name')] + bucket.get('doc_count')
-          else:
-            grouped_by_7to15[bucket.get('name')] = bucket.get('doc_count')
+  #   if dim and dim.get('groupBy') == '3to7Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_3to7.get(bucket.get('name')):
+  #           grouped_by_3to7[bucket.get('name')] = grouped_by_3to7[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_3to7[bucket.get('name')] = bucket.get('doc_count')
+
+  #   if dim and dim.get('groupBy') == '7to15Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_7to15.get(bucket.get('name')):
+  #           grouped_by_7to15[bucket.get('name')] = grouped_by_7to15[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_7to15[bucket.get('name')] = bucket.get('doc_count')
     
 
-    if dim and dim.get('groupBy') == 'MoreThan15Days':
-      buckets = dim.get('buckets')
-      if buckets and len(buckets) > 0:
-        for bucket in buckets:
-          if bucket.get('name') and grouped_by_MoreThan15.get(bucket.get('name')):
-            grouped_by_MoreThan15[bucket.get('name')] = grouped_by_MoreThan15[bucket.get(
-                'name')] + bucket.get('doc_count')
-          else:
-            grouped_by_MoreThan15[bucket.get('name')] = bucket.get('doc_count')
+  #   if dim and dim.get('groupBy') == 'MoreThan15Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_MoreThan15.get(bucket.get('name')):
+  #           grouped_by_MoreThan15[bucket.get('name')] = grouped_by_MoreThan15[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_MoreThan15[bucket.get('name')] = bucket.get('doc_count')
 
-    logging.info("before consolidation-3")
-    all_dims = []
-    buckets = []
-    for k in grouped_by_0to3.keys():
-      logging.info(grouped_by_0to3[k])
-      buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
+  #   logging.info("before consolidation-3")
+  #   all_dims = []
+  #   buckets = []
+  #   for k in grouped_by_0to3.keys():
+  #     logging.info(grouped_by_0to3[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
 
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
-    buckets = []
-    for k in grouped_by_3to7.keys():
-      logging.info(grouped_by_3to7[k])
-      buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+  #   buckets = []
+  #   for k in grouped_by_3to7.keys():
+  #     logging.info(grouped_by_3to7[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
-    buckets = []
-    for k in grouped_by_7to15.keys():
-      logging.info(grouped_by_7to15[k])
-      buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
+  #   buckets = []
+  #   for k in grouped_by_7to15.keys():
+  #     logging.info(grouped_by_7to15[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
   
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
       
-    buckets = []
-    for k in grouped_by_MoreThan15.keys():
-      logging.info(grouped_by_[k])
-      buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
+  #   buckets = []
+  #   for k in grouped_by_MoreThan15.keys():
+  #     logging.info(grouped_by_MoreThan15[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
   
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
 
-    metrics['pendingConnections'] = all_dims
-    return metrics
+  #   metrics['pendingConnections'] = all_dims
+  #   return metrics
   
   
-  return metrics
+  # return metrics
 
 ws_pending_connections = {'path': 'wsapplications/_search',
                               'name': 'ws_pending_connections',
