@@ -308,7 +308,7 @@ def extract_ws_pending_connections(metrics, region_bucket):
   logging.info("before consolidation -2")
 
   all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_0to3}) 
-  all_dims.append({ 'groupBy': 'duratio', 'buckets' : grouped_by_3to7})
+  all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_3to7})
   all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_7to15}) 
   all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_MoreThan15})
   metrics['pendingConnections'] = all_dims
