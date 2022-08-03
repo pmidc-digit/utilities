@@ -349,34 +349,33 @@ def extract_ws_pending_connections(metrics, region_bucket):
     all_dims = []
     buckets = []
     for k in grouped_by_0to3.keys():
-      logging.info(grouped_by_0to3[k])
       buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
 
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : '0to3Days', 'buckets' : buckets}) 
 
     buckets = []
     for k in grouped_by_3to7.keys():
-      logging.info(grouped_by_3to7[k])
       buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : '3to7Days', 'buckets' : buckets}) 
 
     buckets = []
     for k in grouped_by_7to15.keys():
-      logging.info(grouped_by_7to15[k])
       buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
   
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : '7to15Days', 'buckets' : buckets}) 
       
     buckets = []
     for k in grouped_by_MoreThan15.keys():
-      logging.info(grouped_by_MoreThan15[k])
       buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
   
-    all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+    all_dims.append({ 'groupBy' : 'MoreThan15Days', 'buckets' : buckets}) 
 
     metrics['pendingConnections'] = all_dims
     return metrics
   
+  
+  return metrics
+
 ws_pending_connections = {'path': 'wsapplications/_search',
                               'name': 'ws_pending_connections',
                               'lambda': extract_ws_pending_connections,
@@ -779,14 +778,23 @@ def extract_ws_todays_applications(metrics, region_bucket):
     metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get(
         'value') if region_bucket.get('todaysTotalApplications') else 0
     return metrics
+
 ws_todays_applications = {'path': 'wsapplications/_search',
                          'name': 'ws_todays_applications',
                          'lambda': extract_ws_todays_applications,
                          'query': """
+
  {{
     "size": 0,
     "query":{{
       "bool": {{
+        "must_not": [
+            {{
+              "term": {{
+                "applicationstatus.keyword": "Cancelled"
+              }}
+            }}
+          ],
         "must": [
           {{
              "range": {{
@@ -803,17 +811,20 @@ ws_todays_applications = {'path': 'wsapplications/_search',
         "aggs": {{
             "ward": {{
               "terms": {{
-                "field": "block.keyword"
+                "field": "block.keyword",
+                "size":10000
               }},
           "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "cityname.keyword"
+                "field": "cityname.keyword",
+                "size":10000
               }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "regionname.keyword"
+                  "field": "districtname.keyword",
+                  "size":10000
                 }},
                 "aggs": {{
                   "todaysTotalApplications": {{
@@ -829,12 +840,10 @@ ws_todays_applications = {'path': 'wsapplications/_search',
                 }}
                 }}
                 }}
+
+
 """
                          }
-
-  
-
-
 
 
 def extract_ws_closed_applications(metrics, region_bucket):
@@ -1250,6 +1259,7 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
 def extract_ws_todays_completed_applications_withinSLA(metrics, region_bucket):
     val = 0 if region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
     metrics['todaysCompletedApplicationsWithinSLA'] = val
+    metrics['todaysCompletedApplicationsWithinSLA'] = val
     return metrics
 
 ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
@@ -1471,3 +1481,4 @@ def empty_ws_payload(region, ulb, ward, date):
         }
     }
 
+    
