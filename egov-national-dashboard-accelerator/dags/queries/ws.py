@@ -775,14 +775,10 @@ ws_water_connections = {'path': 'wsapplications/_search',
                             }
 
 
-
 def extract_ws_todays_applications(metrics, region_bucket):
-  if (metrics['todaysTotalApplications']) == None:
-    logging("None")
-    metrics['todaysTotalApplications'] = []
-  metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get('value') if region_bucket.get('todaysTotalApplications') else 0
-  return metrics    
-
+    metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get(
+        'value') if region_bucket.get('todaysTotalApplications') else 0
+    return metrics
 ws_todays_applications = {'path': 'wsapplications/_search',
                          'name': 'ws_todays_applications',
                          'lambda': extract_ws_todays_applications,
@@ -807,20 +803,17 @@ ws_todays_applications = {'path': 'wsapplications/_search',
         "aggs": {{
             "ward": {{
               "terms": {{
-                "field": "block.keyword",
-                "size":10000
+                "field": "block.keyword"
               }},
           "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "cityname.keyword",
-                "size":10000
+                "field": "cityname.keyword"
               }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "districtname.keyword",
-                  "size":10000
+                  "field": "regionname.keyword"
                 }},
                 "aggs": {{
                   "todaysTotalApplications": {{
@@ -838,6 +831,10 @@ ws_todays_applications = {'path': 'wsapplications/_search',
                 }}
 """
                          }
+
+  
+
+
 
 
 def extract_ws_closed_applications(metrics, region_bucket):
