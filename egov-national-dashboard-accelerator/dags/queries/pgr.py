@@ -278,7 +278,7 @@ def extract_pgr_sla_achieved(metrics, region_bucket):
   for department_bucket in department_buckets:
     department_name = department_bucket.get('key')
     value = 0
-    value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value')
+    value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('slaAchievement').get('value')
     slaAchievement['buckets'].append( { 'name' : department_name, 'value' :value})
    
   metrics['slaAchievement'] = [slaAchievement]
