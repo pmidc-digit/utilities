@@ -205,7 +205,6 @@ def extract_pgr_unique_citizens(metrics, region_bucket):
 
 pgr_unique_citizens = {
     'path': 'pgrindex-v1-enriched/_search',
-
     'name': 'pgr_unique_citizens',
     'lambda': extract_pgr_unique_citizens,
     'query': """
@@ -279,12 +278,9 @@ def extract_pgr_sla_achieved(metrics, region_bucket):
   for department_bucket in department_buckets:
     department_name = department_bucket.get('key')
     value = 0
-    sla_agg = department_bucket.get('slaAchievement')
-    if sla_agg:
-      sla_buckets = sla_agg.get('buckets')
-      for sla_bucket in sla_buckets:
-         value = sla_bucket.get('slaAchievement').get(
-                              'value') if sla_bucket.get('slaAchievement')  else 0
+    sla_agg = department_bucket.get('all_matching_doc').get('buckets').get('all')
+    logging.info(sla_agg.get('completionRate').get('value'))
+    value = sla_agg.get('slaAchievement').get('value') if sla_agg.get('slaAchievement')  else 0
 
     slaAchievement['buckets'].append( { 'name' : department_name, 'value' :value})
    
@@ -320,6 +316,14 @@ pgr_sla_achieved = {
               "format": "epoch_millis"
             }}
           }}
+        }},
+        {{
+          "range": {{
+            "Data.slaHours": {{
+              "gte": 0,
+              "lte": 360
+            }}
+          }}
         }}
       ]
     }}
@@ -327,20 +331,17 @@ pgr_sla_achieved = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword",
-        "size":10000
+        "field": "Data.complaintWard.name.keyword"
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
+            "field": "Data.tenantId.keyword"
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword",
-                "size":10000
+                "field": "Data.tenantData.city.districtName.keyword"
               }},
               "aggs": {{
                 "department": {{
@@ -348,20 +349,32 @@ pgr_sla_achieved = {
                     "field": "Data.department.keyword"
                   }},
                   "aggs": {{
-                    "slaAchievement": {{
-                      "range": {{
-                        "field": "Data.slaHours",
-                        "ranges": [
-                          {{
-                            "from": 0,
-                            "to": 360
+                    "all_matching_docs": {{
+                      "filters": {{
+                        "filters": {{
+                          "all": {{
+                            "match_all": {{   }}
                           }}
-                        ]
+                        }}
                       }},
                       "aggs": {{
-                        "slaAchievement": {{
+                        "totalComplaints": {{
+                          "value_count": {{
+                            "field": "Data.dateOfComplaint"
+                          }}
+                        }},
+                        "slaAchieved": {{
                           "value_count": {{
                             "field": "Data.slaHours"
+                          }}
+                        }},
+                        "slaAchievement": {{
+                          "bucket_script": {{
+                            "buckets_path": {{
+                              "closed": "slaAchieved",
+                              "total": "totalComplaints"
+                            }},
+                            "script": "params.closed / params.total * 100"
                           }}
                         }}
                       }}
@@ -384,10 +397,22 @@ pgr_sla_achieved = {
 
 
 def extract_pgr_completion_rate(metrics, region_bucket):
-    if region_bucket.get('all_matching_docs') and region_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate'):
-      metrics['completionRate']  = region_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') if region_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') else 0
+
+  department_agg = region_bucket.get('department')
+  department_buckets = department_agg.get('buckets')
+  completionRate = { 'groupBy' : 'department', 'buckets' : []}
    
-    return metrics
+  for department_bucket in department_buckets:
+    department_name = department_bucket.get('key')
+    value = 0
+    sla_agg = department_bucket.get('all_matching_doc').get('buckets').get('all')
+    logging.info(sla_agg.get('completionRate').get('value'))
+    value = sla_agg.get('completionRate').get('value') if sla_agg.get('completionRate')  else 0
+
+    completionRate['buckets'].append( { 'name' : department_name, 'value' :value})
+
+  metrics['completionRate'] = [completionRate]
+  return metrics
 
 pgr_completion_rate = {
     'path': 'pgrindex-v1-enriched/_search',
@@ -623,7 +648,7 @@ pgr_todays_complaints = {
                     "field": "Data.department.keyword"
                   }},
                     "aggs": {{
-                      "byDept": {{
+                      "byDepartment": {{
                         "value_count": {{
                           "field": "Data.dateOfComplaint"
                         }}
@@ -879,7 +904,7 @@ pgr_avg_solution_time = {
 
     'name': 'pgr_avg_solution_time',
     'lambda': extract_pgr_avg_solution_time,
-    'query': """
+    'query': """ "slaAchievement": 25,
    {{
     "size":0,
     "query": {{
