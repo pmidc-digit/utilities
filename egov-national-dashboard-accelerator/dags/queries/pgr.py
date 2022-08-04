@@ -48,7 +48,8 @@ pgr_closed_complaints = {
               "terms": {{
                 "Data.status.keyword": [
                     "closed",
-                    "rejected"
+                    "rejected",
+                    "resolved"
                 ]
               }}
             }}
@@ -225,7 +226,7 @@ pgr_unique_citizens = {
         "must":[
             {{
                "range": {{
-                    "Data.dateOfComplaint": {{
+                    "Data.@timestamp": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
@@ -387,22 +388,10 @@ pgr_sla_achieved = {
 
 
 def extract_pgr_completion_rate(metrics, region_bucket):
-  department_agg = region_bucket.get('department')
-  department_buckets = department_agg.get('buckets')
-  completionRate = { 'groupBy' : 'department', 'buckets' : []}
+    if region_bucket.get('all_matching_docs') and region_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate'):
+      metrics['completionRate']  = region_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') if region_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') else 0
    
-
-  for department_bucket in department_buckets:
-    department_name = department_bucket.get('key')
-    value = 0
-    if department_bucket.get('all_matching_docs') and department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate'):
-      value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') if department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') else 0
-    completionRate['buckets'].append( { 'name' : department_name, 'value' : value})
-   
-    metrics['completionRate'] = [completionRate]
-    
-
-  return metrics
+    return metrics
 
 
 pgr_completion_rate = {
@@ -453,11 +442,6 @@ pgr_completion_rate = {
                 "field": "Data.tenantData.city.districtName.keyword",
                 "size":10000
               }},
-              "aggs": {{
-                "department": {{
-                  "terms": {{
-                    "field": "Data.department.keyword"
-                  }},
                   "aggs": {{
                     "all_matching_docs": {{
                       "filters": {{
@@ -510,8 +494,6 @@ pgr_completion_rate = {
         }}
       }}
     }}
-  }}
-}}
 
 
 
