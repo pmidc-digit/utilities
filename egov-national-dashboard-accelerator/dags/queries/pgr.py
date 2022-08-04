@@ -16,7 +16,6 @@ def extract_pgr_closed_complaints(metrics, region_bucket):
 
   return metrics
    
-
 pgr_closed_complaints = {
   'path': 'pgrindex-v1-enriched/_search',
     'name': 'pgr_closed_complaints',
@@ -116,7 +115,6 @@ def extract_pgr_resolved_complaints(metrics, region_bucket):
 
   return metrics
 
-
 pgr_resolved_complaints = {
     'path': 'pgrindex-v1-enriched/_search',
     'name': 'pgr_resolved_complaints',
@@ -205,7 +203,6 @@ def extract_pgr_unique_citizens(metrics, region_bucket):
         'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
     return metrics
 
-
 pgr_unique_citizens = {
     'path': 'pgrindex-v1-enriched/_search',
 
@@ -226,7 +223,7 @@ pgr_unique_citizens = {
         "must":[
             {{
                "range": {{
-                    "Data.@timestamp": {{
+                    "Data.dateOfComplaint": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
@@ -295,7 +292,6 @@ def extract_pgr_sla_achieved(metrics, region_bucket):
     
 
   return metrics
-
 
 
 pgr_sla_achieved = {
@@ -393,7 +389,6 @@ def extract_pgr_completion_rate(metrics, region_bucket):
    
     return metrics
 
-
 pgr_completion_rate = {
     'path': 'pgrindex-v1-enriched/_search',
 
@@ -442,6 +437,12 @@ pgr_completion_rate = {
                 "field": "Data.tenantData.city.districtName.keyword",
                 "size":10000
               }},
+            "aggs": {{
+                "department": {{
+                  "terms": {{
+                    "field": "Data.department.keyword",
+                    "size":10000
+                  }},
                   "aggs": {{
                     "all_matching_docs": {{
                       "filters": {{
@@ -494,6 +495,8 @@ pgr_completion_rate = {
         }}
       }}
     }}
+  }}
+}}
 
 
 
@@ -686,7 +689,6 @@ def extract_pgr_status(metrics, region_bucket):
 
     return metrics
 
-
 pgr_status = {
   
   'path': 'pgrindex-v1-enriched/_search',
@@ -854,6 +856,7 @@ pgr_status = {
 
     """
 }
+
 
 def extract_pgr_avg_solution_time(metrics, region_bucket):
     department_agg = region_bucket.get('department')
