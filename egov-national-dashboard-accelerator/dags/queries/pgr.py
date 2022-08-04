@@ -904,7 +904,7 @@ pgr_avg_solution_time = {
 
     'name': 'pgr_avg_solution_time',
     'lambda': extract_pgr_avg_solution_time,
-    'query': """ "slaAchievement": 25,
+    'query': """
    {{
     "size":0,
     "query": {{
@@ -976,7 +976,7 @@ pgr_avg_solution_time = {
     """
 }
 
-pgr_queries = [pgr_closed_complaints, pgr_resolved_complaints, pgr_unique_citizens, pgr_sla_achieved, pgr_completion_rate, pgr_todays_complaints, pgr_status]
+pgr_queries = [pgr_closed_complaints, pgr_resolved_complaints, pgr_unique_citizens, pgr_sla_achieved, pgr_completion_rate, pgr_todays_complaints, pgr_status, pgr_avg_solution_time]
 
 
 def empty_pgr_payload(region, ulb, ward, date):
