@@ -1167,15 +1167,10 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
 
 
 def extract_ws_total_transactions(metrics, region_bucket):
-    status_agg = region_bucket.get('applicationsMovedToday')
-    status_buckets = status_agg.get('buckets')
-    grouped_by = []
-    for status_bucket in status_buckets:
-        grouped_by.append({'name': status_bucket.get('key'), 'value': status_bucket.get(
-            'applicationsMovedToday').get('value') if status_bucket.get('applicationsMovedToday') else 0})
-    metrics['applicationsMovedToday'] = [
-        {'groupBy': 'status', 'buckets': grouped_by}]
-    return metrics
+     metrics['transactions'] = region_bucket.get('transactions').get(
+        'value') if region_bucket.get('transactions') else 0
+     return metrics
+
 
 ws_total_transactions = {'path': 'dss-collection_v2/_search',
                          'name': 'ws_total_transactions',
