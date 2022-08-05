@@ -791,12 +791,7 @@ pt_properties_registered_by_year = {'path': 'property-assessments/_search',
             }}
           }}
         }}
-      ],
-      "filter": {{
-        "exists": {{
-          "field": "Data.ward"
-        }}
-      }}
+      ]
     }}
   }},
   "aggs": {{
@@ -845,8 +840,8 @@ pt_properties_registered_by_year = {'path': 'property-assessments/_search',
 
 
 def extract_pt_properties_assessments(metrics, region_bucket):
-  metrics['assessments'] = region_bucket.get('assessments').get(
-        'value') if region_bucket.get('assessments') else 0
+  metrics['assessments'] = region_bucket.get('assesments').get(
+        'value') if region_bucket.get('assesments') else 0
   return metrics
   
 pt_properties_assessments = {'path': 'property-assessments/_search',
@@ -876,12 +871,7 @@ pt_properties_assessments = {'path': 'property-assessments/_search',
             }}
           }}
         }}
-      ],
-      "filter": {{
-        "exists": {{
-          "field": "Data.ward"
-        }}
-      }}
+      ]
     }}
   }},
   "aggs": {{
