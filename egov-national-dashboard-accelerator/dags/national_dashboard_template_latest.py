@@ -376,26 +376,26 @@ load_ws = PythonOperator(
 #     dag=dag)
 
 
-extract_pt = PythonOperator(
-    task_id='elastic_search_extract_pt',
-    python_callable=dump_kibana,
-    provide_context=True,
-    do_xcom_push=True,
-    op_kwargs={ 'module' : 'PT'},
-    dag=dag)
+# extract_pt = PythonOperator(
+#     task_id='elastic_search_extract_pt',
+#     python_callable=dump_kibana,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     op_kwargs={ 'module' : 'PT'},
+#     dag=dag)
 
-transform_pt = PythonOperator(
-    task_id='nudb_transform_pt',
-    python_callable=transform,
-    provide_context=True,
-    dag=dag)
+# transform_pt = PythonOperator(
+#     task_id='nudb_transform_pt',
+#     python_callable=transform,
+#     provide_context=True,
+#     dag=dag)
 
-load_pt = PythonOperator(
-    task_id='nudb_ingest_load_pt',
-    python_callable=load,
-    provide_context=True,
-    op_kwargs={ 'module' : 'PT'},
-    dag=dag)
+# load_pt = PythonOperator(
+#     task_id='nudb_ingest_load_pt',
+#     python_callable=load,
+#     provide_context=True,
+#     op_kwargs={ 'module' : 'PT'},
+#     dag=dag)
 
 extract_firenoc = PythonOperator(
     task_id='elastic_search_extract_firenoc',
@@ -419,26 +419,26 @@ load_firenoc = PythonOperator(
     dag=dag)
 
 
-extract_mcollect = PythonOperator(
-    task_id='elastic_search_extract_mcollect',
-    python_callable=dump_kibana,
-    provide_context=True,
-    do_xcom_push=True,
-    op_kwargs={ 'module' : 'MCOLLECT'},
-    dag=dag)
+# extract_mcollect = PythonOperator(
+#     task_id='elastic_search_extract_mcollect',
+#     python_callable=dump_kibana,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     op_kwargs={ 'module' : 'MCOLLECT'},
+#     dag=dag)
 
-transform_mcollect = PythonOperator(
-    task_id='nudb_transform_mcollect',
-    python_callable=transform,
-    provide_context=True,
-    dag=dag)
+# transform_mcollect = PythonOperator(
+#     task_id='nudb_transform_mcollect',
+#     python_callable=transform,
+#     provide_context=True,
+#     dag=dag)
 
-load_mcollect = PythonOperator(
-    task_id='nudb_ingest_load_mcollect',
-    python_callable=load,
-    provide_context=True,
-    op_kwargs={ 'module' : 'MCOLLECT'},
-    dag=dag)
+# load_mcollect = PythonOperator(
+#     task_id='nudb_ingest_load_mcollect',
+#     python_callable=load,
+#     provide_context=True,
+#     op_kwargs={ 'module' : 'MCOLLECT'},
+#     dag=dag)
 
 
 # extract_obps = PythonOperator(
@@ -488,8 +488,8 @@ extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
-extract_pt >> transform_pt >> load_pt
+#extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
-extract_mcollect >> transform_mcollect >> load_mcollect
+#extract_mcollect >> transform_mcollect >> load_mcollect
 #extract_obps >> transform_obps >> load_obps
 extract_common >> transform_common >> load_common
