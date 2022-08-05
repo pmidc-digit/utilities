@@ -784,7 +784,7 @@ def extract_firenoc_collections_by_department(metrics, region_bucket):
         {'groupBy': 'department', 'buckets': grouped_by})
 
     paymentmode_agg = region_bucket.get('paymentmode')
-    paymentmode_buckets = department_agg.get('buckets')
+    paymentmode_buckets = paymentmode_agg.get('buckets')
     grouped_by = []
     for paymentmode_bucket in paymentmode_buckets:
         grouped_by.append({'name': paymentmode_bucket.get('key'), 'value': paymentmode_bucket.get(
