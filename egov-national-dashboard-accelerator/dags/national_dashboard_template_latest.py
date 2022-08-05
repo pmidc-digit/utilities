@@ -205,8 +205,6 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
                     ward_payload = empty_lambda(region, ulb, ward, date)         
                 metrics = ward_payload.get('metrics')
                 metrics = lambda_function(metrics, region_bucket)
-                logging.info(type(metrics))
-                logging.info()
                 ward_payload['metrics'] = metrics
                 ward_map[get_key(ward, ulb)] = ward_payload
     return ward_map
@@ -378,26 +376,26 @@ load_ws = PythonOperator(
 #     dag=dag)
 
 
-# extract_pt = PythonOperator(
-#     task_id='elastic_search_extract_pt',
-#     python_callable=dump_kibana,
-#     provide_context=True,
-#     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'PT'},
-#     dag=dag)
+extract_pt = PythonOperator(
+    task_id='elastic_search_extract_pt',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'PT'},
+    dag=dag)
 
-# transform_pt = PythonOperator(
-#     task_id='nudb_transform_pt',
-#     python_callable=transform,
-#     provide_context=True,
-#     dag=dag)
+transform_pt = PythonOperator(
+    task_id='nudb_transform_pt',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
 
-# load_pt = PythonOperator(
-#     task_id='nudb_ingest_load_pt',
-#     python_callable=load,
-#     provide_context=True,
-#     op_kwargs={ 'module' : 'PT'},
-#     dag=dag)
+load_pt = PythonOperator(
+    task_id='nudb_ingest_load_pt',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'PT'},
+    dag=dag)
 
 extract_firenoc = PythonOperator(
     task_id='elastic_search_extract_firenoc',
@@ -421,26 +419,26 @@ load_firenoc = PythonOperator(
     dag=dag)
 
 
-# extract_mcollect = PythonOperator(
-#     task_id='elastic_search_extract_mcollect',
-#     python_callable=dump_kibana,
-#     provide_context=True,
-#     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'MCOLLECT'},
-#     dag=dag)
+extract_mcollect = PythonOperator(
+    task_id='elastic_search_extract_mcollect',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'MCOLLECT'},
+    dag=dag)
 
-# transform_mcollect = PythonOperator(
-#     task_id='nudb_transform_mcollect',
-#     python_callable=transform,
-#     provide_context=True,
-#     dag=dag)
+transform_mcollect = PythonOperator(
+    task_id='nudb_transform_mcollect',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
 
-# load_mcollect = PythonOperator(
-#     task_id='nudb_ingest_load_mcollect',
-#     python_callable=load,
-#     provide_context=True,
-#     op_kwargs={ 'module' : 'MCOLLECT'},
-#     dag=dag)
+load_mcollect = PythonOperator(
+    task_id='nudb_ingest_load_mcollect',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'MCOLLECT'},
+    dag=dag)
 
 
 # extract_obps = PythonOperator(
@@ -464,34 +462,34 @@ load_firenoc = PythonOperator(
 #     op_kwargs={ 'module' : 'OBPS'},
 #     dag=dag)
 
-# extract_common = PythonOperator(
-#     task_id='elastic_search_extract_common',
-#     python_callable=dump_kibana,
-#     provide_context=True,
-#     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'COMMON'},
-#     dag=dag)
+extract_common = PythonOperator(
+    task_id='elastic_search_extract_common',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'COMMON'},
+    dag=dag)
 
-# transform_common = PythonOperator(
-#     task_id='nudb_transform_common',
-#     python_callable=transform,
-#     provide_context=True,
-#     dag=dag)
+transform_common = PythonOperator(
+    task_id='nudb_transform_common',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
 
-# load_common = PythonOperator(
-#     task_id='nudb_ingest_load_common',
-#     python_callable=load,
-#     provide_context=True,
-#     op_kwargs={ 'module' : 'COMMON'},
-#     dag=dag)
+load_common = PythonOperator(
+    task_id='nudb_ingest_load_common',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'COMMON'},
+    dag=dag)
 
 
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
-#extract_pt >> transform_pt >> load_pt
+extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
-#extract_mcollect >> transform_mcollect >> load_mcollect
+extract_mcollect >> transform_mcollect >> load_mcollect
 #extract_obps >> transform_obps >> load_obps
-#extract_common >> transform_common >> load_common
+extract_common >> transform_common >> load_common
