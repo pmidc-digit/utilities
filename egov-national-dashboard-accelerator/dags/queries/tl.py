@@ -633,14 +633,13 @@ tl_applications_moved_today = {'path': 'tlindex-v1-enriched/_search',
 
 
 def extract_collections_by_trade_category(metrics, region_bucket):
-    status_agg = region_bucket.get('applicationsMovedToday')
-    status_buckets = status_agg.get('buckets')
+    tradeType_agg = region_bucket.get('tradeType')
+    tradeType_buckets = tradeType_agg.get('buckets')
     grouped_by = []
-    for status_bucket in status_buckets:
-        grouped_by.append({'name': status_bucket.get('key'), 'value': status_bucket.get(
-            'applicationsMovedToday').get('value') if status_bucket.get('applicationsMovedToday') else 0})
-    metrics['applicationsMovedToday'] = [
-        {'groupBy': 'status', 'buckets': grouped_by}]
+    for tradeType_bucket in tradeType_buckets:
+        grouped_by.append({'name': tradeType_bucket.get('key'), 'value': tradeType_bucket.get(
+            'todaysCollection').get('value') if tradeType_bucket.get('todaysCollection') else 0})
+    metrics['todaysCollection'] = [{'groupBy': 'tradeType', 'buckets': grouped_by}]
     return metrics
 
 
