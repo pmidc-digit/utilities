@@ -462,26 +462,26 @@ load_firenoc = PythonOperator(
 #     op_kwargs={ 'module' : 'OBPS'},
 #     dag=dag)
 
-extract_common = PythonOperator(
-    task_id='elastic_search_extract_common',
-    python_callable=dump_kibana,
-    provide_context=True,
-    do_xcom_push=True,
-    op_kwargs={ 'module' : 'COMMON'},
-    dag=dag)
+# extract_common = PythonOperator(
+#     task_id='elastic_search_extract_common',
+#     python_callable=dump_kibana,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     op_kwargs={ 'module' : 'COMMON'},
+#     dag=dag)
 
-transform_common = PythonOperator(
-    task_id='nudb_transform_common',
-    python_callable=transform,
-    provide_context=True,
-    dag=dag)
+# transform_common = PythonOperator(
+#     task_id='nudb_transform_common',
+#     python_callable=transform,
+#     provide_context=True,
+#     dag=dag)
 
-load_common = PythonOperator(
-    task_id='nudb_ingest_load_common',
-    python_callable=load,
-    provide_context=True,
-    op_kwargs={ 'module' : 'COMMON'},
-    dag=dag)
+# load_common = PythonOperator(
+#     task_id='nudb_ingest_load_common',
+#     python_callable=load,
+#     provide_context=True,
+#     op_kwargs={ 'module' : 'COMMON'},
+#     dag=dag)
 
 
 extract_tl >> transform_tl >> load_tl
@@ -492,4 +492,4 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 #extract_mcollect >> transform_mcollect >> load_mcollect
 #extract_obps >> transform_obps >> load_obps
-extract_common >> transform_common >> load_common
+#extract_common >> transform_common >> load_common
