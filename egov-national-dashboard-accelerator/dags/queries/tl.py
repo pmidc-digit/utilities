@@ -124,7 +124,7 @@ tl_collection_adhoc_penalty = {
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword",
+            "field": "dataObject.tenantId.keyword",
             "size":10000
           }},
           "aggs": {{
@@ -220,7 +220,7 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword",
+            "field": "dataObject.tenantId.keyword",
             "size":10000
           }},
           "aggs": {{
@@ -322,7 +322,7 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword",
+            "field": "dataObject.tenantId.keyword",
             "size":10000
           }},
           "aggs": {{
@@ -512,7 +512,7 @@ tl_total_transactions = {'path': 'dss-collection_v2/_search',
                             "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "domainObject.tenantId.keyword",
+                "field": "dataObject.tenantId.keyword",
                 "size":10000
               }},
         "aggs": {{
@@ -693,7 +693,7 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
           "aggs": {{
             "ulb_buckets": {{
               "terms": {{
-                "field": "domainObject.tenantId.keyword",
+                "field": "dataObject.tenantId.keyword",
                 "size":10000
               }},
               "aggs": {{
