@@ -31,7 +31,7 @@ default_args = {
     'depends_on_past': False,
     'retries': 3,
     'retry_delay': timedelta(seconds=10),
-    'start_date': datetime(2022, 8, 9)
+    'start_date': datetime(2017, 1, 24)
 
 }
 
@@ -48,7 +48,7 @@ module_map = {
 }
 
 
-dag = DAG('national_dashboard_template_latest', catchup = True, default_args=default_args, schedule_interval='None')
+dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
