@@ -66,7 +66,6 @@ def dump_kibana(**kwargs):
     module_config = module_map.get(module)
     queries = module_config[0]
     date = kwargs['dag_run'].conf.get('date')
-    #today = date.today().strftime("%d-%m-%Y")
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
