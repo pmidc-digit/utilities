@@ -5,7 +5,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta, timezone
-from datetime import date
+#from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
