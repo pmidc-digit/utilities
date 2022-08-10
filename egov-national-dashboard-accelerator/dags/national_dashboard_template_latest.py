@@ -48,7 +48,7 @@ module_map = {
 }
 
 
-dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval='0 * * * *')
+dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval=timedelta(hours=13))
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
