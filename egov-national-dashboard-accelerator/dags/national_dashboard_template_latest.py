@@ -4,7 +4,8 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
-from datetime import datetime, timedelta, timezone, date
+from datetime import datetime, timedelta, timezone
+from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
@@ -64,7 +65,7 @@ def dump_kibana(**kwargs):
     module = kwargs['module']
     module_config = module_map.get(module)
     queries = module_config[0]
-    date = kwargs['dag_run'].conf.get('date')
+    date1 = kwargs['dag_run'].conf.get('date')
     today = date.today()
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(today, "%d-%m-%Y"))
