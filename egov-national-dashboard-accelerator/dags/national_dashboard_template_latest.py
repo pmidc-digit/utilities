@@ -48,7 +48,7 @@ module_map = {
 }
 
 
-dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval='45 12 * * *')
+dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval='0 * * * *')
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
@@ -66,9 +66,9 @@ def dump_kibana(**kwargs):
     module_config = module_map.get(module)
     queries = module_config[0]
     date1 = kwargs['dag_run'].conf.get('date')
-    today = date.today()
+    today = date.today().strftime("%d-%m-%Y")
     localtz = timezone('Asia/Kolkata')
-    dt_aware = localtz.localize(datetime.strptime(today.strftime("%d-%m-%Y"), "%d-%m-%Y"))
+    dt_aware = localtz.localize(datetime.strptime(today, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
     end = start + (24 * 60 * 60 * 1000) - 1000
     logging.info(start)
