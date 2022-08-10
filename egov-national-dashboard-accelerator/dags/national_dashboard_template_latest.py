@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
@@ -30,7 +30,7 @@ default_args = {
     'depends_on_past': False,
     'retries': 3,
     'retry_delay': timedelta(seconds=10),
-    'start_date': datetime(2022, 8, 10)
+    'start_date': datetime(2022, 8, 9)
 
 }
 
@@ -47,7 +47,7 @@ module_map = {
 }
 
 
-dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval='@hourly')
+dag = DAG('national_dashboard_template_latest', default_args=default_args, schedule_interval='45 11 * * *')
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
@@ -65,10 +65,13 @@ def dump_kibana(**kwargs):
     module_config = module_map.get(module)
     queries = module_config[0]
     date = kwargs['dag_run'].conf.get('date')
+    today = date.today()
     localtz = timezone('Asia/Kolkata')
-    dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
+    dt_aware = localtz.localize(datetime.strptime(today, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
     end = start + (24 * 60 * 60 * 1000) - 1000
+    logging.info(start)
+    logging.info(end)
     if module == 'COMMON':
         actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
         end = start + (24 * 60 * 60 * 1000) - 1000
