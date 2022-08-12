@@ -5,7 +5,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta, timezone
-#from datetime import date
+from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
@@ -31,7 +31,7 @@ default_args = {
     'depends_on_past': False,
     'retries': 3,
     'retry_delay': timedelta(seconds=10),
-    'start_date': datetime(2017, 1, 24)
+    'start_date': datetime(2022, 8, 9)
 
 }
 
@@ -48,7 +48,7 @@ module_map = {
 }
 
 
-dag = DAG('national_dashboard_template_manual', default_args=default_args, schedule_interval=None)
+dag = DAG('national_dashboard_template_scheduled', catchup = True, default_args=default_args, schedule_interval='0 * * * *')
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
@@ -65,9 +65,9 @@ def dump_kibana(**kwargs):
     module = kwargs['module']
     module_config = module_map.get(module)
     queries = module_config[0]
-    date = kwargs['dag_run'].conf.get('date')
+    today = date.today() - date.timedelta(days=1).strftime("%d-%m-%Y")
     localtz = timezone('Asia/Kolkata')
-    dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
+    dt_aware = localtz.localize(datetime.strptime(today, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
     end = start + (24 * 60 * 60 * 1000) - 1000
     logging.info(start)
@@ -123,13 +123,13 @@ def dump_kibana(**kwargs):
         
         empty_lambda =  module_config[1]
         common_list = []
-        common_payload = empty_lambda('N/A', 'pb.amritsar', 'N/A', date)
+        common_payload = empty_lambda('N/A', 'pb.amritsar', 'N/A', today)
         common_payload['metrics'] = common_metrics
         common_list.append(common_payload)
         kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(common_list))
         return json.dumps(common_list)
     else:
-        ward_list = transform_response_sample(merged_document, date, module)
+        ward_list = transform_response_sample(merged_document, today, module)
         kwargs['ti'].xcom_push(key='payload_{0}'.format(module), value=json.dumps(ward_list))
         return json.dumps(ward_list)
 
