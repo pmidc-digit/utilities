@@ -150,8 +150,8 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     }
 
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
-    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
-        helpers.bulk(es, json.dumps(data), index='adaptor_logs')
+    #with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
+    helpers.bulk(es, json.dumps(data), index='adaptor_logs')
     #log(module, 'Info', json.dumps(data), ElasticHook('POST', 'es_conn'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
@@ -211,15 +211,6 @@ load_tl = PythonOperator(
     op_kwargs={ 'module' : 'TL'},
     dag=dag)
   
-extract_import_water_meter = PythonOperator(
-    task_id='elastic_search_bulk_import',
-    python_callable=import_data,
-    provide_context=True,
-    do_xcom_push=True,
-    dag=dag)
-
-extract_import_water_meter
-
 
 
 extract_tl >> transform_tl >> load_tl
