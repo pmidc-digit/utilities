@@ -157,9 +157,16 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     logging.info(json.dumps(data))
     logging.info(response)
     logging.info("after insert")
+    q = {
+        'timestamp' : int(datetime.datetime.now().timestamp() * 1000),
+        'module' : module,
+        'severity' : type,
+        'state' : 'Punjab', 
+        'message' : 'test'
+    }
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
     with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
-        helpers.bulk(es, f, index='adaptor_logs')
+        helpers.bulk(es, json.dumps(q), index='adaptor_logs')
     return response
 
 
