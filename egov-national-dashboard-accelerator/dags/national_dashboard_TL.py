@@ -161,13 +161,13 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
     q = {
         'timestamp' : start,
-        'module' : module,
-        'severity' : type,
+        'module' : 'TL',
+        'severity' : 'Info',
         'state' : 'Punjab', 
         'message' : 'test'
     }
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
-    helpers.bulk(es, json.dumps(q), index='adaptor_logs')
+    helpers.bulk(es, data=json.dumps(q), index='adaptor_logs')
     return response
 
 
