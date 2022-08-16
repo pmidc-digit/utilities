@@ -5,6 +5,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta, timezone
+from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
@@ -157,8 +158,9 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     logging.info(json.dumps(data))
     logging.info(response)
     logging.info("after insert")
+    localtz = timezone('Asia/Kolkata')
     q = {
-        'timestamp' : int(datetime.datetime.now().timestamp() * 1000),
+        'timestamp' : int(localtz.localize(datetime.strptime(date.today(), "%d-%m-%Y")).timestamp() * 1000),
         'module' : module,
         'severity' : type,
         'state' : 'Punjab', 
