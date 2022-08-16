@@ -43,7 +43,7 @@ modules = {}
 total_ulbs = 0 
 totalApplications = 0 
 totalApplicationWithinSLA = 0
-
+start = 0
 
 def dump_kibana(**kwargs):
     hook = ElasticHook('GET', 'es_conn')
@@ -158,9 +158,9 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     logging.info(json.dumps(data))
     logging.info(response)
     logging.info("after insert")
-    localtz = timezone('Asia/Kolkata')
+
     q = {
-        'timestamp' : int(localtz.localize(datetime.strptime(date.today(), "%d-%m-%Y")).timestamp() * 1000),
+        'timestamp' : start,
         'module' : module,
         'severity' : type,
         'state' : 'Punjab', 
