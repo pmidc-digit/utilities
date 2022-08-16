@@ -150,7 +150,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     }
 
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
-    with open('stockerbot-export.csv') as f:
+    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
         helpers.bulk(es, json.dumps(data), index='adaptor_logs')
     #log(module, 'Info', json.dumps(data), ElasticHook('POST', 'es_conn'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
@@ -183,7 +183,7 @@ def transform(**kwargs):
 
 def import_data():
     hook = ElasticHook('GET', 'es_conn')
-    with open('water_and_meter.csv') as f:
+    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
         reader = csv.DictReader(f)
         helpers.bulk(hook, reader, index='water_and_meter')
 
