@@ -170,7 +170,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     actions = [
                 {
                     '_index':'adaptor_logs',
-                    '_type': 'text',
+                    '_type': 'document',
                     '_id': 123,
                     '_source': json.dumps(q),
                 }
