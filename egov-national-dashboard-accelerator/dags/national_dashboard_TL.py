@@ -169,7 +169,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
     actions = [
                 {
-                    '_index':' adaptor_logs',
+                    '_index':'adaptor_logs',
                     '_type': 'text',
                     '_id': 123,
                     '_source': json.dumps(q),
