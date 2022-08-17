@@ -168,7 +168,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
                 {
                     '_index':'adaptor_logs',
                     '_type': '_doc',
-                    '_id': str(uuid.UUID()),
+                    '_id': str(uuid.UUID().hex),
                     '_source': json.dumps(q),
                 }
             ]
