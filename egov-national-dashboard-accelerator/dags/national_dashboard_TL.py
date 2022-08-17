@@ -9,7 +9,6 @@ from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
-import datetime
 from airflow.hooks.base import BaseHook
 from queries.tl import *
 from utils.utils import log
@@ -44,7 +43,6 @@ modules = {}
 total_ulbs = 0 
 totalApplications = 0 
 totalApplicationWithinSLA = 0
-start = 0
 
 def dump_kibana(**kwargs):
     hook = ElasticHook('GET', 'es_conn')
@@ -132,7 +130,7 @@ def get_auth_token(connection):
     return (response.get('access_token'), response.get('refresh_token'), response.get('UserRequest'))
 
 
-def call_ingest_api(connection, access_token, user_info, payload, module, startdate):
+def call_ingest_api(connection, access_token, user_info, payload, module):
     endpoint = 'national-dashboard/metric/_ingest'
     url = '{0}://{1}/{2}'.format('https', connection.host, endpoint)
     data = {
@@ -157,7 +155,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module, startd
     logging.info(response)
 
     q = {
-        'timestamp' : startdate,
+        'timestamp' : 0,
         'module' : module,
         'severity' : 'Info',
         'state' : 'Punjab', 
@@ -188,11 +186,12 @@ def load(**kwargs):
     logging.info("payload length {0} {1}".format(len(payload_obj),module))
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(kwargs['dag_run'].conf.get('date'), "%d-%m-%Y"))
-    start = int(dt_aware.timestamp() * 1000)
+    startdate = int(dt_aware.timestamp() * 1000)
+    logging.info(startdate)
     if access_token and refresh_token:
         for i in range(0, len(payload_obj), batch_size):
             logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
-            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module,start)
+            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module)
     return None
 
 def transform(**kwargs):
