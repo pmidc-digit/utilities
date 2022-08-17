@@ -177,7 +177,6 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     # Iterate over each row in the csv using reader object
         for row in csv_reader:
         # row variable is a list that represents a row in csv
-            logging.log(row)
             actions = [
                 {
                     '_index':'water_and_meter',
