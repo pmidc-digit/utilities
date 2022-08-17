@@ -18,7 +18,7 @@ import logging
 import json
 from elasticsearch import Elasticsearch, helpers
 import csv
-
+import uuid
 
 default_args = {
     'owner': 'airflow',
@@ -151,31 +151,31 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     }
 
 
-    #log(module, 'Info', json.dumps(data), ElasticHook('POST', 'es_conn'), log_endpoint)
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
-    #log(module, 'Info', json.dumps(response), ElasticHook('GET', 'es_conn'), log_endpoint)
     logging.info(json.dumps(data))
     logging.info(response)
-    logging.info("after insert")
 
     q = {
-        'timestamp' : start,
-        'module' : 'TL',
+        'timestamp' : datetime.now(),
+        'module' : module,
         'severity' : 'Info',
         'state' : 'Punjab', 
-        'message' : 'test'
+        'message' : json.dumps(response)
     }
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
     actions = [
                 {
                     '_index':'adaptor_logs',
                     '_type': '_doc',
-                    '_id': 123,
+                    '_id': str(uuid.uuid4),
                     '_source': json.dumps(q),
                 }
             ]
     helpers.bulk(es, actions)
+    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
+        reader = csv.DictReader(f)
+        helpers.bulk(es, reader, index='water_and_meter')
     return response
 
 
