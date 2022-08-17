@@ -168,14 +168,11 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
                 {
                     '_index':'adaptor_logs',
                     '_type': '_doc',
-                    '_id': '123',
+                    '_id': str(uuid.uuid1()),
                     '_source': json.dumps(q),
                 }
             ]
     helpers.bulk(es, actions)
-    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
-        reader = csv.DictReader(f)
-        helpers.bulk(es,json.dumps(reader), index='water_and_meter')
     return response
 
 
