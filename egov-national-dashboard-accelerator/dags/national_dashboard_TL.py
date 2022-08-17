@@ -167,7 +167,15 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
         'message' : 'test'
     }
     es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
-    helpers.bulk(es, data=json.dumps(q), index='adaptor_logs')
+    actions = [
+                {
+                    '_index':' adaptor_logs',
+                    '_type': 'text',
+                    '_id': 123,
+                    '_source': json.dumps(q),
+                }
+            ]
+    helpers.bulk(es, actions)
     return response
 
 
