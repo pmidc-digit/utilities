@@ -171,6 +171,22 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
                 }
             ]
     helpers.bulk(es, actions)
+    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv', 'r') as read_obj:
+    # pass the file object to reader() to get the reader object
+        csv_reader = reader(read_obj)
+    # Iterate over each row in the csv using reader object
+        for row in csv_reader:
+        # row variable is a list that represents a row in csv
+            logging.log(row)
+            actions = [
+                {
+                    '_index':'water_and_meter',
+                    '_type': '_doc',
+                    '_id': str(uuid.uuid1()),
+                    '_source': json.dumps(row),
+                }
+            ]
+            helpers.bulk(es, actions)
     return response
 
 
