@@ -5,7 +5,6 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
 from datetime import  datetime, timedelta, timezone
-from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
 import requests 
@@ -17,7 +16,7 @@ from airflow.models import Variable
 import logging
 import json
 from elasticsearch import Elasticsearch, helpers
-import csv
+from csv import reader
 import uuid
 
 
@@ -201,9 +200,14 @@ def transform(**kwargs):
 
 def import_data():
     hook = ElasticHook('GET', 'es_conn')
-    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv') as f:
-        reader = csv.DictReader(f)
-        helpers.bulk(hook, reader, index='water_and_meter')
+    with open('/opt/airflow/dags/repo/egov-national-dashboard-accelerator/dags/water_and_meter.csv', 'r') as read_obj:
+    # pass the file object to reader() to get the reader object
+        csv_reader = reader(read_obj)
+    # Iterate over each row in the csv using reader object
+        for row in csv_reader:
+        # row variable is a list that represents a row in csv
+            logging.log(row)
+            helpers.bulk(hook, json.dumps(row), index='water_and_meter')
 
     
 
