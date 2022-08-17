@@ -157,7 +157,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     logging.info(response)
 
     q = {
-        'timestamp' : datetime.now(),
+        'timestamp' : start,
         'module' : module,
         'severity' : 'Info',
         'state' : 'Punjab', 
