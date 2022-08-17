@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.utils.dates import days_ago
-from datetime import datetime, timedelta, timezone
+from datetime import  timedelta, timezone
 from datetime import date
 from hooks.elastic_hook import ElasticHook
 from airflow.operators.http_operator import SimpleHttpOperator
@@ -19,6 +19,7 @@ import json
 from elasticsearch import Elasticsearch, helpers
 import csv
 import uuid
+import datetime
 
 default_args = {
     'owner': 'airflow',
@@ -155,7 +156,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
     logging.info(response)
 
     q = {
-        'timestamp' : int(datetime(date.today()).timestamp() * 1000),
+        'timestamp' : int(datetime.datetime.now().timestamp() * 1000),
         'module' : module,
         'severity' : 'Info',
         'state' : 'Punjab', 
