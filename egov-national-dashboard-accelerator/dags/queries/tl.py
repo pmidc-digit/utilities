@@ -705,7 +705,8 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
                 "aggs": {{
                     "byTradeType": {{
                       "terms": {{
-                       "field": "domainObject.tradelicense.calculation.tradeLicense.tradeLicenseDetail.tradeUnits.tradeType.keyword"
+                       "field": "domainObject.tradelicense.calculation.tradeLicense.tradeLicenseDetail.tradeUnits.tradeType.keyword",
+                       "size":1
                       }},
                   "aggs": {{
                     "Total Collection": {{
