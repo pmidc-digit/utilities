@@ -25,6 +25,10 @@ from queries.common import *
 from utils.utils import log
 from pytz import timezone
 from airflow.models import Variable
+from elasticsearch import Elasticsearch, helpers
+from csv import reader
+import uuid
+
 
 default_args = {
     'owner': 'airflow',
@@ -93,6 +97,7 @@ def dump_kibana(**kwargs):
 
     if module == 'COMMON':
         total_ulbs = readulb()
+        citizen_count = get_citizen_count()
         common_metrics = {}
         module_ulbs = []
         for tenantid in ulbs:
@@ -110,12 +115,10 @@ def dump_kibana(**kwargs):
         for md in modules:
             module_ulbs.append({'name': md, 'value': len(modules[md])})
 
-        logging.info(totalApplications)
-        logging.info(totalApplicationWithinSLA)
         common_metrics['totalLiveUlbsCount'] = live_ulbs
         common_metrics['status']  = isStateLive  
         common_metrics['onboardedUlbsCount'] = 0
-        common_metrics['totalCitizensCount'] = 0
+        common_metrics['totalCitizensCount'] = citizen_count
         common_metrics['slaAchievement'] = (totalApplicationWithinSLA/totalApplications) * 100
         common_metrics['totalUlbCount'] = total_ulbs
         common_metrics['liveUlbsCount'] = [{'groupBy': 'serviceModuleCode', 'buckets': module_ulbs}]
@@ -145,6 +148,14 @@ def readulb(**kwargs):
         ulbs.append(tenant["code"])
     total_ulbs = len(ulbs)
     return total_ulbs
+
+def get_citizen_count(parameters):
+        response = requests.get("https://mseva.lgpunjab.gov.in/egov-searcher/unique-citizen-count")
+        if response.status_code == 200:
+            logging.info("sucessfully fetched the data")
+            logging.info(response.json())
+        else:
+            logging.info("There is an error {0} error with your request".format(response.status_code))
                 
    
 def transform_response_common(merged_document,query_name,query_module):
@@ -263,12 +274,30 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
     }
 
-    #log(module, 'Info', json.dumps(data), ElasticHook('GET', 'es_conn'), log_endpoint)
+
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
-    #log(module, 'Info', json.dumps(response), ElasticHook('GET', 'es_conn'), log_endpoint)
     logging.info(json.dumps(data))
     logging.info(response)
+
+    #logging to the index adaptor_logs
+    q = {
+        'timestamp' : 0,
+        'module' : module,
+        'severity' : 'Info',
+        'state' : 'Punjab', 
+        'message' : json.dumps(response)
+    }
+    es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
+    actions = [
+                {
+                    '_index':'adaptor_logs',
+                    '_type': '_doc',
+                    '_id': str(uuid.uuid1()),
+                    '_source': json.dumps(q),
+                }
+            ]
+    helpers.bulk(es, actions)
     return response
 
 
@@ -357,27 +386,6 @@ load_ws = PythonOperator(
     op_kwargs={ 'module' : 'WS'},
     dag=dag)
 
-# extract_ws_digit = PythonOperator(
-#     task_id='elastic_search_extract_ws_digit',
-#     python_callable=dump_kibana,
-#     provide_context=True,
-#     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'WS_DIGIT'},
-#     dag=dag)
-
-# transform_ws_digit = PythonOperator(
-#     task_id='nudb_transform_ws_digit',
-#     python_callable=transform,
-#     provide_context=True,
-#     dag=dag)
-
-# load_ws_digit = PythonOperator(
-#     task_id='nudb_ingest_load_ws_digit',
-#     python_callable=load,
-#     provide_context=True,
-#     op_kwargs={ 'module' : 'WS_DIGIT'},
-#     dag=dag)
-
 
 extract_pt = PythonOperator(
     task_id='elastic_search_extract_pt',
@@ -443,6 +451,47 @@ load_mcollect = PythonOperator(
     op_kwargs={ 'module' : 'MCOLLECT'},
     dag=dag)
 
+extract_common = PythonOperator(
+    task_id='elastic_search_extract_common',
+    python_callable=dump_kibana,
+    provide_context=True,
+    do_xcom_push=True,
+    op_kwargs={ 'module' : 'COMMON'},
+    dag=dag)
+
+transform_common = PythonOperator(
+    task_id='nudb_transform_common',
+    python_callable=transform,
+    provide_context=True,
+    dag=dag)
+
+load_common = PythonOperator(
+    task_id='nudb_ingest_load_common',
+    python_callable=load,
+    provide_context=True,
+    op_kwargs={ 'module' : 'COMMON'},
+    dag=dag)
+
+# extract_ws_digit = PythonOperator(
+#     task_id='elastic_search_extract_ws_digit',
+#     python_callable=dump_kibana,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     op_kwargs={ 'module' : 'WS_DIGIT'},
+#     dag=dag)
+
+# transform_ws_digit = PythonOperator(
+#     task_id='nudb_transform_ws_digit',
+#     python_callable=transform,
+#     provide_context=True,
+#     dag=dag)
+
+# load_ws_digit = PythonOperator(
+#     task_id='nudb_ingest_load_ws_digit',
+#     python_callable=load,
+#     provide_context=True,
+#     op_kwargs={ 'module' : 'WS_DIGIT'},
+#     dag=dag)
 
 # extract_obps = PythonOperator(
 #     task_id='elastic_search_extract_obps',
@@ -465,34 +514,14 @@ load_mcollect = PythonOperator(
 #     op_kwargs={ 'module' : 'OBPS'},
 #     dag=dag)
 
-# extract_common = PythonOperator(
-#     task_id='elastic_search_extract_common',
-#     python_callable=dump_kibana,
-#     provide_context=True,
-#     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'COMMON'},
-#     dag=dag)
-
-# transform_common = PythonOperator(
-#     task_id='nudb_transform_common',
-#     python_callable=transform,
-#     provide_context=True,
-#     dag=dag)
-
-# load_common = PythonOperator(
-#     task_id='nudb_ingest_load_common',
-#     python_callable=load,
-#     provide_context=True,
-#     op_kwargs={ 'module' : 'COMMON'},
-#     dag=dag)
 
 
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
-#extract_ws_digit >> transform_ws_digit >> load_ws_digit
 extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
+extract_common >> transform_common >> load_common
+#extract_ws_digit >> transform_ws_digit >> load_ws_digit
 #extract_obps >> transform_obps >> load_obps
-#extract_common >> transform_common >> load_common
