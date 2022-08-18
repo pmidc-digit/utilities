@@ -153,7 +153,7 @@ def get_citizen_count():
         response = requests.get("https://mseva.lgpunjab.gov.in/egov-searcher/unique-citizen-count")
         if response.status_code == 200:
             logging.info("sucessfully fetched the data")
-            logging.info(response.json())
+            return response.json()
         else:
             logging.info("There is an error {0} error with your request".format(response.status_code))
                 
@@ -255,7 +255,7 @@ def get_auth_token(connection):
     return (response.get('access_token'), response.get('refresh_token'), response.get('UserRequest'))
 
 
-def call_ingest_api(connection, access_token, user_info, payload, module):
+def call_ingest_api(connection, access_token, user_info, payload, module,startdate):
     endpoint = 'national-dashboard/metric/_ingest'
     url = '{0}://{1}/{2}'.format('https', connection.host, endpoint)
     data = {
@@ -282,7 +282,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
 
     #logging to the index adaptor_logs
     q = {
-        'timestamp' : 0,
+        'timestamp' : startdate,
         'module' : module,
         'severity' : 'Info',
         'state' : 'Punjab', 
@@ -311,10 +311,14 @@ def load(**kwargs):
     logging.info(payload)
     payload_obj = json.loads(payload)
     logging.info("payload length {0} {1}".format(len(payload_obj),module))
+    localtz = timezone('Asia/Kolkata')
+    dt_aware = localtz.localize(datetime.strptime(kwargs['dag_run'].conf.get('date'), "%d-%m-%Y"))
+    startdate = int(dt_aware.timestamp() * 1000)
+    logging.info(startdate)
     if access_token and refresh_token:
         for i in range(0, len(payload_obj), batch_size):
             logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
-            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module)
+            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module,startdate)
     return None
 
 def transform(**kwargs):
