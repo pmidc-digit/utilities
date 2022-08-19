@@ -819,10 +819,13 @@ def extract_tl_todays_collection_by_trade_type(metrics, region_bucket):
     tt_buckets = tt_agg.get('buckets')
     grouped_by = []
     for tt_bucket in tt_buckets:
-        grouped_by.append({'name': tt_bucket.get('key'), 'value': tt_bucket.get(
-            'todaysCollection').get('value') if tt_bucket.get('todaysCollection') else 0})
-    metrics['todaysCollection'] = [
-        {'groupBy': 'tradeType', 'buckets': grouped_by}]
+        if preval != tt_bucket.get('todaysCollection').get('value'):
+          grouped_by.append({'name': tt_bucket.get('key'), 'value': tt_bucket.get(
+              'todaysCollection').get('value') if tt_bucket.get('todaysCollection') else 0})
+          metrics['todaysCollection'] = [
+          {'groupBy': 'tradeType', 'buckets': grouped_by}]
+        preval = tt_bucket.get(
+              'todaysCollection').get('value')
     return metrics
 
 
