@@ -273,7 +273,6 @@ def extract_tl_collection_tax(metrics, region_bucket):
     return metrics
 
 
-
 tl_collection_tax = {'path': 'dss-collection_v2/_search',
                      'name': 'tl_collection_tax',
                      'lambda': extract_tl_collection_tax,
@@ -894,7 +893,8 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
               "aggs": {{
                 "tradeType": {{
                   "terms": {{
-                    "field": "domainObject.tradelicense.tradeLicenseDetail.tradeUnits.tradeType.keyword"
+                    "field": "domainObject.tradelicense.tradeLicenseDetail.tradeUnits.tradeType.keyword",
+                    "size":1
                   }},
                   "aggs": {{
                     "todaysCollection": {{
