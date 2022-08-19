@@ -815,6 +815,7 @@ tl_license_issued_within_sla = {'path': 'tlindex-v1-enriched/_search',
 
 
 def extract_tl_todays_collection_by_trade_type(metrics, region_bucket):
+    preval = 0
     tt_agg = region_bucket.get('tradeType')
     tt_buckets = tt_agg.get('buckets')
     grouped_by = []
