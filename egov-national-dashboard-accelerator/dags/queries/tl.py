@@ -1,10 +1,9 @@
 
+#queries for the TL module
 def extract_tl_license_issued_by_boundary(metrics, region_bucket):
     metrics['todaysApplications'] = region_bucket.get('todaysApplications').get(
         'value') if region_bucket.get('todaysApplications') else 0
     return metrics
-
-
 
 tl_license_issued_by_boundary = {'path': 'tlindex-v1-enriched/_search',
                                  'name': 'tl_license_issued_by_boundary',
@@ -77,7 +76,6 @@ def extract_tl_collection_adhoc_penalty(metrics, region_bucket):
     metrics['adhocPenalty'] = region_bucket.get('adhocPenalty').get('aggrFilter').get('amount').get(
         'value') if region_bucket.get('adhocPenalty').get('aggrFilter').get('amount').get('value') else 0
     return metrics
-
 
 tl_collection_adhoc_penalty = {
     'path': 'dss-collection_v2/_search',
