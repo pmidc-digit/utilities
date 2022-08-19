@@ -76,6 +76,7 @@ def dump_kibana(**kwargs):
     end = start + (24 * 60 * 60 * 1000) - 1000
     logging.info(start)
     logging.info(end)
+    logging.info("start the DAGS")
     if module == 'COMMON':
         actualstart = int(localtz.localize(datetime.strptime('01-01-1970', "%d-%m-%Y")).timestamp() * 1000)
         end = start + (24 * 60 * 60 * 1000) - 1000
