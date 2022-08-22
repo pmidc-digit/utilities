@@ -97,10 +97,9 @@ def dump_kibana(**kwargs):
 
 
     if module == 'COMMON':
-        present = date.strftime("%Y-%m-%d %H:%M:%S.%f")
-        dt_aware = datetime.strptime(present,"%Y-%m-%d %H:%M:%S.%f")
+        present = datetime.strptime(date,"%d-%m-%Y")        
+        citizen_count = get_citizen_count(present.strftime("%Y-%m-%d %H:%M:%S.%f"))
         total_ulbs = readulb()
-        citizen_count = get_citizen_count(dt_aware.strftime("%Y-%m-%d %H:%M:%S.%f"))
         common_metrics = {}
         module_ulbs = []
         for tenantid in ulbs:
