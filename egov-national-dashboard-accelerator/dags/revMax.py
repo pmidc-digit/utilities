@@ -9,7 +9,6 @@ import logging
 import pandas as pd
 import numpy as np
 import json
-import requests
 
 
 
@@ -23,18 +22,24 @@ default_args = {
 }
 
 dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
-log_endpoint = 'kibana/api/console/proxy'
-batch_size = 50
+
 
 def test():
     logging.info('testing DAG')
 
-    
-def dump_kibana_pt():
+flatten_data  = PythonOperator(
+    task_id='flatten_data',
+    python_callable=test,
+    provide_context=True,
+    dag=dag)
+
+flatten_data
+
+#def dump_kibana_pt():
     #connection = BaseHook.get_connection('qa-punjab-kibana')
     #endpoint = 'kibana/api/console/proxy'
 
-    merged_document = {}
+    #merged_document = {}
     # query = property_details
     # url = '{0}://{1}/{2}?path={3}&method=POST'.format('https', connection.host, endpoint, query.get('path'))
     # q = query.get('query')
@@ -45,8 +50,8 @@ def dump_kibana_pt():
     # logging.info(r.request)
     # logging.info('>>>>>>>>>>>>>>>>')
     # logging.info(r.text)
-    with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
-        json.dump(elastic_dump_pt, outfile)
+    #with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
+        #json.dump(elastic_dump_pt, outfile)
     #merged_document['pt'] = elastic_dump_pt
     #merged_document['tl'] = elastic_dump_tl
     #merged_document['ws'] = elastic_dump_ws
@@ -55,257 +60,257 @@ def dump_kibana_pt():
 
 
 
-property_details = {
-  'path': 'property-services/_search',
-  'name': 'property_details',
-  'query': """
-{{
-  "size":100,
-    "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ]
-        }}
-      }}
-}}
+# property_details = {
+#   'path': 'property-services/_search',
+#   'name': 'property_details',
+#   'query': """
+# {{
+#   "size":100,
+#     "query": {{
+#         "bool": {{
+#           "must_not": [
+#             {{
+#               "term": {{
+#                 "Data.tenantId.keyword": "pb.testing"
+#               }}
+#             }}
+#           ]
+#         }}
+#       }}
+# }}
 
-    """
-}  
+#     """
+# }  
 
-def elastic_dump_pt():
-    hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('property-services/_search', json.loads(property_details('query')))
-    logging.info(resp)
-    logging.info(resp['hits']['hits'])
-    return resp['hits']['hits']
+# def elastic_dump_pt():
+#     hook = ElasticHook('GET', 'es_conn')
+#     resp = hook.search('property-services/_search', json.loads(property_details('query')))
+#     logging.info(resp)
+#     logging.info(resp['hits']['hits'])
+#     return resp['hits']['hits']
 
-def elastic_dump_tl():
-    hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('/property-services', {
-        "size": 10,
-        "query": {
-        "match_all": {}
-         },
-        "sort": [
-        {
-        "Data.@timestamp": {
-            "order": "desc"
-        }
-        }
-    ]
-    })
-    logging.info(resp)
-    logging.info(resp['hits']['hits'])
-    return resp['hits']['hits']
+# def elastic_dump_tl():
+#     hook = ElasticHook('GET', 'es_conn')
+#     resp = hook.search('/property-services', {
+#         "size": 10,
+#         "query": {
+#         "match_all": {}
+#          },
+#         "sort": [
+#         {
+#         "Data.@timestamp": {
+#             "order": "desc"
+#         }
+#         }
+#     ]
+#     })
+#     logging.info(resp)
+#     logging.info(resp['hits']['hits'])
+#     return resp['hits']['hits']
 
-def elastic_dump_ws():
-    hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('/property-services', {
-        "size": 10,
-        "query": {
-        "match_all": {}
-         },
-        "sort": [
-        {
-        "Data.@timestamp": {
-            "order": "desc"
-        }
-        }
-    ]
-    })
-    logging.info(resp)
-    logging.info(resp['hits']['hits'])
-    return resp['hits']['hits']
+# def elastic_dump_ws():
+#     hook = ElasticHook('GET', 'es_conn')
+#     resp = hook.search('/property-services', {
+#         "size": 10,
+#         "query": {
+#         "match_all": {}
+#          },
+#         "sort": [
+#         {
+#         "Data.@timestamp": {
+#             "order": "desc"
+#         }
+#         }
+#     ]
+#     })
+#     logging.info(resp)
+#     logging.info(resp['hits']['hits'])
+#     return resp['hits']['hits']
 
-def elastic_dump_collection():
-    hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('/property-services', {
-        "size": 10,
-        "query": {
-        "match_all": {}
-         },
-        "sort": [
-        {
-        "Data.@timestamp": {
-            "order": "desc"
-        }
-        }
-    ]
-    })
-    logging.info(resp)
-    logging.info(resp['hits']['hits'])
-    return resp['hits']['hits']
-
-
-def elastic_dump_meter():
-    hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('/meter-services', {
-        "size": 10,
-        "query": {
-        "match_all": {}
-         },
-        "sort": [
-        {
-        "Data.currentReadingDate": {
-            "order": "desc"
-        }
-        }
-    ]
-    })
-    logging.info(resp)
-    logging.info(resp['hits']['hits'])
-    return resp['hits']['hits']
-
-def replace_empty_objects_with_null_value(df):
-
-    df_columns = df.columns.tolist()
-
-    for cols in df_columns:
-        try:
-            unique_values = df[cols].unique().tolist()
-
-            if (len(unique_values) == 1) and (
-                unique_values == "{}" or unique_values == "[]"
-            ):
-                df[cols] = np.NaN
-        except Exception as e:
-            df[cols] = np.NaN
-
-    return df
-
-def convert_dataframe_to_csv(dataframe, file_name):
-
-    dataframe.to_csv(
-       f"""/opt/airflow/dags/csv/{file_name}.csv""", index=False
-    )
-
-    logging.info(dataframe)
+# def elastic_dump_collection():
+#     hook = ElasticHook('GET', 'es_conn')
+#     resp = hook.search('/property-services', {
+#         "size": 10,
+#         "query": {
+#         "match_all": {}
+#          },
+#         "sort": [
+#         {
+#         "Data.@timestamp": {
+#             "order": "desc"
+#         }
+#         }
+#     ]
+#     })
+#     logging.info(resp)
+#     logging.info(resp['hits']['hits'])
+#     return resp['hits']['hits']
 
 
-def get_dataframe_after_flattening(json_data):
+# def elastic_dump_meter():
+#     hook = ElasticHook('GET', 'es_conn')
+#     resp = hook.search('/meter-services', {
+#         "size": 10,
+#         "query": {
+#         "match_all": {}
+#          },
+#         "sort": [
+#         {
+#         "Data.currentReadingDate": {
+#             "order": "desc"
+#         }
+#         }
+#     ]
+#     })
+#     logging.info(resp)
+#     logging.info(resp['hits']['hits'])
+#     return resp['hits']['hits']
 
-    logging.info(json_data)
+# def replace_empty_objects_with_null_value(df):
+
+#     df_columns = df.columns.tolist()
+
+#     for cols in df_columns:
+#         try:
+#             unique_values = df[cols].unique().tolist()
+
+#             if (len(unique_values) == 1) and (
+#                 unique_values == "{}" or unique_values == "[]"
+#             ):
+#                 df[cols] = np.NaN
+#         except Exception as e:
+#             df[cols] = np.NaN
+
+#     return df
+
+# def convert_dataframe_to_csv(dataframe, file_name):
+
+#     dataframe.to_csv(
+#        f"""/opt/airflow/dags/csv/{file_name}.csv""", index=False
+#     )
+
+#     logging.info(dataframe)
+
+
+# def get_dataframe_after_flattening(json_data):
+
+#     logging.info(json_data)
     
-    df = [flatten_json(d) for d in json_data]
+#     df = [flatten_json(d) for d in json_data]
     
-    df = pd.DataFrame(df)
+#     df = pd.DataFrame(df)
 
-    df = replace_empty_objects_with_null_value(df)
+#     df = replace_empty_objects_with_null_value(df)
 
-    return df
+#     return df
 
-def flatten_json(y):
-    out = {}
+# def flatten_json(y):
+#     out = {}
   
-    def flatten(x, name =''):
+#     def flatten(x, name =''):
 
-        if type(x) is dict:
+#         if type(x) is dict:
               
-            for a in x:
-                flatten(x[a], name + a + '.')
+#             for a in x:
+#                 flatten(x[a], name + a + '.')
 
-        elif type(x) is list:
+#         elif type(x) is list:
               
-            i = 0
+#             i = 0
               
-            for a in x:                
-                flatten(a, name + str(i) + '.')
-                i += 1
-        else:
-            out[name[:-1]] = x
+#             for a in x:                
+#                 flatten(a, name + str(i) + '.')
+#                 i += 1
+#         else:
+#             out[name[:-1]] = x
   
-    flatten(y)
-    return out
+#     flatten(y)
+#     return out
 
 
-def water_and_meter_services(water_services, meter_services):
+# def water_and_meter_services(water_services, meter_services):
 
-    water_and_meter = water_services.merge(
-        meter_services,
-        how="inner",
-        left_on="_source.Data.connectionNo",
-        right_on="_source.Data.connectionNo",
-        suffixes=("_water", "_meter"),
-    )
+#     water_and_meter = water_services.merge(
+#         meter_services,
+#         how="inner",
+#         left_on="_source.Data.connectionNo",
+#         right_on="_source.Data.connectionNo",
+#         suffixes=("_water", "_meter"),
+#     )
 
-    convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
-
-
-def property_and_water_services(water_services, property_services):
-
-    water_and_property = water_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_water", "_property"),
-    )
-
-    convert_dataframe_to_csv(
-        dataframe=water_and_property, file_name="water_and_property"
-    )
+#     convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
 
 
-def trade_and_property_services(trade_services, property_services):
+# def property_and_water_services(water_services, property_services):
 
-    trade_and_property = trade_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.tradelicense.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_trade", "_property"),
-    )
+#     water_and_property = water_services.merge(
+#         property_services,
+#         how="inner",
+#         left_on="_source.Data.propertyId",
+#         right_on="_source.Data.propertyId",
+#         suffixes=("_water", "_property"),
+#     )
 
-    convert_dataframe_to_csv(
-        dataframe=trade_and_property, file_name="trade_and_property"
-    )
+#     convert_dataframe_to_csv(
+#         dataframe=water_and_property, file_name="water_and_property"
+#     )
 
-def dss_collection_and_water(dss_collection,water_services):
 
-    collection_and_water = dss_collection.merge(
-        water_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.applicationNo",
-        suffixes=("_trade", "_property"),
-    )
+# def trade_and_property_services(trade_services, property_services):
 
-    convert_dataframe_to_csv(
-        dataframe=collection_and_water, file_name="collection_and_water"
-    )
+#     trade_and_property = trade_services.merge(
+#         property_services,
+#         how="inner",
+#         left_on="_source.Data.tradelicense.propertyId",
+#         right_on="_source.Data.propertyId",
+#         suffixes=("_trade", "_property"),
+#     )
 
-def dss_collection_and_property(dss_collection,property_services):
+#     convert_dataframe_to_csv(
+#         dataframe=trade_and_property, file_name="trade_and_property"
+#     )
 
-    collection_and_property = dss_collection.merge(
-        property_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.propertyId",
-        suffixes=("_trade", "_property"),
-    )
+# def dss_collection_and_water(dss_collection,water_services):
 
-    convert_dataframe_to_csv(
-        dataframe=collection_and_property, file_name="collection_and_property"
-    )
+#     collection_and_water = dss_collection.merge(
+#         water_services,
+#         how="inner",
+#         left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+#         right_on="_source.Data.applicationNo",
+#         suffixes=("_trade", "_property"),
+#     )
 
-def dss_collection_and_trade(trade_services, dss_collection):
+#     convert_dataframe_to_csv(
+#         dataframe=collection_and_water, file_name="collection_and_water"
+#     )
 
-    collection_and_trade = dss_collection.merge(
-        trade_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.tradelicense.applicationNumber",
-        suffixes=("_trade", "_property"),
-    )
+# def dss_collection_and_property(dss_collection,property_services):
 
-    convert_dataframe_to_csv(
-        dataframe=collection_and_trade, file_name="collection_and_trade"
-    )
+#     collection_and_property = dss_collection.merge(
+#         property_services,
+#         how="inner",
+#         left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+#         right_on="_source.Data.propertyId",
+#         suffixes=("_trade", "_property"),
+#     )
+
+#     convert_dataframe_to_csv(
+#         dataframe=collection_and_property, file_name="collection_and_property"
+#     )
+
+# def dss_collection_and_trade(trade_services, dss_collection):
+
+#     collection_and_trade = dss_collection.merge(
+#         trade_services,
+#         how="inner",
+#         left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+#         right_on="_source.Data.tradelicense.applicationNumber",
+#         suffixes=("_trade", "_property"),
+#     )
+
+#     convert_dataframe_to_csv(
+#         dataframe=collection_and_trade, file_name="collection_and_trade"
+#     )
 
 # property_service_json = open("/opt/airflow/dags/json/property_service.json")
 
@@ -386,12 +391,7 @@ def dss_collection_and_trade(trade_services, dss_collection):
 # property_service csv
 
 
-flatten_data  = PythonOperator(
-    task_id='flatten_data',
-    python_callable=test,
-    provide_context=True,
-    do_xcom_push=True,
-    dag=dag)
+
 
 # join_data  = PythonOperator(
 #     task_id='join_data',
