@@ -26,7 +26,10 @@ dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
+def test():
+    logging.info('testing DAG')
 
+    
 def dump_kibana_pt():
     #connection = BaseHook.get_connection('qa-punjab-kibana')
     #endpoint = 'kibana/api/console/proxy'
@@ -385,7 +388,7 @@ def dss_collection_and_trade(trade_services, dss_collection):
 
 flatten_data  = PythonOperator(
     task_id='flatten_data',
-    python_callable=elastic_dump_pt,
+    python_callable=test,
     provide_context=True,
     do_xcom_push=True,
     dag=dag)
