@@ -97,8 +97,8 @@ def dump_kibana(**kwargs):
 
 
     if module == 'COMMON':
-        dt_aware = localtz.localize(datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f"))
-        logging.info(dt_aware.strftime("%Y-%m-%d %H:%M:%S.%f"))
+        present = date.strftime("%Y-%m-%d %H:%M:%S.%f")
+        dt_aware = datetime.strptime(present,"%Y-%m-%d %H:%M:%S.%f")
         total_ulbs = readulb()
         citizen_count = get_citizen_count(dt_aware.strftime("%Y-%m-%d %H:%M:%S.%f"))
         common_metrics = {}
