@@ -43,7 +43,19 @@ property_details = {
 
 def elastic_dump_pt():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('property-services/_search', json.loads(property_details.get('query')))
+    resp = hook.search('property-services/_search', {
+        "size": 10,
+        "query": {
+        "match_all": {}
+         },
+        "sort": [
+        {
+        "Data.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ]
+    })
     logging.info(resp)
     logging.info(resp['hits']['hits'])
     with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
