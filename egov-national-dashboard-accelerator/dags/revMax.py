@@ -1,4 +1,3 @@
-from heapq import merge
 import json
 from airflow import DAG
 from hooks.elastic_hook import ElasticHook
@@ -9,7 +8,6 @@ import logging
 import pandas as pd
 import numpy as np
 import json
-
 
 
 default_args = {
