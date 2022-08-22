@@ -10,11 +10,11 @@ class ElasticHook(HttpHook):
     def search(self, index_and_type, args):
         session = self.get_conn({})
 
-        url = self.base_url + index_and_type + '/_search'
-        logging.info(url)
-
+        url = self.base_url + '/'+ index_and_type
+ 
         req = requests.Request('GET', url, json=args)
         prep_req = session.prepare_request(req)
+
 
         resp = session.send(prep_req)
         try:
