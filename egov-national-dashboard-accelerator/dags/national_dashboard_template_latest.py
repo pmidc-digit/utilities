@@ -153,8 +153,8 @@ def readulb(**kwargs):
     return total_ulbs
 
 def get_citizen_count(startdate):
-        logging.info('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}').format(startdate)
-        response = requests.get(('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}').format(startdate))
+        logging.info('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}'.format(startdate))
+        #response = requests.get('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}'.format(startdate))
         if response.status_code == 200:
             logging.info("sucessfully fetched the data")
             return response.json()
