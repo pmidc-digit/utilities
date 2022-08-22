@@ -43,6 +43,36 @@ dag = DAG('national_dashboard_template', default_args=default_args, schedule_int
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
+property_details = {
+  'path': 'property-services/_search',
+  'name': 'property_details',
+  'query': """
+{{
+  "size":100,
+    "query": {{
+        "bool": {{
+          "must_not": [
+            {{
+              "term": {{
+                "Data.tenantId.keyword": "pb.testing"
+              }}
+            }}
+          ]
+        }}
+      }}
+}}
+
+    """
+}  
+
+def elastic_dump_pt():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('property-services/_search', json.loads(property_details('query')))
+    logging.info(resp)
+    logging.info(resp['hits']['hits'])
+    return resp['hits']['hits']
+
+
 def dump_kibana(**kwargs):
     connection = BaseHook.get_connection('qa-punjab-kibana')
     endpoint = 'kibana/api/console/proxy'
@@ -370,6 +400,12 @@ load_obps = PythonOperator(
     op_kwargs={ 'module' : 'OBPS'},
     dag=dag)
 
+load_pt = PythonOperator(
+    task_id='dump_pt',
+    python_callable=elastic_dump_pt,
+    provide_context=True,
+    dag=dag)
+
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
 extract_ws >> transform_ws >> load_ws
@@ -378,3 +414,4 @@ extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 extract_obps >> transform_obps >> load_obps
+load_pt
