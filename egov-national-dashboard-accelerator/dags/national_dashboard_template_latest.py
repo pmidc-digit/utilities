@@ -98,8 +98,8 @@ def dump_kibana(**kwargs):
 
     if module == 'COMMON':
         present = datetime.strptime(date,"%d-%m-%Y")  
-        logging.info(present.strftime("%Y-%m-%d %H:%M:%S.%f"))      
-        citizen_count = get_citizen_count(present.strftime("%Y-%m-%d %H:%M:%S.%f"))
+        logging.info(present.strftime("%Y-%m-%d %H:%M:%S"))      
+        citizen_count = get_citizen_count(present.strftime("%Y-%m-%d %H:%M:%S"))
         total_ulbs = readulb()
         common_metrics = {}
         module_ulbs = []
@@ -154,7 +154,7 @@ def readulb(**kwargs):
 
 def get_citizen_count(startdate):
         logging.info('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}'.format(startdate))
-        #response = requests.get('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}'.format(startdate))
+        response = requests.get('http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date={0}'.format(startdate))
         if response.status_code == 200:
             logging.info("sucessfully fetched the data")
             return response.json()
