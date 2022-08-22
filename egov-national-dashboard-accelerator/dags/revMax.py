@@ -27,29 +27,61 @@ log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
 
+def dump_kibana_pt():
+    #connection = BaseHook.get_connection('qa-punjab-kibana')
+    #endpoint = 'kibana/api/console/proxy'
+    # query = property_details
+    # url = '{0}://{1}/{2}?path={3}&method=POST'.format('https', connection.host, endpoint, query.get('path'))
+    # q = query.get('query')
+    # logging.info(q)
+    # logging.info(query.get('path'))
+    # logging.info(url)
+    # r = requests.post(url, data=q, headers={'kbn-xsrf' : 'true', 'Content-Type' : 'application/json'}, auth=(connection.login, connection.password))
+    # logging.info(r.request)
+    # logging.info('>>>>>>>>>>>>>>>>')
+    # logging.info(r.text)
+    with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
+        json.dump(elastic_dump_pt,outfile)
+    #merged_document['pt'] = elastic_dump_pt
+    #merged_document['tl'] = elastic_dump_tl
+    #merged_document['ws'] = elastic_dump_ws
+    #merged_document['collection'] = elastic_dump_collection
+    #merged_document['meter'] = elastic_dump_meter
+
+
+
+property_details = {
+  'path': 'property-services/_search',
+  'name': 'property_details',
+  'query': """
+GET /property-services/_search
+{{
+  "size":100,
+    "query": {{
+        "bool": {{
+          "must_not": [
+            {{
+              "term": {{
+                "Data.tenantId.keyword": "pb.testing"
+              }}
+            }}
+          ]
+        }}
+      }}
+}}
+
+    """
+}  
 
 def elastic_dump_pt():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('property-services/_search', {
-        "size": 10,
-        "query": {
-        "match_all": {}
-         },
-        "sort": [
-        {
-        "Data.@timestamp": {
-            "order": "desc"
-        }
-        }
-    ]
-    })
-    logging.info(resp)
+    resp = hook.search(property_details.get('path'),json.loads(property_details.get('query')))
     logging.info(resp['hits']['hits'])
     return resp['hits']['hits']
 
 def elastic_dump_tl():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('tlindex-v1-enriched/_search', {
+    resp = hook.search('/property-services', {
         "size": 10,
         "query": {
         "match_all": {}
@@ -68,7 +100,7 @@ def elastic_dump_tl():
 
 def elastic_dump_ws():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('wsapplications/_search/property-services', {
+    resp = hook.search('/property-services', {
         "size": 10,
         "query": {
         "match_all": {}
@@ -87,7 +119,7 @@ def elastic_dump_ws():
 
 def elastic_dump_collection():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('dss-collection_v2/_search', {
+    resp = hook.search('/property-services', {
         "size": 10,
         "query": {
         "match_all": {}
@@ -107,7 +139,7 @@ def elastic_dump_collection():
 
 def elastic_dump_meter():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('meter-services/_search', {
+    resp = hook.search('/meter-services', {
         "size": 10,
         "query": {
         "match_all": {}
