@@ -97,8 +97,11 @@ def dump_kibana(**kwargs):
 
 
     if module == 'COMMON':
+        today = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S.%f")
+        dt_aware = datetime.strptime(today, "%Y-%m-%d %H:%M:%S.%f")
+        print(dt_aware)
         total_ulbs = readulb()
-        citizen_count = get_citizen_count()
+        citizen_count = get_citizen_count(dt_aware)
         common_metrics = {}
         module_ulbs = []
         for tenantid in ulbs:
@@ -150,8 +153,8 @@ def readulb(**kwargs):
     total_ulbs = len(ulbs)
     return total_ulbs
 
-def get_citizen_count():
-        response = requests.get("https://mseva.lgpunjab.gov.in/egov-searcher/unique-citizen-count")
+def get_citizen_count(startdate):
+        response = requests.get("http://mseva-uat.lgpunjab.gov.in/egov-searcher/unique-citizen-count?date=2022-08-21 17:20:34.935")
         if response.status_code == 200:
             logging.info("sucessfully fetched the data")
             return response.json()
