@@ -500,7 +500,7 @@ transform_common = PythonOperator(
     dag=dag)
 
 load_common = PythonOperator(
-    task_id='nudb_ingest_load_common',
+    task_id='test',
     python_callable=elastic_dump_pt,
     provide_context=True,
     dag=dag)
