@@ -563,4 +563,4 @@ flatten_data  = PythonOperator(
 # extract_common >> transform_common >> load_common
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
 #extract_obps >> transform_obps >> load_obps
-elastic_dump_pt
+flatten_data
