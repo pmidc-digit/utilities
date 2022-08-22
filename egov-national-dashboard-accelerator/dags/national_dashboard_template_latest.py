@@ -86,10 +86,11 @@ property_details = {
 
 def elastic_dump_pt():
     hook = ElasticHook('GET', 'es_conn')
+    logging.info(property_details('query'))
     resp = hook.search('property-services/_search', json.loads(property_details('query')))
     logging.info(resp)
     logging.info(resp['hits']['hits'])
-    return resp['hits']['hits']
+    #return resp['hits']['hits']
 
 def dump_kibana(**kwargs):
     hook = ElasticHook('GET', 'es_conn')
