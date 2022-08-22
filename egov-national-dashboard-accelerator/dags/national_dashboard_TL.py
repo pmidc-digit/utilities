@@ -182,7 +182,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module):
                     '_index':'water_and_meter',
                     '_type': '_doc',
                     '_id': str(uuid.uuid1()),
-                    '_source': json.dumps(row),
+                    '_source': row,
                 }
             ]
             helpers.bulk(es, actions)

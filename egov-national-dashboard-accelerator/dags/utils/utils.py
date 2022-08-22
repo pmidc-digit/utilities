@@ -12,7 +12,8 @@ def log(module, type, message, connection, endpoint):
         'timestamp' : int(datetime.datetime.now().timestamp() * 1000),
         'module' : module,
         'severity' : type,
-        'state' : 'Punjab', 'message' : message
+        'state' : 'Punjab', 
+        'message' : message
     }
     r = requests.post(url, data=json.dumps(q), headers={'kbn-xsrf' : 'true', 'Content-Type' : 'application/json'}, auth=(connection.login, connection.password))
     response = r.json()
