@@ -397,4 +397,4 @@ flatten_data  = PythonOperator(
 #     do_xcom_push=True,
 #     dag=dag)
 
-flatten_data >> join_data
+flatten_data
