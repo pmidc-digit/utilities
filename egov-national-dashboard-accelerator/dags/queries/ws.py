@@ -1,28 +1,32 @@
 
+import logging
+
+
 def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
-  allDims = []
-  grouped_by = []
+  groupby_usage = []
+  groupby_channel = []
+  collection = []
 
-  channel_agg = region_bucket.get('bypaymentChannelType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:  
-      grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
-            'todaysCollection').get('value') if channel_bucket.get('todaysCollection') else 0})
-      allDims.append(
-        {'groupBy': 'paymentChannelType', 'buckets': grouped_by})
+  if region_bucket.get('byChannel'):
+    channel_buckets = region_bucket.get('byChannel').get('buckets')
+    for channel_bucket in channel_buckets:
+      channel = channel_bucket.get('key')
+      value = channel_bucket.get('byChannel').get('value') if channel_bucket.get('byChannel') else 0
+      groupby_channel.append({ 'name' : channel, 'value' : value})
   
-  channel_agg = region_bucket.get('byUsageType')  
-  usage_type_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for usage_type_bucket in usage_type_buckets:
-      grouped_by.append({'name': usage_type_bucket.get('key'), 'value': usage_type_bucket.get(
-            'todaysCollection').get('value') if usage_type_bucket.get('todaysCollection') else 0})
-      allDims.append(
-        {'groupBy': 'usageType', 'buckets': grouped_by})
+  if region_bucket.get('byUsageType'):
+    usage_type_buckets = region_bucket.get('byUsageType').get('buckets')
+    for usage_type_bucket in usage_type_buckets:
+      usage_type = usage_type_bucket.get('key')
+      value = usage_type_bucket.get('byUsageType').get('value') if usage_type_bucket.get('byUsageType') else 0
+      groupby_usage.append({ 'name' : usage_type, 'value' : value})
+  
 
+  collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
+  collection.append({ 'groupBy': 'paymentChannelType', 'buckets' : groupby_channel})
+  metrics['todaysCollection'] = collection
   
-  metrics['todaysCollection'] = allDims
+  
   return metrics
 
 ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
@@ -57,17 +61,20 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
     "aggs": {{
             "ward": {{
               "terms": {{
-                "field": "block.keyword"
+                "field": "block.keyword",
+                "size":10000
               }},
         "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "cityname.keyword"
+                "field": "cityname.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "regionname.keyword"
+                    "field": "districtname.keyword",
+                    "size":10000
                      }},
                    "aggs": {{
                       "byUsageType": {{
@@ -75,19 +82,19 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
                           "field": "consumertype.keyword"
                         }},
                           "aggs": {{
-                              "todaysCollection": {{
+                              "byUsageType": {{
                                 "sum":{{
                                 "field": "totalamount"
                               }}
                             }}
                           }}
                          }},
-                      "bypaymentChannelType": {{
+                      "byChannel": {{
                         "terms": {{
-                          "field": "paymentmode.keyword"
+                          "field": "channel.keyword"
                         }},
                           "aggs": {{
-                            "todaysCollection": {{
+                            "byChannel": {{
                               "sum": {{
                                 "field": "totalamount"
                               }}
@@ -108,17 +115,29 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
                                  }
 
 
-def extract_ws_collection_by_tax_head(metrics, region_bucket):
+def extract_ws_collection_by_tax_head_connection_type(metrics, region_bucket):
   groupby_tax_heads = []
   collection = metrics.get('todaysCollection') if metrics.get('todaysCollection') else []
 
-  if region_bucket.get('collectionbytaxHeads'):
-    tax_head_buckets = region_bucket.get('collectionbytaxHeads').get('buckets')
-    if tax_head_buckets:
-      for tax_head_bucket in tax_head_buckets:
-        tax_head = tax_head_bucket.get('key')
-        value = tax_head_bucket.get('bytaxHeads').get('value') if tax_head_bucket.get('bytaxHeads') else 0
-        groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
+  tax_head = region_bucket.get('INTEREST')
+  value = region_bucket.get('INTEREST').get('todaysCollection').get('value') if region_bucket.get('INTEREST').get('todaysCollection') else 0
+  groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
+
+  tax_head = region_bucket.get('ADVANCE')
+  value = region_bucket.get('ADVANCE').get('todaysCollection').get('value') if region_bucket.get('ADVANCE').get('todaysCollection') else 0
+  groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
+
+  tax_head = region_bucket.get('CURRENT.CHARGES')
+  value = region_bucket.get('CURRENT.CHARGES').get('todaysCollection').get('value') if region_bucket.get('CURRENT.CHARGES').get('todaysCollection') else 0
+  groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
+
+  tax_head = region_bucket.get('ARREAR.CHARGES')
+  value = region_bucket.get('ARREAR.CHARGES').get('todaysCollection').get('value') if region_bucket.get('ARREAR.CHARGES').get('todaysCollection') else 0
+  groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
+
+  tax_head = region_bucket.get('LATE.CHARGES')
+  value = region_bucket.get('LATE.CHARGES').get('todaysCollection').get('value') if region_bucket.get('LATE.CHARGES').get('todaysCollection') else 0
+  groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
     
  
   collection.append({ 'groupBy': 'taxHeads', 'buckets' : groupby_tax_heads})
@@ -127,79 +146,126 @@ def extract_ws_collection_by_tax_head(metrics, region_bucket):
   
   return metrics
 
-ws_collection_by_tax_head = {
-    'path': 'receipts-consumers/_search',
-    'name': 'ws_collection_by_tax_head',
-    'lambda': extract_ws_collection_by_tax_head,
+ws_collection_by_tax_head_connection_type = {
+    'path': 'demandbillconsumers/_search',
+    'name': 'ws_collection_by_tax_head_connection_type',
+    'lambda': extract_ws_collection_by_tax_head_connection_type,
     'query': """
 {{
-  "size":0,
+  "size": 0,
   "query": {{
-        "bool": {{
-              "must_not": [
-                {{
-                  "term": {{
-                    "status": "Cancelled"
-                  }}
-                }}
-              ],
-              "must":[
-                {{
-                   "range": {{
-                      "receiptdate": {{
-                      "gte": {0},
-                      "lte":  {1},
-                      "format": "epoch_millis"
-                }}
-              }}
-                }}
-                ]
+    "bool": {{
+      "must": [
+        {{
+          "range": {{
+            "billdate": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
             }}
-}},
-  "aggs": {{
-      "ward": {{
-        "terms": {{
-          "field": "block.keyword"
-        }},
-        "aggs": {{
-            "ulb": {{
-              "terms": {{
-                "field": "cityname.keyword"
-              }},
-              "aggs": {{
-                "region": {{
-                  "terms": {{
-                    "field": "regionname.keyword"
-                     }},
-  "aggs": {{
-    "collectionbytaxHeads": {{
-      "filter": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "status": "Cancelled"
-              }}
-            }}
-          ]
+          }}
         }}
+      ]
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "block.keyword",
+        "size":10000
       }},
       "aggs": {{
-        "bytaxHeads": {{
-          "sum": {{
-            "field": "totalamount"
+        "ulb": {{
+          "terms": {{
+            "field": "cityname.keyword",
+            "size":10000
+          }},
+          "aggs": {{
+            "region": {{
+              "terms": {{
+                "field": "districtname.keyword",
+                "size":10000
+              }},
+              "aggs": {{
+                "LATE.CHARGES": {{
+                  "filter": {{
+                    "term": {{
+                      "billgenerated": true
+                    }}
+                  }},
+                  "aggs": {{
+                    "todaysCollection": {{
+                      "sum": {{
+                        "field": "penaltycollection"
+                      }}
+                    }}
+                  }}
+                }},
+                "INTEREST": {{
+                  "filter": {{
+                    "term": {{
+                      "billgenerated": true
+                    }}
+                  }},
+                  "aggs": {{
+                    "todaysCollection": {{
+                      "sum": {{
+                        "field": "interestcollection"
+                      }}
+                    }}
+                  }}
+                }},
+                "ADVANCE": {{
+                  "filter": {{
+                    "term": {{
+                      "billgenerated": true
+                    }}
+                  }},
+                  "aggs": {{
+                    "todaysCollection": {{
+                      "sum": {{
+                        "field": "advancecollection"
+                      }}
+                    }}
+                  }}
+                }},
+                "CURRENT.CHARGES": {{
+                  "filter": {{
+                    "term": {{
+                      "billgenerated": true
+                    }}
+                  }},
+                  "aggs": {{
+                    "todaysCollection": {{
+                      "sum": {{
+                        "field": "currentcharges"
+                      }}
+                    }}
+                  }}
+                }},
+                "ARREAR.CHARGES": {{
+                  "filter": {{
+                    "term": {{
+                      "billgenerated": true
+                    }}
+                  }},
+                  "aggs": {{
+                    "todaysCollection": {{
+                      "sum": {{
+                        "field": "arrearcharges"
+                      }}
+                    }}
+                  }}
+                }}
+              }}
+            }}
           }}
         }}
       }}
     }}
   }}
 }}
-}}
-}}
-}}
-}}
-}}
-}}
+
 
 
 """
@@ -207,20 +273,123 @@ ws_collection_by_tax_head = {
 
 
 def extract_ws_pending_connections(metrics, region_bucket):
-  groupby_duration = []
-  collection = []
-  duration_buckets = ['0to3Days', '3to7Days', '7to15Days', 'MoreThan15Days' ]
-  for duration_bucket in duration_buckets:
-    if region_bucket.get(duration_bucket):
-      inner_buckets = region_bucket.get(duration_bucket).get('buckets')
-      value = inner_buckets[0].get('doc_count') if inner_buckets and len(inner_buckets) > 0 else 0
-      groupby_duration.append({ 'name' : duration_bucket, 'value' : value})
 
-  collection.append({ 'groupBy': 'duration', 'buckets' : groupby_duration})
-  metrics['pendingConnections'] = collection
+  all_dims = metrics['pendingConnections'] if metrics.get('pendingConnections') else []
+  logging.info("before consolidation-1")
+  #get new metrics from region_bucket
+  duration_agg = region_bucket.get('0to3Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_0to3= []
+  for duration_bucket in duration_buckets:
+      grouped_by_0to3.append({ 'name' : "0to3Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0})
+  logging.info("value -0t03 {0}".format(duration_bucket.get('doc_count')))
+
+  duration_agg = region_bucket.get('3to7Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_3to7 = []
+  for duration_bucket in duration_buckets:
+      grouped_by_3to7.append({ 'name' : "3to7Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0}) 
+  logging.info("value -3to7 {0}".format(duration_bucket.get('doc_count')))
+
+  duration_agg = region_bucket.get('7to15Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_7to15 = []
+  for duration_bucket in duration_buckets:
+         grouped_by_7to15.append({ 'name' : "7to15Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0})
+  logging.info("value -7to15 {0}".format(duration_bucket.get('doc_count')))
+
+  duration_agg = region_bucket.get('MoreThan15Days')
+  duration_buckets = duration_agg.get('buckets')
+  grouped_by_MoreThan15 = []
+  for duration_bucket in duration_buckets:
+         grouped_by_MoreThan15.append({ 'name' : "MoreThan15Days", 'value' : duration_bucket.get('doc_count') if duration_bucket.get('doc_count') else 0}) 
+  logging.info("value -morethan15 {0}".format(duration_bucket.get('doc_count')))
   
-  
+  logging.info("before consolidation -2")
+
+  all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_0to3}) 
+  all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_3to7})
+  all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_7to15}) 
+  all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_MoreThan15})
+  metrics['pendingConnections'] = all_dims
+  logging.info("before consolidation -4")
   return metrics
+  # for dim in all_dims:
+  #   if dim and dim.get('groupBy') == '0to3Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_0to3.get(bucket.get('name')):
+  #           grouped_by_0to3[bucket.get('name')] = grouped_by_0to3[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_0to3[bucket.get('name')] = bucket.get('doc_count')
+
+  #   if dim and dim.get('groupBy') == '3to7Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and gouped_by_3to7.get(bucket.get('name')):
+  #           grouped_by_3to7[bucket.get('name')] = grouped_by_3to7[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_3to7[bucket.get('name')] = bucket.get('doc_count')
+
+  #   if dim and dim.get('groupBy') == '7to15Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_7to15.get(bucket.get('name')):
+  #           grouped_by_7to15[bucket.get('name')] = grouped_by_7to15[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_7to15[bucket.get('name')] = bucket.get('doc_count')
+    
+
+  #   if dim and dim.get('groupBy') == 'MoreThan15Days':
+  #     buckets = dim.get('buckets')
+  #     if buckets and len(buckets) > 0:
+  #       for bucket in buckets:
+  #         if bucket.get('name') and grouped_by_MoreThan15.get(bucket.get('name')):
+  #           grouped_by_MoreThan15[bucket.get('name')] = grouped_by_MoreThan15[bucket.get(
+  #               'name')] + bucket.get('doc_count')
+  #         else:
+  #           grouped_by_MoreThan15[bucket.get('name')] = bucket.get('doc_count')
+
+  #   logging.info("before consolidation-3")
+  #   all_dims = []
+  #   buckets = []
+  #   for k in grouped_by_0to3.keys():
+  #     logging.info(grouped_by_0to3[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_0to3[k]})
+
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+
+  #   buckets = []
+  #   for k in grouped_by_3to7.keys():
+  #     logging.info(grouped_by_3to7[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_3to7[k]})
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+
+  #   buckets = []
+  #   for k in grouped_by_7to15.keys():
+  #     logging.info(grouped_by_7to15[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_7to15[k]})
+  
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+      
+  #   buckets = []
+  #   for k in grouped_by_MoreThan15.keys():
+  #     logging.info(grouped_by_MoreThan15[k])
+  #     buckets.append({ 'name': k, 'value': grouped_by_MoreThan15[k]})
+  
+  #   all_dims.append({ 'groupBy' : 'duration', 'buckets' : buckets}) 
+
+  #   metrics['pendingConnections'] = all_dims
+  #   return metrics
+  
+  
+  # return metrics
 
 ws_pending_connections = {'path': 'wsapplications/_search',
                               'name': 'ws_pending_connections',
@@ -245,7 +414,8 @@ ws_pending_connections = {'path': 'wsapplications/_search',
                 "applicationstatus.keyword": [
                   "Created",
                   "Rejected",
-                  "Verified"
+                  "Verified",
+                  "verified"
                 ]
               }}
             }},
@@ -264,17 +434,20 @@ ws_pending_connections = {'path': 'wsapplications/_search',
             "aggs": {{
               "ward": {{
                 "terms": {{
-                  "field": "block.keyword"
+                  "field": "block.keyword",
+                  "size":10000
                 }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "cityname.keyword"
+                    "field": "cityname.keyword",
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword",
+                      "size":10000
                     }},
                     "aggs": {{
         "0to3Days": {{
@@ -361,7 +534,7 @@ def extract_ws_sewerage_connections(metrics, region_bucket):
   collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   metrics['sewerageConnections'] = collection
   
-  
+ 
   return metrics
 
 ws_sewerage_connections = {'path': 'wsapplications/_search',
@@ -370,7 +543,7 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
 
                      'query': """
 {{
-  "size": 0,
+  "size": 10,
     "query": {{
         "bool": {{
           "must_not": [
@@ -410,17 +583,20 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
     "aggs": {{
               "ward": {{
                 "terms": {{
-                  "field": "block.keyword"
+                  "field": "block.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "ulb": {{
                 "terms": {{
-                  "field": "cityname.keyword"
+                  "field": "cityname.keyword",
+                  "size":10000
                 }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "regionname.keyword"
+                    "field": "districtname.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                     "sewerageConnectionsbyChannelType": {{
@@ -437,7 +613,8 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
                     }},
                     "sewerageConnectionsbyUsageType": {{
                       "terms": {{
-                        "field": "usage.keyword"
+                        "field": "usage.keyword",
+                        "size":10000
                       }},
                     "aggs": {{
                         "sewerageConnectionsbyUsageType": {{
@@ -463,38 +640,39 @@ ws_sewerage_connections = {'path': 'wsapplications/_search',
 
 
 def extract_ws_water_connections(metrics, region_bucket):
-  all_dims = []
-  grouped_by = []
+  groupby_usage = []
+  groupby_channel = []
+  groupby_meter = []
+  collection =  []
 
-  channel_agg = region_bucket.get('waterConnectionsbyChannelType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:  
-    grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
-            'waterConnectionsbyChannelType').get('value') if channel_bucket.get('waterConnectionsbyChannelType') else 0})
-    all_dims.append(
-        {'groupBy': 'channelType', 'buckets': grouped_by})
+  if region_bucket.get('waterConnectionsbyChannelType'):
+    channel_buckets = region_bucket.get('waterConnectionsbyChannelType').get('buckets')
+    for channel_bucket in channel_buckets:
+      channel = channel_bucket.get('key')
+      value = channel_bucket.get('waterConnectionsbyChannelType').get('value') if channel_bucket.get('waterConnectionsbyChannelType') else 0
+      groupby_channel.append({ 'name' : channel, 'value' : value})
+  
+  if region_bucket.get('waterConnectionsbyUsageType'):
+    usage_type_buckets = region_bucket.get('waterConnectionsbyUsageType').get('buckets')
+    for usage_type_bucket in usage_type_buckets:
+      usage_type = usage_type_bucket.get('key')
+      value = usage_type_bucket.get('waterConnectionsbyUsageType').get('value') if usage_type_bucket.get('waterConnectionsbyUsageType') else 0
+      groupby_usage.append({ 'name' : usage_type, 'value' : value})
+  
+  if region_bucket.get('waterConnectionsbyMeterType'):
+    meter_type_buckets = region_bucket.get('waterConnectionsbyMeterType').get('buckets')
+    for meter_type_bucket in meter_type_buckets:
+      meter_type = meter_type_bucket.get('key')
+      value = meter_type_bucket.get('waterConnectionsbyMeterType').get('value') if meter_type_bucket.get('waterConnectionsbyMeterType') else 0
+      groupby_meter.append({ 'name' : meter_type, 'value' : value})
+  
 
-  channel_agg = region_bucket.get('waterConnectionsbyUsageType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:  
-    grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
-            'waterConnectionsbyUsageType').get('value') if channel_bucket.get('waterConnectionsbyUsageType') else 0})
-    all_dims.append(
-        {'groupBy': 'usageType', 'buckets': grouped_by})
-
-  channel_agg = region_bucket.get('waterConnectionsbyMeterType')  
-  channel_buckets = channel_agg.get('buckets')
-  grouped_by = []
-  for channel_bucket in channel_buckets:  
-    grouped_by.append({'name': channel_bucket.get('key'), 'value': channel_bucket.get(
-            'waterConnectionsbyMeterType').get('value') if channel_bucket.get('waterConnectionsbyMeterType') else 0})
-    all_dims.append(
-        {'groupBy': 'meterType', 'buckets': grouped_by})
-
-
-  metrics['waterConnections'] = all_dims
+  collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
+  collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
+  collection.append({ 'groupBy': 'meterType', 'buckets' : groupby_meter})
+  metrics['waterConnections'] = collection
+  
+  
   return metrics
 
 ws_water_connections = {'path': 'wsapplications/_search',
@@ -503,7 +681,7 @@ ws_water_connections = {'path': 'wsapplications/_search',
                             'query': """
 
  {{
-    "size": 0,
+    "size": 20,
       "query": {{
           "bool": {{
             "must_not": [
@@ -543,17 +721,20 @@ ws_water_connections = {'path': 'wsapplications/_search',
             "aggs": {{
                 "ward": {{
                   "terms": {{
-                    "field": "block.keyword"
+                    "field": "block.keyword",
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "cityname.keyword"
+                    "field": "cityname.keyword",
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword",
+                      "size":10000
                     }},
                     "aggs": {{
                       "waterConnectionsbyChannelType": {{
@@ -625,7 +806,7 @@ ws_todays_applications = {'path': 'wsapplications/_search',
         "must": [
           {{
              "range": {{
-                "createddate": {{
+                "applicationdate": {{
                 "gte": {0},
                 "lte": {1},
                 "format": "epoch_millis"
@@ -638,17 +819,20 @@ ws_todays_applications = {'path': 'wsapplications/_search',
         "aggs": {{
             "ward": {{
               "terms": {{
-                "field": "block.keyword"
+                "field": "block.keyword",
+                "size":10000
               }},
           "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "cityname.keyword"
+                "field": "cityname.keyword",
+                "size":10000
               }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "regionname.keyword"
+                  "field": "districtname.keyword",
+                  "size":10000
                 }},
                 "aggs": {{
                   "todaysTotalApplications": {{
@@ -694,30 +878,33 @@ ws_closed_applications = {'path': 'wsapplications/_search',
                 }}
           }}
               }},
-              {{
-                "terms": {{
-                  "Data.connectionstatus.keyword": [
-                    "INPROGRESS"
-                    ]
-                }}
+               {{
+              "terms": {{
+                "Data.connectionstatus.keyword": [
+                  "INPROGRESS"
+                ]
               }}
+            }}
             ]
           }}
         }},
             "aggs": {{
                 "ward": {{
                   "terms": {{
-                    "field": "block.keyword"
+                    "field": "block.keyword",
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "cityname.keyword"
+                    "field": "cityname.keyword",
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword",
+                      "size":10000
                     }},
                     "aggs": {{
                       "todaysClosedApplications": {{
@@ -739,7 +926,6 @@ ws_closed_applications = {'path': 'wsapplications/_search',
 }
 
 
-
 def extract_ws_connections_created_by_connection_type(metrics, region_bucket):
   groupby_connection_type = []
   collection = metrics.get('connectionsCreated') if metrics.get('connectionsCreated') else []
@@ -759,8 +945,10 @@ def extract_ws_connections_created_by_connection_type(metrics, region_bucket):
     if created_buckets:
       groupby_connection_type.append({'name' : 'WATER.NONMETERED', 'value' : created_buckets.get('value') if created_buckets else 0})
   
-  collection.append({ 'groupBy': 'ConnectionType', 'buckets' : groupby_connection_type})
+  collection.append({ 'groupBy': 'connectionType', 'buckets' : groupby_connection_type})
   metrics['connectionsCreated'] = collection
+
+  return metrics
 
 ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
                          'name': 'ws_connections_created_by_connection_type',
@@ -783,7 +971,7 @@ ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
                 "terms": {{
                   "connectionstatus.keyword": [
                     "ACTIVE"
-                    ]
+                  ]
                 }}
               }},
                 {{
@@ -801,17 +989,20 @@ ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
             "aggs": {{
                 "ward": {{
                   "terms": {{
-                    "field": "block.keyword"
+                    "field": "block.keyword",
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "cityname.keyword"
+                    "field": "cityname.keyword",
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword",
+                      "size":10000
                     }},
                     "aggs": {{
                       "meteredconnectionCreated": {{
@@ -870,26 +1061,21 @@ ws_connections_created_by_connection_type = {'path': 'wsapplications/_search',
 
 
 def extract_ws_connections_created_by_channel_type(metrics, region_bucket):
-  groupby_channel_type = []
+  groupby_channel = []
   collection = metrics.get('connectionsCreated') if metrics.get('connectionsCreated') else []
 
-  if region_bucket.get('meteredconnectionCreated'):
-    created_buckets = region_bucket.get('meteredconnectionCreated').get('meteredconnectionCreated')
-    if created_buckets:
-      groupby_channel_type.append({'name' : 'WATER.METERED', 'value' : created_buckets.get('value') if created_buckets else 0})
+  if region_bucket.get('channelType'):
+    channel_buckets = region_bucket.get('channelType').get('buckets')
+    for channel_bucket in channel_buckets:
+      channel = channel_bucket.get('key')
+      value = channel_bucket.get('count').get('value') if channel_bucket.get('count') else 0
+      groupby_channel.append({ 'name' : channel, 'value' : value})
+
   
-  if region_bucket.get('sewerageconnectionCreated'):
-    created_buckets = region_bucket.get('sewerageconnectionCreated').get('sewerageconnectionCreated')
-    if created_buckets:
-      groupby_channel_type.append({'name' : 'SEWERAGE', 'value' : created_buckets.get('value') if created_buckets else 0})
-  
-  if region_bucket.get('non-meteredconnectionCreated'):
-    created_buckets = region_bucket.get('non-meteredconnectionCreated').get('non-meteredconnectionCreated')
-    if created_buckets:
-      groupby_channel_type.append({'name' : 'WATER.NONMETERED', 'value' : created_buckets.get('value') if created_buckets else 0})
-  
-  collection.append({ 'groupBy': 'ChannelType', 'buckets' : groupby_channel_type})
+  collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   metrics['connectionsCreated'] = collection
+
+  return metrics
 
 ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
                          'name': 'ws_connections_created_by_channel_type',
@@ -937,23 +1123,34 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
             "aggs": {{
                 "ward": {{
                   "terms": {{
-                    "field": "block.keyword"
+                    "field": "block.keyword",
+                    "size":10000
                   }},
               "aggs": {{
                 "ulb": {{
                   "terms": {{
-                    "field": "cityname.keyword"
+                    "field": "cityname.keyword",
+                    "size":10000
                   }},
                 "aggs": {{
                   "region": {{
                     "terms": {{
-                      "field": "regionname.keyword"
+                      "field": "districtname.keyword",
+                      "size":10000
                     }},
                     "aggs": {{
                       "channelType": {{
                         "terms": {{
-                          "field": "channel.keyword"
+                          "field": "channel.keyword",
+                          "size":10000
+                        }},
+                      "aggs": {{
+                        "count": {{
+                          "value_count": {{
+                            "field": "applicationnumber.keyword"
+                          }}
                         }}
+                      }}
                     }}
     }}
     }}
@@ -970,15 +1167,10 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
 
 
 def extract_ws_total_transactions(metrics, region_bucket):
-    status_agg = region_bucket.get('applicationsMovedToday')
-    status_buckets = status_agg.get('buckets')
-    grouped_by = []
-    for status_bucket in status_buckets:
-        grouped_by.append({'name': status_bucket.get('key'), 'value': status_bucket.get(
-            'applicationsMovedToday').get('value') if status_bucket.get('applicationsMovedToday') else 0})
-    metrics['applicationsMovedToday'] = [
-        {'groupBy': 'status', 'buckets': grouped_by}]
-    return metrics
+     metrics['transactions'] = region_bucket.get('transactions').get(
+        'value') if region_bucket.get('transactions') else 0
+     return metrics
+
 
 ws_total_transactions = {'path': 'dss-collection_v2/_search',
                          'name': 'ws_total_transactions',
@@ -1029,17 +1221,20 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
   "aggs": {{
         "ward": {{
           "terms": {{
-            "field": "domainObject.ward.name.keyword"
+            "field": "domainObject.ward.name.keyword",
+            "size":10000
           }},
                 "aggs": {{
         "ulb" :{{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "domainObject.tenantId.keyword",
+            "size":10000
           }},
       "aggs": {{
          "region": {{
             "terms": {{
-              "field": "dataObject.tenantData.city.districtName.keyword"
+              "field": "dataObject.tenantData.city.districtName.keyword",
+              "size":10000
             }},
             "aggs":{{
              "transactions": {{
@@ -1064,17 +1259,16 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
 }
 
 
-def extract_ws_todays_completed_application_withinSLA(metrics, region_bucket):
-  metrics['todaysCompletedApplicationsWithinSLA'] = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
-        'doc_count') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
-  return metrics
+def extract_ws_todays_completed_applications_withinSLA(metrics, region_bucket):
+    val = 0 if region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
+    metrics['todaysCompletedApplicationsWithinSLA'] = val
+    metrics['todaysCompletedApplicationsWithinSLA'] = val
+    return metrics
 
-ws_sewerage_todays_completed_application_withinSLA = {
-                         'path': 'wsapplications/_search',
-                         'name': 'ws_sewerage_todays_completed_application_withinSLA',
-                         'lambda': extract_ws_todays_completed_application_withinSLA,
+ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
+                         'name': 'ws_todays_completed_application_withinSLA',
+                         'lambda': extract_ws_todays_completed_applications_withinSLA,
                          'query': """
-
 
 {{
   "size": 0,
@@ -1084,8 +1278,8 @@ ws_sewerage_todays_completed_application_withinSLA = {
         {{
           "range": {{
             "createddate": {{
-              "gte": 1577817000000,
-              "lte": 1580495400000,
+              "gte": {0},
+              "lte": {1},
               "format": "epoch_millis"
             }}
           }}
@@ -1103,17 +1297,20 @@ ws_sewerage_todays_completed_application_withinSLA = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "block.keyword"
+        "field": "block.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "cityname.keyword"
+            "field": "cityname.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "regionname.keyword"
+                "field": "districtname.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -1122,13 +1319,13 @@ ws_sewerage_todays_completed_application_withinSLA = {
                       "script": {{
                         "params": {{
                           "threshold": 172800000
-                         }},
+                        }},
                         "lang": "painless",
                         "source": "new Date().getTime() * 1000- doc['createddate'].date.getMillis()  < params.threshold"
-                      }}
                      }}
-                   }}
-                 }}
+                    }}
+                  }}
+                }}
               }}
             }}
           }}
@@ -1140,79 +1337,78 @@ ws_sewerage_todays_completed_application_withinSLA = {
 
 
 
-
 """
 }
 
+def extract_ws_todays_sla_compliance(metrics, region_bucket):
+    metrics['todaysCompletedApplicationsWithinSLA'] = region_bucket.get('slaCompliance').get(
+        'value') if region_bucket.get('slaCompliance') else 0
+    return metrics
 
-def extract_ws_sla_compliance(metrics, region_bucket):
-  metrics['slaCompliance'] = region_bucket.get('slaCompliance').get(
-        'value') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
-  return metrics
-
-ws_sla_compliance = {
-                         'path': 'wsapplications/_search',
-                         'name': 'ws_sla_compliance',
-                         'lambda': extract_ws_sla_compliance,
+ws_todays_sla_compliance = {'path': 'wsapplications/_search',
+                         'name': 'ws_todays_sla_compliance',
+                         'lambda': extract_ws_todays_sla_compliance,
                          'query': """
-
 {{
   "size": 0,
-    "query":{{
-      "bool": {{
-        "must": [
-          {{
-             "range": {{
-                "createddate": {{
-                "gte": {0},
-                "lte": {1},
-                "format": "epoch_millis"
-                }}
-             }}
+  "query": {{
+    "bool": {{
+      "must": [
+        {{
+          "range": {{
+            "createddate": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
           }}
-          ],
-        "filter": {{
-                          "terms": {{
-                            "connectionstatus.keyword": [
-                              "INPROGRESS"
-                            ]
-                          }}
-             }}
-          }}
+        }}
+      ],
+      "filter": {{
+        "terms": {{
+          "connectionstatus.keyword": [
+            "INPROGRESS"
+          ]
+        }}
+      }}
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "block.keyword",
+        "size":10000
       }},
-    "aggs": {{
-            "ward": {{
-              "terms": {{
-                "field": "block.keyword"
-              }},
+      "aggs": {{
+        "ulb": {{
+          "terms": {{
+            "field": "cityname.keyword",
+            "size":10000
+          }},
           "aggs": {{
-            "ulb": {{
+            "region": {{
               "terms": {{
-                "field": "cityname.keyword"
-              },
-            "aggs": {{
-              "region": {{
-                "terms": {{
-                  "field": "regionname.keyword"
-                }},
+                "field": "districtname.keyword",
+                "size":10000
+              }},
               "aggs": {{
                 "TotalApplication": {{
                   "value_count": {{
                     "field": "applicationnumber.keyword"
                   }}
                 }},
-              "todaysCompletedApplicationsWithinSLA": {{
-                    "filter": {{
+                "todaysCompletedApplicationsWithinSLA": {{
+                  "filter": {{
+                    "script": {{
                       "script": {{
-                            "script": {{
-                              "params": {{
-                                "threshold": 172800000
-                              }},
-                              "lang": "painless",
-                              "source" : "new Date().getTime() * 1000- doc['createddate'].date.getMillis()  < params.threshold"
-                            }}
+                        "params": {{
+                          "threshold": 172800000
+                        }},
+                        "lang": "painless",
+                        "source": "new Date().getTime() * 1000- doc['createddate'].date.getMillis()  < params.threshold"
                       }}
-                    }},
+                    }}
+                  }},
                   "aggs": {{
                     "count": {{
                       "value_count": {{
@@ -1220,7 +1416,7 @@ ws_sla_compliance = {
                       }}
                     }}
                   }}
-              }},
+                }},
                 "slaCompliance": {{
                   "bucket_script": {{
                     "buckets_path": {{
@@ -1239,18 +1435,23 @@ ws_sla_compliance = {
   }}
 }}
 
-
-
 """
 }
 
+ws_queries = [ws_collection_by_payment_channel_type,
+              ws_connections_created_by_connection_type,
+              ws_pending_connections, 
+              ws_sewerage_connections, 
+              ws_water_connections, 
+              ws_todays_applications, 
+              ws_closed_applications,  
+              ws_connections_created_by_channel_type,
+              ws_connections_created_by_connection_type,
+              ws_total_transactions,
+              ws_todays_sla_compliance,
+              ws_todays_completed_application_withinSLA]
 
-
-
-ws_queries = [ws_collection_by_payment_channel_type, 
-              ws_pending_connections, ws_sewerage_connections, ws_water_connections, ws_todays_applications, ws_closed_applications,  ws_connections_created_by_channel_type,
-              ws_total_transactions,ws_sewerage_todays_completed_application_withinSLA]
-
+#the default payload for WS
 def empty_ws_payload(region, ulb, ward, date):
     return {
         "date": date,
@@ -1283,3 +1484,4 @@ def empty_ws_payload(region, ulb, ward, date):
         }
     }
 
+    

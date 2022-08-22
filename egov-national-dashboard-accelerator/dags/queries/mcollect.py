@@ -5,9 +5,6 @@ def extract_mcollect_total_by_categories(metrics, region_bucket):
         'value') if region_bucket.get('numberOfCategories') else 0
     return metrics
 
-
-   
-
 mcollect_total_by_categories = {
   'path': 'dss-collection_v2/_search',
     'name': 'mcollect_total_by_categories',
@@ -67,17 +64,20 @@ mcollect_total_by_categories = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "numberOfCategories": {{
@@ -97,6 +97,7 @@ mcollect_total_by_categories = {
 
     """
 }
+
 
 def extract_mcollect_todays_collection(metrics, region_bucket):
     status_agg = region_bucket.get('byStatus')
@@ -130,8 +131,6 @@ def extract_mcollect_todays_collection(metrics, region_bucket):
 
     metrics['todaysCollection'] = all_dims
     return metrics
-
-   
 
 mcollect_todays_collection = {
   'path': 'dss-collection_v2/_search',
@@ -193,17 +192,20 @@ mcollect_todays_collection = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "bypaymentMode": {{
@@ -289,9 +291,6 @@ def extract_mcollect_receipts(metrics, region_bucket):
     metrics['numberOfReceipts'] = all_dims
     return metrics
     
-
-   
-
 mcollect_receipts = {
   'path': 'dss-collection_v2/_search',
     'name': 'mcollect_receipts',
@@ -352,17 +351,20 @@ mcollect_receipts = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+              "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "byPaymentMode": {{
@@ -426,7 +428,7 @@ def extract_mcollect_challans(metrics, region_bucket):
     grouped_by = []
     for challanStatus_bucket in challanStatus_buckets:
         grouped_by.append({'name': challanStatus_bucket.get('key'), 'value': challanStatus_bucket.get(
-            'challanStatus').get('value') if challanStatus_bucket.get('paymentMode') else 0})
+            'challanStatus').get('value') if challanStatus_bucket.get('challanStatus') else 0})
     all_dims.append(
         {'groupBy': 'challanStatus', 'buckets': grouped_by})
 
@@ -443,7 +445,6 @@ def extract_mcollect_challans(metrics, region_bucket):
     metrics['numberOfChallans'] = all_dims
     return metrics
    
-
 mcollect_challans = {
   'path': 'dss-collection_v2/_search',
     'name': 'mcollect_challans',
@@ -504,17 +505,20 @@ mcollect_challans = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "dataObject.tenantId.keyword"
+            "field": "dataObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "bychallanStatus": {{

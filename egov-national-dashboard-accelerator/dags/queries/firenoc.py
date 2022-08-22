@@ -1,5 +1,5 @@
 
-
+import logging
 def extract_firenoc_bundle_metrics(metrics, region_bucket):
   department_agg = region_bucket.get('department')
   department_buckets = department_agg.get('buckets')
@@ -14,14 +14,16 @@ def extract_firenoc_bundle_metrics(metrics, region_bucket):
 
 
   for department_bucket in department_buckets:
+    val = 0
     department_name = department_bucket.get('key')   
-
     actualNOCIssued['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('actualNOCIssued').get('actualNOCIssued').get('value') if department_bucket.get('actualNOCIssued') else 0})
     provisionalNOCIssued['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('provisionalNOCIssued').get('provisionalNOCIssued').get('value') if department_bucket.get('provisionalNOCIssued') else 0})
     slaComplianceProvisional['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('slaComplianceProvisional').get('slaComplianceProvisional').get('value') if department_bucket.get('slaComplianceProvisional') else 0})
     slaComplianceActual['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('slaComplianceActual').get('slaComplianceActual').get('value') if department_bucket.get('slaComplianceActual') else 0})
-    avgDaysToIssueActualNOC['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('avgDaysToIssueActualNOC').get('avgDaysToIssueActualNOC').get('value') if department_bucket.get('avgDaysToIssueActualNOC') else 0})
-    avgDaysToIssueProvisionalNOC['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('avgDaysToIssueProvisionalNOC').get('avgDaysToIssueProvisionalNOC').get('value') if department_bucket.get('avgDaysToIssueProvisionalNOC') else 0})
+    val = 0 if  department_bucket.get('avgDaysToIssueActualNOC').get('avgDaysToIssueActualNOC').get('value') == None else department_bucket.get('avgDaysToIssueActualNOC').get('avgDaysToIssueActualNOC').get('value')
+    avgDaysToIssueActualNOC['buckets'].append( { 'name' : department_name, 'value' : val if department_bucket.get('avgDaysToIssueActualNOC') else 0})
+    val = 0 if  department_bucket.get('avgDaysToIssueProvisionalNOC').get('avgDaysToIssueProvisionalNOC').get('value') == None else department_bucket.get('avgDaysToIssueProvisionalNOC').get('avgDaysToIssueProvisionalNOC').get('value')
+    avgDaysToIssueProvisionalNOC['buckets'].append( { 'name' : department_name, 'value' : val if department_bucket.get('avgDaysToIssueProvisionalNOC') else 0})
     todaysApplications['buckets'].append( { 'name' : department_name, 'value' : department_bucket.get('todaysApplications').get('value') if department_bucket.get('todaysApplications') else 0})
     
   
@@ -98,17 +100,20 @@ firenoc_bundle_metrics = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.code.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -359,17 +364,20 @@ firenoc_issued_by_usage_type = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.code.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "usageType": {{
@@ -446,17 +454,20 @@ firenoc_issued_today_by_type = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "type": {{
@@ -533,17 +544,20 @@ firenoc_applications_today_by_type = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "applicationType": {{
@@ -618,17 +632,20 @@ firenoc_applications_closed = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysClosedApplications": {{
@@ -652,8 +669,8 @@ firenoc_applications_closed = {
 
 
 def extract_firenoc_applications_completed_within_sla(metrics, region_bucket):
-  metrics['todaysCompletedApplicationsWithinSLA'] = region_bucket.get('todaysCompletedApplicationsWithinSLA').get(
-        'value') if region_bucket.get('todaysCompletedApplicationsWithinSLA') else 0
+  val = 0 if  region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
+  metrics['todaysCompletedApplicationsWithinSLA'] = val 
   return metrics
    
 firenoc_applications_completed_within_sla = {
@@ -699,17 +716,20 @@ firenoc_applications_completed_within_sla = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword"
+        "field": "Data.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "todaysCompletedApplicationsWithinSLA": {{
@@ -720,7 +740,7 @@ firenoc_applications_completed_within_sla = {
                           "terms": {{
                             "Data.fireNOCDetails.status.keyword": [
                               "APPROVED",
-             		 "CANCELED",
+             		               "CANCELED",
                                "REJECTED"
                             ]
                           }}
@@ -759,16 +779,16 @@ def extract_firenoc_collections_by_department(metrics, region_bucket):
     grouped_by = []
     for department_bucket in department_buckets:
         grouped_by.append({'name': department_bucket.get('key'), 'value': department_bucket.get(
-            'department').get('value') if department_bucket.get('department') else 0})
+            'todaysCollection').get('value') if department_bucket.get('todaysCollection') else 0})
     all_dims.append(
         {'groupBy': 'department', 'buckets': grouped_by})
 
     paymentmode_agg = region_bucket.get('paymentmode')
-    paymentmode_buckets = department_agg.get('buckets')
+    paymentmode_buckets = paymentmode_agg.get('buckets')
     grouped_by = []
     for paymentmode_bucket in paymentmode_buckets:
         grouped_by.append({'name': paymentmode_bucket.get('key'), 'value': paymentmode_bucket.get(
-            'paymentmode').get('value') if paymentmode_bucket.get('paymentmode') else 0})
+            'todaysCollection').get('value') if paymentmode_bucket.get('todaysCollection') else 0})
     all_dims.append(
         {'groupBy': 'paymentMode', 'buckets': grouped_by})
 
@@ -815,17 +835,20 @@ firenoc_collections_by_department = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword"
+        "field": "domainObject.ward.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword"
+            "field": "domainObject.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "dataObject.tenantData.city.districtName.keyword"
+                "field": "dataObject.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "paymentmode": {{
@@ -835,7 +858,7 @@ firenoc_collections_by_department = {
                   "aggs": {{
                     "todaysCollection": {{
                       "sum": {{
-                        "field": "dataObject.paymentDetails.totalAmountPaid.keyword"
+                        "field": "dataObject.paymentDetails.totalAmountPaid"
                       }}
                       }}
                       }}
@@ -847,7 +870,7 @@ firenoc_collections_by_department = {
                   "aggs": {{
                     "todaysCollection": {{
                       "sum": {{
-                        "field": "dataObject.paymentDetails.totalAmountPaid.keyword"
+                        "field": "dataObject.paymentDetails.totalAmountPaid"
                       }}
                     }}
                   }}

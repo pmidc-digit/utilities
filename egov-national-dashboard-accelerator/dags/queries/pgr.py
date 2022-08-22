@@ -16,7 +16,6 @@ def extract_pgr_closed_complaints(metrics, region_bucket):
 
   return metrics
    
-
 pgr_closed_complaints = {
   'path': 'pgrindex-v1-enriched/_search',
     'name': 'pgr_closed_complaints',
@@ -48,7 +47,8 @@ pgr_closed_complaints = {
               "terms": {{
                 "Data.status.keyword": [
                     "closed",
-                    "rejected"
+                    "rejected",
+                    "resolved"
                 ]
               }}
             }}
@@ -57,17 +57,20 @@ pgr_closed_complaints = {
         "aggs": {{
         "ward": {{
           "terms": {{
-            "field": "Data.complaintWard.name.keyword"
+            "field": "Data.complaintWard.name.keyword",
+            "size":10000
           }},
            "aggs": {{
             "ulb": {{
             "terms": {{
-              "field": "Data.tenantId.keyword"
+              "field": "Data.tenantId.keyword",
+              "size":10000
             }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                 }},
                             "aggs": {{
               "department": {{
@@ -112,7 +115,6 @@ def extract_pgr_resolved_complaints(metrics, region_bucket):
 
   return metrics
 
-
 pgr_resolved_complaints = {
     'path': 'pgrindex-v1-enriched/_search',
     'name': 'pgr_resolved_complaints',
@@ -152,17 +154,20 @@ pgr_resolved_complaints = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -194,15 +199,12 @@ pgr_resolved_complaints = {
 
 
 def extract_pgr_unique_citizens(metrics, region_bucket):
- # metrics['todaysLicenseIssued'] = region_bucket.get('todaysLicenseIssued').get('value') if region_bucket.get('todaysLicenseIssued') else 0
     metrics['uniqueCitizens'] = region_bucket.get('uniqueCitizens').get(
         'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
     return metrics
 
-
 pgr_unique_citizens = {
     'path': 'pgrindex-v1-enriched/_search',
-
     'name': 'pgr_unique_citizens',
     'lambda': extract_pgr_unique_citizens,
     'query': """
@@ -232,17 +234,20 @@ pgr_unique_citizens = {
         "aggs": {{
               "ward": {{
                 "terms": {{
-                  "field": "Data.complaintWard.name.keyword"
+                  "field": "Data.complaintWard.name.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "ulb": {{
                 "terms": {{
-                  "field": "Data.tenantId.keyword"
+                  "field": "Data.tenantId.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "region": {{
                 "terms": {{
-                  "field": "Data.tenantData.city.districtName.keyword"
+                  "field": "Data.tenantData.city.districtName.keyword",
+                  "size":10000
                 }},
             "aggs": {{
               "uniqueCitizens": {{
@@ -273,20 +278,13 @@ def extract_pgr_sla_achieved(metrics, region_bucket):
   for department_bucket in department_buckets:
     department_name = department_bucket.get('key')
     value = 0
-    sla_agg = department_bucket.get('slaAchievement')
-    if sla_agg:
-      sla_buckets = sla_agg.get('buckets')
-      for sla_bucket in sla_buckets:
-         value = sla_bucket.get('slaAchievement').get(
-                              'value') if sla_bucket.get('slaAchievement')  else 0
-
+    value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('slaAchievement').get('value')
     slaAchievement['buckets'].append( { 'name' : department_name, 'value' :value})
    
   metrics['slaAchievement'] = [slaAchievement]
     
 
   return metrics
-
 
 
 pgr_sla_achieved = {
@@ -315,6 +313,14 @@ pgr_sla_achieved = {
               "format": "epoch_millis"
             }}
           }}
+        }},
+        {{
+          "range": {{
+            "Data.slaHours": {{
+              "gte": 0,
+              "lte": 360
+            }}
+          }}
         }}
       ]
     }}
@@ -340,20 +346,32 @@ pgr_sla_achieved = {
                     "field": "Data.department.keyword"
                   }},
                   "aggs": {{
-                    "slaAchievement": {{
-                      "range": {{
-                        "field": "Data.slaHours",
-                        "ranges": [
-                          {{
-                            "from": 0,
-                            "to": 360
+                    "all_matching_docs": {{
+                      "filters": {{
+                        "filters": {{
+                          "all": {{
+                            "match_all": {{   }}
                           }}
-                        ]
+                        }}
                       }},
                       "aggs": {{
-                        "slaAchievement": {{
+                        "totalComplaints": {{
+                          "value_count": {{
+                            "field": "Data.dateOfComplaint"
+                          }}
+                        }},
+                        "slaAchieved": {{
                           "value_count": {{
                             "field": "Data.slaHours"
+                          }}
+                        }},
+                        "slaAchievement": {{
+                          "bucket_script": {{
+                            "buckets_path": {{
+                              "closed": "slaAchieved",
+                              "total": "totalComplaints"
+                            }},
+                            "script": "params.closed / params.total * 100"
                           }}
                         }}
                       }}
@@ -376,23 +394,19 @@ pgr_sla_achieved = {
 
 
 def extract_pgr_completion_rate(metrics, region_bucket):
+
   department_agg = region_bucket.get('department')
   department_buckets = department_agg.get('buckets')
   completionRate = { 'groupBy' : 'department', 'buckets' : []}
    
-
   for department_bucket in department_buckets:
     department_name = department_bucket.get('key')
     value = 0
-    if department_bucket.get('all_matching_docs') and department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate'):
-      value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') if department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value') else 0
-    completionRate['buckets'].append( { 'name' : department_name, 'value' : value})
-   
-    metrics['completionRate'] = [completionRate]
-    
+    value = department_bucket.get('all_matching_docs').get('buckets').get('all').get('completionRate').get('value')
+    completionRate['buckets'].append( { 'name' : department_name, 'value' :value})
 
+  metrics['completionRate'] = [completionRate]
   return metrics
-
 
 pgr_completion_rate = {
     'path': 'pgrindex-v1-enriched/_search',
@@ -427,22 +441,26 @@ pgr_completion_rate = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
-              "aggs": {{
+            "aggs": {{
                 "department": {{
                   "terms": {{
-                    "field": "Data.department.keyword"
+                    "field": "Data.department.keyword",
+                    "size":10000
                   }},
                   "aggs": {{
                     "all_matching_docs": {{
@@ -579,17 +597,20 @@ pgr_todays_complaints = {
        "aggs": {{
             "ward": {{
               "terms": {{
-                "field": "Data.complaintWard.name.keyword"
+                "field": "Data.complaintWard.name.keyword",
+                "size":10000
               }},
            "aggs": {{
             "ulb": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantId.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.tenantData.city.districtName.keyword",
+                    "size":10000
                   }},
                     "aggs": {{
                     "Complaints By Status": {{
@@ -621,7 +642,7 @@ pgr_todays_complaints = {
                     "field": "Data.department.keyword"
                   }},
                     "aggs": {{
-                      "byDept": {{
+                      "byDepartment": {{
                         "value_count": {{
                           "field": "Data.dateOfComplaint"
                         }}
@@ -687,7 +708,6 @@ def extract_pgr_status(metrics, region_bucket):
 
     return metrics
 
-
 pgr_status = {
   
   'path': 'pgrindex-v1-enriched/_search',
@@ -722,17 +742,20 @@ pgr_status = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.complaintWard.name.keyword"
+        "field": "Data.complaintWard.name.keyword",
+        "size":10000
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "Data.tenantId.keyword"
+            "field": "Data.tenantId.keyword",
+            "size":10000
           }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.tenantData.city.districtName.keyword"
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "department": {{
@@ -853,6 +876,7 @@ pgr_status = {
     """
 }
 
+
 def extract_pgr_avg_solution_time(metrics, region_bucket):
     department_agg = region_bucket.get('department')
     department_buckets = department_agg.get('buckets') if department_agg.get('buckets') else []
@@ -901,17 +925,20 @@ pgr_avg_solution_time = {
     "aggs": {{
           "ward": {{
             "terms": {{
-              "field": "Data.complaintWard.name.keyword"
+              "field": "Data.complaintWard.name.keyword",
+              "size":10000
             }},
              "aggs": {{
               "ulb": {{
               "terms": {{
-                "field": "Data.tenantId.keyword"
+                "field": "Data.tenantId.keyword",
+                "size":10000
               }},
               "aggs": {{
                 "region": {{
                   "terms": {{
-                    "field": "Data.tenantData.city.districtName.keyword"
+                    "field": "Data.tenantData.city.districtName.keyword",
+                    "size":10000
                   }},
                   "aggs":{{
                      "department": {{
