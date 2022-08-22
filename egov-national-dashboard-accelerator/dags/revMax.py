@@ -42,11 +42,13 @@ def dump_kibana_pt():
     # logging.info(r.request)
     # logging.info('>>>>>>>>>>>>>>>>')
     # logging.info(r.text)
-    merged_document['pt'] = elastic_dump_pt
-    merged_document['tl'] = elastic_dump_tl
-    merged_document['ws'] = elastic_dump_ws
-    merged_document['collection'] = elastic_dump_collection
-    merged_document['meter'] = elastic_dump_meter
+    with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
+        json.dump(elastic_dump_pt, outfile)
+    #merged_document['pt'] = elastic_dump_pt
+    #merged_document['tl'] = elastic_dump_tl
+    #merged_document['ws'] = elastic_dump_ws
+    #merged_document['collection'] = elastic_dump_collection
+    #merged_document['meter'] = elastic_dump_meter
 
 
 
@@ -359,7 +361,7 @@ def flattendata():
 
 # trade service csv
     df = get_dataframe_after_flattening(trade_licence_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="trade_license")
+    convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license_license")
 
 # meter_service csv
     df = get_dataframe_after_flattening(meter_service_json)
