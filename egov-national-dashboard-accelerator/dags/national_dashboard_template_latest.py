@@ -97,7 +97,7 @@ def dump_kibana(**kwargs):
 
 
     if module == 'COMMON':
-        today = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S.%f")
+        today = (date).strftime("%Y-%m-%d %H:%M:%S.%f")
         dt_aware = datetime.strptime(today, "%Y-%m-%d %H:%M:%S.%f")
         logging.info(dt_aware.strftime("%Y-%m-%d %H:%M:%S.%f"))
         total_ulbs = readulb()
