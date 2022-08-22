@@ -97,7 +97,8 @@ def dump_kibana(**kwargs):
 
 
     if module == 'COMMON':
-        present = datetime.strptime(date,"%d-%m-%Y")        
+        present = datetime.strptime(date,"%d-%m-%Y")  
+        logging.info(present.strftime("%Y-%m-%d %H:%M:%S.%f"))      
         citizen_count = get_citizen_count(present.strftime("%Y-%m-%d %H:%M:%S.%f"))
         total_ulbs = readulb()
         common_metrics = {}
