@@ -59,7 +59,7 @@ def elastic_dump_pt():
     })
     logging.info(resp)
     logging.info(resp['hits']['hits'])
-    with open(os.path.join("/opt/airflow/dags","property_service.json"), "w") as outfile:
+    with open("property_service.json", "w") as outfile:
         json.dump(elastic_dump_pt, outfile)
     return resp['hits']['hits']
 
