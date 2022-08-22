@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import json
 import logging
+import os
 
 default_args = {
 'owner': 'airflow',
@@ -58,7 +59,7 @@ def elastic_dump_pt():
     })
     logging.info(resp)
     logging.info(resp['hits']['hits'])
-    with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
+    with open(os.path.join("/opt/airflow/dags","property_service.json"), "w") as outfile:
         json.dump(elastic_dump_pt, outfile)
     return resp['hits']['hits']
 
