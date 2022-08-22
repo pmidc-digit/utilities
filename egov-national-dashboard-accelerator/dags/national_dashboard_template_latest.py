@@ -85,6 +85,7 @@ property_details = {
 }  
 
 def elastic_dump_pt():
+    logging.info("testing RevMax")
     hook = ElasticHook('GET', 'es_conn')
     logging.info(property_details('query'))
     resp = hook.search('property-services/_search', json.loads(property_details('query')))
@@ -499,7 +500,7 @@ transform_common = PythonOperator(
     dag=dag)
 
 load_common = PythonOperator(
-    task_id='test',
+    task_id='nudb_ingest_load_common',
     python_callable=elastic_dump_pt,
     provide_context=True,
     dag=dag)
@@ -554,7 +555,6 @@ load_common = PythonOperator(
 # extract_pt >> transform_pt >> load_pt
 # extract_firenoc >> transform_firenoc >> load_firenoc
 # extract_mcollect >> transform_mcollect >> load_mcollect
-# extract_common >> transform_common >> load_common
+extract_common >> transform_common >> load_common
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
 #extract_obps >> transform_obps >> load_obps
-load_common
