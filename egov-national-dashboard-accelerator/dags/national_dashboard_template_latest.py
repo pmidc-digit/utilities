@@ -500,7 +500,7 @@ transform_common = PythonOperator(
 
 load_common = PythonOperator(
     task_id='nudb_ingest_load_common',
-    python_callable=load,
+    python_callable=elastic_dump_pt,
     provide_context=True,
     op_kwargs={ 'module' : 'COMMON'},
     dag=dag)
@@ -547,12 +547,7 @@ load_common = PythonOperator(
 #     op_kwargs={ 'module' : 'OBPS'},
 #     dag=dag)
 
-flatten_data  = PythonOperator(
-    task_id='flatten_data',
-    python_callable=elastic_dump_pt,
-    provide_context=True,
-    do_xcom_push=True,
-    dag=dag)
+
 
 # extract_tl >> transform_tl >> load_tl
 # extract_pgr >> transform_pgr >> load_pgr
@@ -563,4 +558,4 @@ flatten_data  = PythonOperator(
 # extract_common >> transform_common >> load_common
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
 #extract_obps >> transform_obps >> load_obps
-flatten_data
+load_common
