@@ -317,79 +317,79 @@ def dss_collection_and_trade(trade_services, dss_collection):
         dataframe=collection_and_trade, file_name="collection_and_trade"
     )
 
-property_service_json = open("/opt/airflow/dags/json/property_service.json")
+# property_service_json = open("/opt/airflow/dags/json/property_service.json")
 
-water_service_json = open("/opt/airflow/dags/json/water_service.json")
+# water_service_json = open("/opt/airflow/dags/json/water_service.json")
 
-dss_service_json = open("/opt/airflow/dags/dss_collection.json")
+# dss_service_json = open("/opt/airflow/dags/dss_collection.json")
 
-meter_service_json = open("/opt/airflow/dags/json/meter_service.json")
+# meter_service_json = open("/opt/airflow/dags/json/meter_service.json")
 
-trade_licence_json = open("/opt/airflow/dags/json/trade_license.json")
-
-
-property_service_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(property_service_json)["hits"]
-)
-
-water_service_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(water_service_json)["hits"]
-)
-
-dss_services_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(dss_service_json)["hits"]["hits"]
-)
-
-meter_services_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(meter_service_json)["hits"]
-)
-
-trade_licence_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(trade_licence_json)["hits"]
-)
+# trade_licence_json = open("/opt/airflow/dags/json/trade_license.json")
 
 
-def flattendata():
-    logging.info('start')
-# property_service csv
-    df = get_dataframe_after_flattening(property_service_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="property_service")
+# property_service_after_flattening = get_dataframe_after_flattening(
+#     json_data=json.load(property_service_json)["hits"]
+# )
 
-# water_service csv
-    df = get_dataframe_after_flattening(water_service_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="water_service")
+# water_service_after_flattening = get_dataframe_after_flattening(
+#     json_data=json.load(water_service_json)["hits"]
+# )
 
-# trade service csv
-    df = get_dataframe_after_flattening(trade_licence_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license_license")
+# dss_services_after_flattening = get_dataframe_after_flattening(
+#     json_data=json.load(dss_service_json)["hits"]["hits"]
+# )
 
-# meter_service csv
-    df = get_dataframe_after_flattening(meter_service_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
+# meter_services_after_flattening = get_dataframe_after_flattening(
+#     json_data=json.load(meter_service_json)["hits"]
+# )
 
-# dss_collection csv
-    df = get_dataframe_after_flattening(dss_service_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="dss_collection")
-    logging.info('end')
+# trade_licence_after_flattening = get_dataframe_after_flattening(
+#     json_data=json.load(trade_licence_json)["hits"]
+# )
 
-def joindata():
-#join water and meter
-    water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
 
-#join trade and property
-    trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
+# def flattendata():
+#     logging.info('start')
+# # property_service csv
+#     df = get_dataframe_after_flattening(property_service_json)
+#     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
 
-#join water and property
-    property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
+# # water_service csv
+#     df = get_dataframe_after_flattening(water_service_json)
+#     convert_dataframe_to_csv(dataframe=df,file_name="water_service")
 
-#join water and collection
-    dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_services_after_flattening)
+# # trade service csv
+#     df = get_dataframe_after_flattening(trade_licence_json)
+#     convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license_license")
 
-#join property and collection
-    dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_services_after_flattening)
+# # meter_service csv
+#     df = get_dataframe_after_flattening(meter_service_json)
+#     convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
 
-#join trade and collection
-    dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_services_after_flattening)
+# # dss_collection csv
+#     df = get_dataframe_after_flattening(dss_service_json)
+#     convert_dataframe_to_csv(dataframe=df,file_name="dss_collection")
+#     logging.info('end')
+
+# def joindata():
+# #join water and meter
+#     water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
+
+# #join trade and property
+#     trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
+
+# #join water and property
+#     property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
+
+# #join water and collection
+#     dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_services_after_flattening)
+
+# #join property and collection
+#     dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_services_after_flattening)
+
+# #join trade and collection
+#     dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_services_after_flattening)
 
     
 
@@ -398,16 +398,16 @@ def joindata():
 
 flatten_data  = PythonOperator(
     task_id='flatten_data',
-    python_callable=flattendata,
+    python_callable=elastic_dump_pt,
     provide_context=True,
     do_xcom_push=True,
     dag=dag)
 
-join_data  = PythonOperator(
-    task_id='join_data',
-    python_callable=joindata,
-    provide_context=True,
-    do_xcom_push=True,
-    dag=dag)
+# join_data  = PythonOperator(
+#     task_id='join_data',
+#     python_callable=joindata,
+#     provide_context=True,
+#     do_xcom_push=True,
+#     dag=dag)
 
-flatten_data >> join_data
+flatten_data 
