@@ -27,34 +27,11 @@ log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
 
-def dump_kibana_pt():
-    #connection = BaseHook.get_connection('qa-punjab-kibana')
-    #endpoint = 'kibana/api/console/proxy'
-    # query = property_details
-    # url = '{0}://{1}/{2}?path={3}&method=POST'.format('https', connection.host, endpoint, query.get('path'))
-    # q = query.get('query')
-    # logging.info(q)
-    # logging.info(query.get('path'))
-    # logging.info(url)
-    # r = requests.post(url, data=q, headers={'kbn-xsrf' : 'true', 'Content-Type' : 'application/json'}, auth=(connection.login, connection.password))
-    # logging.info(r.request)
-    # logging.info('>>>>>>>>>>>>>>>>')
-    # logging.info(r.text)
-    with open("/opt/airflow/dags/json/property_service.json", "w") as outfile:
-        json.dump(elastic_dump_pt,outfile)
-    #merged_document['pt'] = elastic_dump_pt
-    #merged_document['tl'] = elastic_dump_tl
-    #merged_document['ws'] = elastic_dump_ws
-    #merged_document['collection'] = elastic_dump_collection
-    #merged_document['meter'] = elastic_dump_meter
-
-
 
 property_details = {
   'path': 'property-services/_search',
   'name': 'property_details',
   'query': """
-GET /property-services/_search
 {{
   "size":100,
     "query": {{
