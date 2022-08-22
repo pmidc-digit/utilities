@@ -62,7 +62,34 @@ total_ulbs = 0
 totalApplications = 0 
 totalApplicationWithinSLA = 0
 
+property_details = {
+  'path': 'property-services/_search',
+  'name': 'property_details',
+  'query': """
+{{
+  "size":100,
+    "query": {{
+        "bool": {{
+          "must_not": [
+            {{
+              "term": {{
+                "Data.tenantId.keyword": "pb.testing"
+              }}
+            }}
+          ]
+        }}
+      }}
+}}
 
+    """
+}  
+
+def elastic_dump_pt():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('property-services/_search', json.loads(property_details('query')))
+    logging.info(resp)
+    logging.info(resp['hits']['hits'])
+    return resp['hits']['hits']
 
 def dump_kibana(**kwargs):
     hook = ElasticHook('GET', 'es_conn')
@@ -519,14 +546,20 @@ load_common = PythonOperator(
 #     op_kwargs={ 'module' : 'OBPS'},
 #     dag=dag)
 
+flatten_data  = PythonOperator(
+    task_id='flatten_data',
+    python_callable=elastic_dump_pt,
+    provide_context=True,
+    do_xcom_push=True,
+    dag=dag)
 
-
-extract_tl >> transform_tl >> load_tl
-extract_pgr >> transform_pgr >> load_pgr
-extract_ws >> transform_ws >> load_ws
-extract_pt >> transform_pt >> load_pt
-extract_firenoc >> transform_firenoc >> load_firenoc
-extract_mcollect >> transform_mcollect >> load_mcollect
-extract_common >> transform_common >> load_common
+# extract_tl >> transform_tl >> load_tl
+# extract_pgr >> transform_pgr >> load_pgr
+# extract_ws >> transform_ws >> load_ws
+# extract_pt >> transform_pt >> load_pt
+# extract_firenoc >> transform_firenoc >> load_firenoc
+# extract_mcollect >> transform_mcollect >> load_mcollect
+# extract_common >> transform_common >> load_common
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
 #extract_obps >> transform_obps >> load_obps
+elastic_dump_pt
