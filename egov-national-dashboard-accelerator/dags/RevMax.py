@@ -2,6 +2,7 @@ from airflow import DAG
 from hooks.elastic_hook import ElasticHook
 from airflow.hooks.base import BaseHook
 from airflow.operators.python_operator import PythonOperator
+from elasticsearch import Elasticsearch, helpers
 from datetime import datetime, timedelta
 import logging
 import pandas as pd
@@ -9,6 +10,8 @@ import numpy as np
 import json
 import logging
 import os
+import csv
+
 default_args = {
 'owner': 'airflow',
 'depends_on_past': False,
@@ -123,7 +126,7 @@ def elastic_dump_collection_pt():
     "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
     "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
-    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward.code","domainObject.ward.name","domainObject.propertyId",
     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
     "query": {
         "bool": {
@@ -170,7 +173,7 @@ def elastic_dump_collection_tl():
     "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
     "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
-    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward.code","domainObject.ward.name","domainObject.propertyId",
     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
     "query": {
         "bool": {
@@ -217,7 +220,7 @@ def elastic_dump_collection_ws():
     "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
     "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
-    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward.code","domainObject.ward.name","domainObject.propertyId",
     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
     "query": {
         "bool": {
@@ -288,6 +291,7 @@ def collect_data():
     elastic_dump_collection_tl()
     elastic_dump_collection_ws()
 
+def join_data():
     f= open('property_service.json',"r")
     property_service_json = json.loads(f.read())
     f.close()
@@ -358,15 +362,21 @@ def collect_data():
     #join trade and property
     trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
     #join water and property
-    #property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
+    property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
     #join water and collection
-    #dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
+    dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
     #join property and collection
-    #dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
+    dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
     #join trade and collection
-    #dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
+    dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
 
-
+def upload_data():
+    logging.info("Upload data to Druid")
+    hook = ElasticHook('GET', 'es_conn')
+    # Open csv file and bulk upload
+    with open('water_and_property.csv') as f:
+        reader = csv.DictReader(f)
+        helpers.bulk(hook, reader, index='water_and_property')
 
 def replace_empty_objects_with_null_value(df):
     df_columns = df.columns.tolist()
@@ -478,6 +488,25 @@ def dss_collection_and_trade(trade_services, dss_collection):
         dataframe=collection_and_trade, file_name="collection_and_trade"
     )
 
+def rule3(property_services, water_services):
+    water_and_property = water_services.merge(
+        property_services,
+        how="inner",
+        left_on="_source.Data.propertyId",
+        right_on="_source.Data.propertyId",
+        suffixes=("_water", "_property"),
+    )
+
+    water_and_property = water_and_property["_source.Data.propertyId"]
+
+    query = f"""(`_source.Data.propertyType`.str.upper() != 'VACANT')"""
+
+    property_services = property_services.query(query)
+
+    property_services = property_services[
+        (~(property_services["_source.Data.propertyId"].isin(water_and_property)))
+    ]
+    convert_dataframe_to_csv(dataframe=property_services, file_name="rule_3")
 
 flatten_data = PythonOperator(
 task_id='flatten_data',
@@ -485,10 +514,16 @@ python_callable=collect_data,
 provide_context=True,
 dag=dag)
 
-# join_data = PythonOperator(
-# task_id='flatten_data',
-# python_callable=join_data,
-# provide_context=True,
-# dag=dag)
+join_data = PythonOperator(
+task_id='join_data',
+python_callable=join_data,
+provide_context=True,
+dag=dag)
+
+upload_data = PythonOperator(
+task_id='flatten_data',
+python_callable=upload_data,
+provide_context=True,
+dag=dag)
 
 flatten_data
