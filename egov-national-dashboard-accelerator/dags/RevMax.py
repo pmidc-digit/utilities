@@ -338,18 +338,6 @@ def collect_data():
     df = get_dataframe_after_flattening(dss_collection_ws_json)
     convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_ws")
 
-    #join water and meter
-    #water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
-    #join trade and property
-    trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
-    #join water and property
-    #property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
-    #join water and collection
-    #dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
-    #join property and collection
-    #dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
-    #join trade and collection
-    #dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
 
     property_service_after_flattening = get_dataframe_after_flattening(
     json_data=json.load(property_service_json)["hits"]
@@ -372,6 +360,19 @@ def collect_data():
     trade_licence_after_flattening = get_dataframe_after_flattening(
         json_data=json.load(trade_license_json)["hits"]
     )
+
+    #join water and meter
+    #water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
+    #join trade and property
+    trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
+    #join water and property
+    #property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
+    #join water and collection
+    #dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
+    #join property and collection
+    #dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
+    #join trade and collection
+    #dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
 
 
 
