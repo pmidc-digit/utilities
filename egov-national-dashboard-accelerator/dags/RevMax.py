@@ -457,7 +457,7 @@ def joindata():
 
 
 property_service_after_flattening = get_dataframe_after_flattening(
-    json_data=property_service_json['hits']
+    json_data=property_service_json
 )
 
 water_service_after_flattening = get_dataframe_after_flattening(
