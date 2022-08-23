@@ -53,6 +53,8 @@ def elastic_dump_pt():
 
     f= open('property_service.json',"r")
     data = json.loads(f.read())
+    for i in data['hits']:
+     logging.info(i)
     
     f.close()
     return resp['hits']['hits']
@@ -107,7 +109,7 @@ def elastic_dump_ws():
     ]
     })
     logging.info(resp['hits']['hits'])
-    with open("/opt/airflow/dags/water_service.json", "w") as outfile:
+    with open("water_service.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
