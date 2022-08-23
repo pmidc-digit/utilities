@@ -23,7 +23,7 @@ dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
 def elastic_dump_pt():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('property-services/_search', {
-    "size": 10000,
+    "size": 100,
     "_source": ["Data.propertyId","data.superBuiltUpArea","Data.channel", "Data.tenantId", "Data.ward.name", 
     "Data.ward.code","Data.source", "Data.propertyType", "Data.accountId", "Data.noOfFloors", "Data.@timestamp", 
     "Data.ownershipCategory", "Data.acknowldgementNumber", "Data.usageCategory", "Data.status"],
@@ -55,7 +55,7 @@ def elastic_dump_pt():
 def elastic_dump_tl():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('tlindex-v1-enriched/_search', {
-    "size": 10000,
+    "size": 100,
     "_source": [
     "Data.ward.name",
     "Data.ward.code",
@@ -88,7 +88,7 @@ def elastic_dump_tl():
 def elastic_dump_ws():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('water-services-enriched/_search', {
-        "size": 10000,
+        "size": 100,
         "query": {
         "match_all": {}
          },
@@ -108,7 +108,7 @@ def elastic_dump_ws():
 def elastic_dump_collection():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('dss-collection_v2/_search', {
-    "size": 10000,
+    "size": 100,
     "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
     "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
@@ -146,7 +146,7 @@ def elastic_dump_collection():
 def elastic_dump_meter():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('meter-services/_search', {
-        "size": 10000,
+        "size": 100,
         "query": {
         "match_all": {}
          },
