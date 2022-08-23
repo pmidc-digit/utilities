@@ -50,6 +50,11 @@ def elastic_dump_pt():
     logging.info(resp['hits']['hits'])
     with open("property_service.json", "w") as outfile:
         json.dump(resp['hits']['hits'],outfile)
+
+    f= open('property_service.json',"r")
+    data = json.loads(f.read())
+    
+    f.close()
     return resp['hits']['hits']
 
 def elastic_dump_tl():
@@ -82,7 +87,7 @@ def elastic_dump_tl():
     }
     )
     logging.info(resp['hits']['hits'])
-    with open("/opt/airflow/dags/trade_license.json", "w") as outfile:
+    with open("trade_license.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
@@ -140,7 +145,7 @@ def elastic_dump_collection():
     }
     ) 
     logging.info(resp['hits']['hits'])
-    with open("/opt/airflow/dags/dss_collection.json", "w") as outfile:
+    with open("dss_collection.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
@@ -159,7 +164,7 @@ def elastic_dump_meter():
         }
     ]
     })
-    with open("/opt/airflow/dags/meter_service.json", "w") as outfile:
+    with open("meter_service.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     logging.info(resp['hits']['hits'])
     return resp['hits']['hits']
