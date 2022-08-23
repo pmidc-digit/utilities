@@ -521,7 +521,7 @@ provide_context=True,
 dag=dag)
 
 upload_data = PythonOperator(
-task_id='flatten_data',
+task_id='upload_data',
 python_callable=upload_data,
 provide_context=True,
 dag=dag)
