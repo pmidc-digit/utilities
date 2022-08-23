@@ -53,7 +53,9 @@ def elastic_dump_pt():
 
     f= open('property_service.json',"r")
     data = json.loads(f.read())
-    logging.info("absolute path {0}".format(os.path.abspath("property_service.json"))) 
+    logging.info(os.path.abspath("property_service.json"))
+    logging.info(data)
+
     f.close()
     return resp['hits']['hits']
 
@@ -285,6 +287,112 @@ def collectdata():
     elastic_dump_collection_pt()
     elastic_dump_collection_tl()
     elastic_dump_collection_ws()
+
+def replace_empty_objects_with_null_value(df):
+    df_columns = df.columns.tolist()
+    for cols in df_columns:
+        try:
+            unique_values = df[cols].unique().tolist()
+            if (len(unique_values) == 1) and (
+                unique_values == "{}" or unique_values == "[]"
+            ):
+                df[cols] = np.NaN
+        except Exception as e:
+            df[cols] = np.NaN
+    return df
+def convert_dataframe_to_csv(dataframe, file_name):
+    dataframe.to_csv(
+       f"""/opt/airflow/dags/csv/{file_name}.csv""", index=False
+    )
+    logging.info(dataframe)
+def get_dataframe_after_flattening(json_data):
+    logging.info(json_data)  
+    df = [flatten_json(d) for d in json_data]  
+    df = pd.DataFrame(df)
+    df = replace_empty_objects_with_null_value(df)
+    return df
+def flatten_json(y):
+    out = {}
+    def flatten(x, name =''):
+        if type(x) is dict:            
+            for a in x:
+                flatten(x[a], name + a + '.')
+        elif type(x) is list:          
+            i = 0        
+            for a in x:                
+                flatten(a, name + str(i) + '.')
+                i += 1
+        else:
+            out[name[:-1]] = x
+  
+    flatten(y)
+    return out
+def water_and_meter_services(water_services, meter_services):
+    water_and_meter = water_services.merge(
+        meter_services,
+        how="inner",
+        left_on="_source.Data.connectionNo",
+        right_on="_source.Data.connectionNo",
+        suffixes=("_water", "_meter"),
+    )
+    convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
+
+def property_and_water_services(water_services, property_services):
+    water_and_property = water_services.merge(
+        property_services,
+        how="inner",
+        left_on="_source.Data.propertyId",
+        right_on="_source.Data.propertyId",
+        suffixes=("_water", "_property"),
+    )
+    convert_dataframe_to_csv(dataframe=water_and_property, file_name="water_and_property"
+    )
+
+def trade_and_property_services(trade_services, property_services):
+    trade_and_property = trade_services.merge(
+        property_services,
+        how="inner",
+        left_on="_source.Data.tradelicense.propertyId",
+        right_on="_source.Data.propertyId",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(dataframe=trade_and_property, file_name="trade_and_property"
+    )
+
+def dss_collection_and_water(dss_collection,water_services):
+    collection_and_water = dss_collection.merge(
+        water_services,
+        how="inner",
+        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+        right_on="_source.Data.applicationNo",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(dataframe=collection_and_water, file_name="collection_and_water"
+    )
+
+def dss_collection_and_property(dss_collection,property_services):
+    collection_and_property = dss_collection.merge(
+        property_services,
+        how="inner",
+        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+        right_on="_source.Data.propertyId",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(
+        dataframe=collection_and_property, file_name="collection_and_property"
+    )
+    
+def dss_collection_and_trade(trade_services, dss_collection):
+    collection_and_trade = dss_collection.merge(
+        trade_services,
+        how="inner",
+        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+        right_on="_source.Data.tradelicense.applicationNumber",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(
+        dataframe=collection_and_trade, file_name="collection_and_trade"
+    )
 
 # def replace_empty_objects_with_null_value(df):
 
