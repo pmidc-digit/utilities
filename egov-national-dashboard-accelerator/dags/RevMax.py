@@ -158,6 +158,7 @@ def elastic_dump_collection_pt():
     logging.info("absolute path {0}".format(os.path.abspath("dss_collection_pt.json")))
     return resp['hits']['hits']
 
+
 def elastic_dump_collection_tl():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('dss-collection_v2/_search', {
@@ -203,6 +204,53 @@ def elastic_dump_collection_tl():
     
     logging.info("absolute path {0}".format(os.path.abspath("dss_collection_tl.json")))
     return resp['hits']['hits']
+
+
+# def elastic_dump_collection_tl():
+#     hook = ElasticHook('GET', 'es_conn')
+#     resp = hook.search('dss-collection_v2/_search', {
+#     "size": 300,
+#     "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+#     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
+#     "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
+#     "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
+#     "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
+#     "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
+#     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
+#     "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+#     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
+#     "query": {
+#         "bool": {
+#         "must_not": [
+#             {
+#             "term": {
+#                 "Data.tenantId.keyword": "pb.testing"
+#             }
+#             }
+#         ],
+#         "must": [
+#             {
+#             "term": {
+#                 "dataObject.paymentDetails.businessService.keyword": "TL"
+#             }
+#             }
+#         ]
+#         }
+#     },
+#     "sort": [
+#         {
+#         "dataObject.@timestamp": {
+#             "order": "desc"
+#         }
+#         }
+#     ] 
+#     }) 
+#     logging.info(resp['hits']['hits'])
+#     with open("dss_collection_tl.json", "w") as outfile:
+#         outfile.write(json.dumps(resp['hits']['hits']))
+    
+#     logging.info("absolute path {0}".format(os.path.abspath("dss_collection_tl.json")))
+#     return resp['hits']['hits']
 
 def elastic_dump_collection_ws():
     hook = ElasticHook('GET', 'es_conn')
