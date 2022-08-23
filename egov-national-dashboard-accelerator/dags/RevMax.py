@@ -112,7 +112,7 @@ def elastic_dump_ws():
     logging.info("absolute path {0}".format(os.path.abspath("water_service.json")))
     return resp['hits']['hits']
 
-def elastic_dump_collection():
+def elastic_dump_collection_pt():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('dss-collection_v2/_search', {
     "size": 300,
@@ -133,6 +133,13 @@ def elastic_dump_collection():
                 "Data.tenantId.keyword": "pb.testing"
             }
             }
+        ],
+        "must": [
+            {
+            "term": {
+                "dataObject.paymentDetails.businessService.keyword": "PT"
+            }
+            }
         ]
         }
     },
@@ -143,10 +150,106 @@ def elastic_dump_collection():
         }
         }
     ] 
-    }
-    ) 
+    }) 
     logging.info(resp['hits']['hits'])
-    with open("dss_collection.json", "w") as outfile:
+    with open("dss_collection_pt.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
+    
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
+    return resp['hits']['hits']
+
+def elastic_dump_collection_tl():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('dss-collection_v2/_search', {
+    "size": 300,
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
+    "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
+    "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
+    "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
+    "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
+    "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
+    "query": {
+        "bool": {
+        "must_not": [
+            {
+            "term": {
+                "Data.tenantId.keyword": "pb.testing"
+            }
+            }
+        ],
+        "must": [
+            {
+            "term": {
+                "dataObject.paymentDetails.businessService.keyword": "TL"
+            }
+            }
+        ]
+        }
+    },
+    "sort": [
+        {
+        "dataObject.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ] 
+    }) 
+    logging.info(resp['hits']['hits'])
+    with open("dss_collection_pt.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
+    
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
+    return resp['hits']['hits']
+
+def elastic_dump_collection_ws():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('dss-collection_v2/_search', {
+    "size": 300,
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
+    "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
+    "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
+    "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
+    "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
+    "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
+    "query": {
+        "bool": {
+        "must_not": [
+            {
+            "term": {
+                "Data.tenantId.keyword": "pb.testing"
+            }
+            }
+        ],
+       "must": [
+        {
+          "terms": {
+            "dataObject.paymentDetails.businessService.keyword": [
+              "WS",
+              "WS.ONE_TIME_FEE",
+              "SW.ONE_TIME_FEE",
+              "SW"
+            ]
+          }
+        }
+   ]
+        }
+    },
+    "sort": [
+        {
+        "dataObject.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ] 
+    }) 
+    logging.info(resp['hits']['hits'])
+    with open("dss_collection_ws.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     
     logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
@@ -179,14 +282,59 @@ def collect_data():
     elastic_dump_tl()
     elastic_dump_ws()
     #elastic_dump_meter()
-    elastic_dump_collection()
+    elastic_dump_collection_pt()
 
     f= open('property_service.json',"r")
     property_service_json = json.loads(f.read())
     f.close()
-    logging.info("test")
+
+    f= open('trade_license.json',"r")
+    trade_license_json = json.loads(f.read())
+    f.close()
+
+    f= open('water_service.json',"r")
+    water_service_json = json.loads(f.read())
+    f.close()
+
+    f= open('dss_collection_pt.json',"r")
+    dss_collection_pt_json = json.loads(f.read())
+    f.close()
+
+    f= open('dss_collection_tl.json',"r")
+    dss_collection_tl_json = json.loads(f.read())
+    f.close()
+  
+    f= open('dss_collection_ws.json',"r")
+    dss_collection_ws_json = json.loads(f.read())
+    f.close()
+   
+    f= open('meter_service.json',"r")
+    meter_service_json = json.loads(f.read())
+    f.close()
+  
     df = get_dataframe_after_flattening(property_service_json)
     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
+
+    # water_service csv
+    df = get_dataframe_after_flattening(water_service_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="water_service")
+    # trade service csv
+    df = get_dataframe_after_flattening(trade_license_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="trade_license")
+    # meter_service csv
+    df = get_dataframe_after_flattening(meter_service_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
+    # dss_collection pt csv
+    df = get_dataframe_after_flattening(dss_collection_pt_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_pt")
+     # dss_collection tl csv
+    df = get_dataframe_after_flattening(dss_collection_tl_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_tl")
+    # dss_collection ws csv
+    df = get_dataframe_after_flattening(dss_collection_ws_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_ws")
+
+
 
 def replace_empty_objects_with_null_value(df):
     df_columns = df.columns.tolist()
