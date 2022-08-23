@@ -89,6 +89,7 @@ def elastic_dump_tl():
     logging.info(resp['hits']['hits'])
     with open("trade_license.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
+    logging.info("absolute path {0}".format(os.path.abspath("trade_license.json"))) 
     return resp['hits']['hits']
 
 def elastic_dump_ws():
@@ -109,6 +110,7 @@ def elastic_dump_ws():
     logging.info(resp['hits']['hits'])
     with open("water_service.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
+    logging.info("absolute path {0}".format(os.path.abspath("water_service.json"))) 
     return resp['hits']['hits']
 
 def elastic_dump_collection_pt():
@@ -154,6 +156,7 @@ def elastic_dump_collection_pt():
     logging.info(resp['hits']['hits'])
     with open("dss_collection_pt.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_pt.json"))) 
     return resp['hits']['hits']
 
 def elastic_dump_collection_tl():
@@ -199,6 +202,7 @@ def elastic_dump_collection_tl():
     logging.info(resp['hits']['hits'])
     with open("dss_collection_tl.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_tl.json"))) 
     return resp['hits']['hits']
 
 def elastic_dump_collection_ws():
@@ -249,6 +253,7 @@ def elastic_dump_collection_ws():
     logging.info(resp['hits']['hits'])
     with open("dss_collection_ws.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_ws.json"))) 
     return resp['hits']['hits']
 
 
@@ -494,15 +499,7 @@ python_callable=collectdata,
 provide_context=True,
 dag=dag)
 
-join_data = PythonOperator(
-task_id='join data',
-python_callable=joindata,
-provide_context=True,
-dag=dag)
-
-
-
-flatten_data >> join_data
+flatten_data
 
 
 
