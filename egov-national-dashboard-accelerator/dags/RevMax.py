@@ -339,27 +339,19 @@ def collect_data():
     convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_ws")
 
 
-    property_service_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(property_service_json)["hits"]
-    )
-    water_service_after_flattening = get_dataframe_after_flattening(
-        json_data=json.load(water_service_json)["hits"]
-    )
-    dss_collection_pt_after_flattening = get_dataframe_after_flattening(
-        json_data=json.load(dss_collection_pt_json)["hits"]["hits"]
-    )
-    dss_collection_tl_after_flattening = get_dataframe_after_flattening(
-        json_data=json.load(dss_collection_tl_json)["hits"]["hits"]
-    )
-    dss_collection_ws_after_flattening = get_dataframe_after_flattening(
-        json_data=json.load(dss_collection_ws_json)["hits"]["hits"]
-    )
-    # meter_services_after_flattening = get_dataframe_after_flattening(
-    #     json_data=json.load(meter_service_json)["hits"]
-    # )
-    trade_licence_after_flattening = get_dataframe_after_flattening(
-        json_data=json.load(trade_license_json)["hits"]
-    )
+    property_service_after_flattening = get_dataframe_after_flattening(property_service_json)
+
+    water_service_after_flattening = get_dataframe_after_flattening(water_service_json)
+
+    dss_collection_pt_after_flattening = get_dataframe_after_flattening(dss_collection_pt_json)
+
+    dss_collection_tl_after_flattening = get_dataframe_after_flattening(dss_collection_tl_json)
+
+    dss_collection_ws_after_flattening = get_dataframe_after_flattening(dss_collection_ws_json)
+
+    # meter_services_after_flattening = get_dataframe_after_flattening(meter_service_json)
+
+    trade_licence_after_flattening = get_dataframe_after_flattening(trade_license_json)
 
     #join water and meter
     #water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
