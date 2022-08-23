@@ -47,9 +47,9 @@ def elastic_dump_pt():
     }
     )
     logging.info(resp['hits']['hits'])
-    outfile = open("property_service.json", "w")
-    outfile.write(resp['hits']['hits'])
-    outfile.close()
+    with open("property_service.json", "w") as outfile:
+        json.dump(resp['hits']['hits'],outfile)
+        outfile.close()
 
     logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
     return resp['hits']['hits']
@@ -183,6 +183,7 @@ def collect_data():
 
     f= open('property_service.json',"r")
     property_service_json = json.loads(f.read())
+    f.close()
     logging.info("test")
     df = get_dataframe_after_flattening(property_service_json)
     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
