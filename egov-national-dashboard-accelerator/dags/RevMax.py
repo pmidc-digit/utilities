@@ -286,210 +286,210 @@ def collectdata():
     elastic_dump_collection_tl()
     elastic_dump_collection_ws()
 
-def replace_empty_objects_with_null_value(df):
+# def replace_empty_objects_with_null_value(df):
 
-    df_columns = df.columns.tolist()
+#     df_columns = df.columns.tolist()
 
-    for cols in df_columns:
-        try:
-            unique_values = df[cols].unique().tolist()
+#     for cols in df_columns:
+#         try:
+#             unique_values = df[cols].unique().tolist()
 
-            if (len(unique_values) == 1) and (
-                unique_values == "{}" or unique_values == "[]"
-            ):
-                df[cols] = np.NaN
-        except Exception as e:
-            df[cols] = np.NaN
+#             if (len(unique_values) == 1) and (
+#                 unique_values == "{}" or unique_values == "[]"
+#             ):
+#                 df[cols] = np.NaN
+#         except Exception as e:
+#             df[cols] = np.NaN
 
-    return df
+#     return df
 
-def convert_dataframe_to_csv(dataframe, file_name):
-    dataframe.to_csv(
-       f"""{file_name}.csv""", index=False
-    )
-    logging.info(dataframe)
+# def convert_dataframe_to_csv(dataframe, file_name):
+#     dataframe.to_csv(
+#        f"""{file_name}.csv""", index=False
+#     )
+#     logging.info(dataframe)
 
 
-def get_dataframe_after_flattening(json_data):
-    logging.info(json_data)  
-    df = [flatten_json(d) for d in json_data]  
-    df = pd.DataFrame(df)
-    df = replace_empty_objects_with_null_value(df)
-    return df
+# def get_dataframe_after_flattening(json_data):
+#     logging.info(json_data)  
+#     df = [flatten_json(d) for d in json_data]  
+#     df = pd.DataFrame(df)
+#     df = replace_empty_objects_with_null_value(df)
+#     return df
 
-def flatten_json(y):
-    out = {}
-    def flatten(x, name =''):
-        if type(x) is dict:            
-            for a in x:
-                flatten(x[a], name + a + '.')
-        elif type(x) is list:          
-            i = 0        
-            for a in x:                
-                flatten(a, name + str(i) + '.')
-                i += 1
-        else:
-            out[name[:-1]] = x
+# def flatten_json(y):
+#     out = {}
+#     def flatten(x, name =''):
+#         if type(x) is dict:            
+#             for a in x:
+#                 flatten(x[a], name + a + '.')
+#         elif type(x) is list:          
+#             i = 0        
+#             for a in x:                
+#                 flatten(a, name + str(i) + '.')
+#                 i += 1
+#         else:
+#             out[name[:-1]] = x
   
-    flatten(y)
-    return out
+#     flatten(y)
+#     return out
 
-def water_and_meter_services(water_services, meter_services):
-    water_and_meter = water_services.merge(
-        meter_services,
-        how="inner",
-        left_on="_source.Data.connectionNo",
-        right_on="_source.Data.connectionNo",
-        suffixes=("_water", "_meter"),
-    )
-    convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
-
-
-def property_and_water_services(water_services, property_services):
-    water_and_property = water_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_water", "_property"),
-    )
-    convert_dataframe_to_csv(dataframe=water_and_property, file_name="water_and_property"
-    )
+# def water_and_meter_services(water_services, meter_services):
+#     water_and_meter = water_services.merge(
+#         meter_services,
+#         how="inner",
+#         left_on="_source.Data.connectionNo",
+#         right_on="_source.Data.connectionNo",
+#         suffixes=("_water", "_meter"),
+#     )
+#     convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
 
 
-def trade_and_property_services(trade_services, property_services):
-    trade_and_property = trade_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.tradelicense.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(dataframe=trade_and_property, file_name="trade_and_property"
-    )
+# def property_and_water_services(water_services, property_services):
+#     water_and_property = water_services.merge(
+#         property_services,
+#         how="inner",
+#         left_on="_source.Data.propertyId",
+#         right_on="_source.Data.propertyId",
+#         suffixes=("_water", "_property"),
+#     )
+#     convert_dataframe_to_csv(dataframe=water_and_property, file_name="water_and_property"
+#     )
 
-def dss_collection_and_water(dss_collection,water_services):
-    collection_and_water = dss_collection.merge(
-        water_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.applicationNo",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(dataframe=collection_and_water, file_name="collection_and_water"
-    )
 
-def dss_collection_and_property(dss_collection,property_services):
-    collection_and_property = dss_collection.merge(
-        property_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.propertyId",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(
-        dataframe=collection_and_property, file_name="collection_and_property"
-    )
+# def trade_and_property_services(trade_services, property_services):
+#     trade_and_property = trade_services.merge(
+#         property_services,
+#         how="inner",
+#         left_on="_source.Data.tradelicense.propertyId",
+#         right_on="_source.Data.propertyId",
+#         suffixes=("_trade", "_property"),
+#     )
+#     convert_dataframe_to_csv(dataframe=trade_and_property, file_name="trade_and_property"
+#     )
 
-def dss_collection_and_trade(trade_services, dss_collection):
-    collection_and_trade = dss_collection.merge(
-        trade_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.tradelicense.applicationNumber",
-        suffixes=("_trade", "_property"),
-    )
+# def dss_collection_and_water(dss_collection,water_services):
+#     collection_and_water = dss_collection.merge(
+#         water_services,
+#         how="inner",
+#         left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+#         right_on="_source.Data.applicationNo",
+#         suffixes=("_trade", "_property"),
+#     )
+#     convert_dataframe_to_csv(dataframe=collection_and_water, file_name="collection_and_water"
+#     )
 
-    convert_dataframe_to_csv(
-        dataframe=collection_and_trade, file_name="collection_and_trade"
-    )
+# def dss_collection_and_property(dss_collection,property_services):
+#     collection_and_property = dss_collection.merge(
+#         property_services,
+#         how="inner",
+#         left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+#         right_on="_source.Data.propertyId",
+#         suffixes=("_trade", "_property"),
+#     )
+#     convert_dataframe_to_csv(
+#         dataframe=collection_and_property, file_name="collection_and_property"
+#     )
 
-property_service_json = elastic_dump_pt()
-water_service_json = elastic_dump_ws()
-dss_collection_pt_json = elastic_dump_collection_pt()
-dss_collection_tl_json = elastic_dump_collection_tl()
-dss_collection_ws_json = elastic_dump_collection_ws()
-trade_licence_json = elastic_dump_tl()
-#meter_service_json = open("meter_service.json")
+# def dss_collection_and_trade(trade_services, dss_collection):
+#     collection_and_trade = dss_collection.merge(
+#         trade_services,
+#         how="inner",
+#         left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+#         right_on="_source.Data.tradelicense.applicationNumber",
+#         suffixes=("_trade", "_property"),
+#     )
 
-#property_service csv
-df = get_dataframe_after_flattening(property_service_json)
-convert_dataframe_to_csv(dataframe=df,file_name="property_service")
+#     convert_dataframe_to_csv(
+#         dataframe=collection_and_trade, file_name="collection_and_trade"
+#     )
 
-# water_service csv
-df = get_dataframe_after_flattening(water_service_json)
-convert_dataframe_to_csv(dataframe=df,file_name="water_service")
+# property_service_json = elastic_dump_pt()
+# water_service_json = elastic_dump_ws()
+# dss_collection_pt_json = elastic_dump_collection_pt()
+# dss_collection_tl_json = elastic_dump_collection_tl()
+# dss_collection_ws_json = elastic_dump_collection_ws()
+# trade_licence_json = elastic_dump_tl()
+# #meter_service_json = open("meter_service.json")
 
-# trade service csv
-df = get_dataframe_after_flattening(trade_licence_json)
-convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license")
+# #property_service csv
+# df = get_dataframe_after_flattening(property_service_json)
+# convert_dataframe_to_csv(dataframe=df,file_name="property_service")
 
-# meter_service csv
-#     df = get_dataframe_after_flattening(meter_service_json)
-#     convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
+# # water_service csv
+# df = get_dataframe_after_flattening(water_service_json)
+# convert_dataframe_to_csv(dataframe=df,file_name="water_service")
 
-# dss_collection csv
-df = get_dataframe_after_flattening(dss_collection_pt_json)
-convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_pt")
+# # trade service csv
+# df = get_dataframe_after_flattening(trade_licence_json)
+# convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license")
 
-# dss_collection csv
-df = get_dataframe_after_flattening(dss_collection_tl_json)
-convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_tl")
+# # meter_service csv
+# #     df = get_dataframe_after_flattening(meter_service_json)
+# #     convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
 
 # # dss_collection csv
-df = get_dataframe_after_flattening(dss_collection_ws_json)
-convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_ws")
+# df = get_dataframe_after_flattening(dss_collection_pt_json)
+# convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_pt")
+
+# # dss_collection csv
+# df = get_dataframe_after_flattening(dss_collection_tl_json)
+# convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_tl")
+
+# # # dss_collection csv
+# df = get_dataframe_after_flattening(dss_collection_ws_json)
+# convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_ws")
 
 
-def joindata():
-#join water and meter
-    #water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
+# def joindata():
+# #join water and meter
+#     #water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
 
-#join trade and property
-    trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
+# #join trade and property
+#     trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
 
-#join water and property
-    property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
+# #join water and property
+#     property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
 
-#join water and collection
-    dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
+# #join water and collection
+#     dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
 
-#join property and collection
-    dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
+# #join property and collection
+#     dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
 
-#join trade and collection
-    dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
-
-
-property_service_after_flattening = get_dataframe_after_flattening(
-    json_data=property_service_json
-)
-
-water_service_after_flattening = get_dataframe_after_flattening(
-    json_data=water_service_json
-)
-
-dss_collection_pt_after_flattening = get_dataframe_after_flattening(
-    json_data=dss_collection_pt_json
-)
+# #join trade and collection
+#     dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
 
 
-dss_collection_tl_after_flattening = get_dataframe_after_flattening(
-    json_data=dss_collection_tl_json
-)
-
-
-dss_collection_ws_after_flattening = get_dataframe_after_flattening(
-    json_data=dss_collection_ws_json
-)
-
-# meter_services_after_flattening = get_dataframe_after_flattening(
-#     json_data=json.load(meter_service_json)["hits"]
+# property_service_after_flattening = get_dataframe_after_flattening(
+#     json_data=property_service_json
 # )
 
-trade_licence_after_flattening = get_dataframe_after_flattening(
-    json_data=trade_licence_json
-)
+# water_service_after_flattening = get_dataframe_after_flattening(
+#     json_data=water_service_json
+# )
+
+# dss_collection_pt_after_flattening = get_dataframe_after_flattening(
+#     json_data=dss_collection_pt_json
+# )
+
+
+# dss_collection_tl_after_flattening = get_dataframe_after_flattening(
+#     json_data=dss_collection_tl_json
+# )
+
+
+# dss_collection_ws_after_flattening = get_dataframe_after_flattening(
+#     json_data=dss_collection_ws_json
+# )
+
+# # meter_services_after_flattening = get_dataframe_after_flattening(
+# #     json_data=json.load(meter_service_json)["hits"]
+# # )
+
+# trade_licence_after_flattening = get_dataframe_after_flattening(
+#     json_data=trade_licence_json
+# )
 
 
 
