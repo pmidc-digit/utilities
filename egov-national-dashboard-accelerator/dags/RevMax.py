@@ -198,7 +198,7 @@ def elastic_dump_collection_tl():
     ] 
     }) 
     logging.info(resp['hits']['hits'])
-    with open("dss_collection_pt.json", "w") as outfile:
+    with open("dss_collection_tl.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     
     logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
