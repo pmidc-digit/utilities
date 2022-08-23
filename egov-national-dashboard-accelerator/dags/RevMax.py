@@ -53,6 +53,7 @@ def elastic_dump_pt():
 
     f= open('property_service.json',"r")
     data = json.loads(f.read())
+    logging.info(os.path.abspath("property_service.json"))
     logging.info(data)
     
     f.close()
@@ -138,7 +139,7 @@ def elastic_dump_collection():
     },
     "sort": [
         {
-        "Data.@timestamp": {
+        "dataObject.@timestamp": {
             "order": "desc"
         }
         }
