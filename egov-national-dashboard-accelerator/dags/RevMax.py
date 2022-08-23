@@ -308,9 +308,9 @@ def collect_data():
     dss_collection_ws_json = json.loads(f.read())
     f.close()
    
-    f= open('meter_service.json',"r")
-    meter_service_json = json.loads(f.read())
-    f.close()
+    # f= open('meter_service.json',"r")
+    # meter_service_json = json.loads(f.read())
+    # f.close()
   
     df = get_dataframe_after_flattening(property_service_json)
     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
@@ -322,8 +322,8 @@ def collect_data():
     df = get_dataframe_after_flattening(trade_license_json)
     convert_dataframe_to_csv(dataframe=df,file_name="trade_license")
     # meter_service csv
-    df = get_dataframe_after_flattening(meter_service_json)
-    convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
+    # df = get_dataframe_after_flattening(meter_service_json)
+    # convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
     # dss_collection pt csv
     df = get_dataframe_after_flattening(dss_collection_pt_json)
     convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_pt")
@@ -379,15 +379,15 @@ def flatten_json(y):
     flatten(y)
     return out
 
-def water_and_meter_services(water_services, meter_services):
-    water_and_meter = water_services.merge(
-        meter_services,
-        how="inner",
-        left_on="_source.Data.connectionNo",
-        right_on="_source.Data.connectionNo",
-        suffixes=("_water", "_meter"),
-    )
-    convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
+# def water_and_meter_services(water_services, meter_services):
+#     water_and_meter = water_services.merge(
+#         meter_services,
+#         how="inner",
+#         left_on="_source.Data.connectionNo",
+#         right_on="_source.Data.connectionNo",
+#         suffixes=("_water", "_meter"),
+#     )
+#     convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
 
 def property_and_water_services(water_services, property_services):
     water_and_property = water_services.merge(
