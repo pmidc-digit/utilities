@@ -53,8 +53,7 @@ def elastic_dump_pt():
 
     f= open('property_service.json',"r")
     data = json.loads(f.read())
-    for i in data['hits']:
-     logging.info(i)
+    logging.info(data)
     
     f.close()
     return resp['hits']['hits']
