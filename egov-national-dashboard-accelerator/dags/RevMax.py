@@ -47,13 +47,9 @@ def elastic_dump_pt():
     }
     )
     logging.info(resp['hits']['hits'])
-    with open("property_service.json", "w") as outfile:
-        json.dump(resp['hits']['hits'],outfile)
-
-    f= open('property_service.json',"r")
-    data = json.loads(f.read())
-    logging.info(data)
-    f.close()
+    outfile = open("property_service.json", "w")
+    outfile.write(resp['hits']['hits'])
+    outfile.close()
 
     logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
     return resp['hits']['hits']
@@ -185,6 +181,12 @@ def collect_data():
     #elastic_dump_meter()
     elastic_dump_collection()
 
+    f= open('property_service.json',"r")
+    property_service_json = json.loads(f.read())
+    logging.info("test")
+    df = get_dataframe_after_flattening(property_service_json)
+    convert_dataframe_to_csv(dataframe=df,file_name="property_service")
+
 def replace_empty_objects_with_null_value(df):
     df_columns = df.columns.tolist()
     for cols in df_columns:
@@ -200,7 +202,7 @@ def replace_empty_objects_with_null_value(df):
 
 def convert_dataframe_to_csv(dataframe, file_name):
     dataframe.to_csv(
-       f"""/opt/airflow/dags/csv/{file_name}.csv""", index=False
+       f"""{file_name}.csv""", index=False
     )
     logging.info(dataframe)
 
