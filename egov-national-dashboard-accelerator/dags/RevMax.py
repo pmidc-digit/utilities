@@ -155,7 +155,7 @@ def elastic_dump_collection_pt():
     with open("dss_collection_pt.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     
-    logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_pt.json")))
     return resp['hits']['hits']
 
 def elastic_dump_collection_tl():
@@ -201,7 +201,7 @@ def elastic_dump_collection_tl():
     with open("dss_collection_tl.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     
-    logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_tl.json")))
     return resp['hits']['hits']
 
 def elastic_dump_collection_ws():
@@ -252,7 +252,7 @@ def elastic_dump_collection_ws():
     with open("dss_collection_ws.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     
-    logging.info("absolute path {0}".format(os.path.abspath("dss_collection.json")))
+    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_ws.json")))
     return resp['hits']['hits']
 
 def elastic_dump_meter():
