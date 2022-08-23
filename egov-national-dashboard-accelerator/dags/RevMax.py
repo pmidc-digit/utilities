@@ -300,7 +300,7 @@ def replace_empty_objects_with_null_value(df):
 
 def convert_dataframe_to_csv(dataframe, file_name):
     dataframe.to_csv(
-       f"""/opt/airflow/{file_name}.csv""", index=False
+       f"""{file_name}.csv""", index=False
     )
     logging.info(dataframe)
 
@@ -461,21 +461,21 @@ property_service_after_flattening = get_dataframe_after_flattening(
 )
 
 water_service_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(water_service_json)["hits"]
+    json_data=water_service_json
 )
 
 dss_collection_pt_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(dss_collection_pt_json)["hits"]["hits"]
+    json_data=dss_collection_pt_json
 )
 
 
 dss_collection_tl_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(dss_collection_tl_json)["hits"]["hits"]
+    json_data=dss_collection_tl_json
 )
 
 
 dss_collection_ws_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(dss_collection_ws_json)["hits"]["hits"]
+    json_data=dss_collection_ws_json
 )
 
 # meter_services_after_flattening = get_dataframe_after_flattening(
@@ -483,7 +483,7 @@ dss_collection_ws_after_flattening = get_dataframe_after_flattening(
 # )
 
 trade_licence_after_flattening = get_dataframe_after_flattening(
-    json_data=json.load(trade_licence_json)["hits"]
+    json_data=trade_licence_json
 )
 
 
