@@ -53,9 +53,7 @@ def elastic_dump_pt():
 
     f= open('property_service.json',"r")
     data = json.loads(f.read())
-    logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
-    logging.info(data)
-    
+    logging.info("absolute path {0}".format(os.path.abspath("property_service.json"))) 
     f.close()
     return resp['hits']['hits']
 
@@ -401,12 +399,12 @@ def dss_collection_and_trade(trade_services, dss_collection):
         dataframe=collection_and_trade, file_name="collection_and_trade"
     )
 
-property_service_json = open("/opt/airflow/property_service.json")
-water_service_json = open("water_service.json")
-dss_collection_pt_json = open("dss_collection_pt.json")
-dss_collection_tl_json = open("dss_collection_tl.json")
-dss_collection_ws_json = open("dss_collection_ws.json")
-trade_licence_json = open("trade_license.json")
+property_service_json = elastic_dump_pt()
+water_service_json = elastic_dump_ws()
+dss_collection_pt_json = elastic_dump_collection_pt()
+dss_collection_tl_json = elastic_dump_collection_tl()
+dss_collection_ws_json = elastic_dump_collection_ws()
+trade_licence_json = elastic_dump_tl()
 #meter_service_json = open("meter_service.json")
 
 #property_service csv
