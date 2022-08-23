@@ -53,7 +53,7 @@ def elastic_dump_pt():
 
     f= open('property_service.json',"r")
     data = json.loads(f.read())
-    logging.info(os.path.abspath("property_service.json"))
+    logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
     logging.info(data)
     
     f.close()
@@ -401,7 +401,7 @@ def dss_collection_and_trade(trade_services, dss_collection):
         dataframe=collection_and_trade, file_name="collection_and_trade"
     )
 
-property_service_json = open("property_service.json")
+property_service_json = open("/opt/airflow/property_service.json")
 water_service_json = open("water_service.json")
 dss_collection_pt_json = open("dss_collection_pt.json")
 dss_collection_tl_json = open("dss_collection_tl.json")
