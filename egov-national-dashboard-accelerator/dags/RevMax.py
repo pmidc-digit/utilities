@@ -401,13 +401,13 @@ def dss_collection_and_trade(trade_services, dss_collection):
         dataframe=collection_and_trade, file_name="collection_and_trade"
     )
 
-property_service_json = open("/opt/airflow/property_service.json")
-water_service_json = open("/opt/airflow/water_service.json")
-dss_collection_pt_json = open("/opt/airflow/dags/dss_collection_pt.json")
-dss_collection_tl_json = open("/opt/airflow/dags/dss_collection_tl.json")
-dss_collection_ws_json = open("/opt/airflow/dags/dss_collection_ws.json")
-trade_licence_json = open("/opt/airflow/dags/json/trade_license.json")
-#meter_service_json = open("/opt/airflow/dags/json/meter_service.json")
+property_service_json = open("property_service.json")
+water_service_json = open("water_service.json")
+dss_collection_pt_json = open("dss_collection_pt.json")
+dss_collection_tl_json = open("dss_collection_tl.json")
+dss_collection_ws_json = open("dss_collection_ws.json")
+trade_licence_json = open("trade_license.json")
+#meter_service_json = open("meter_service.json")
 
 #property_service csv
 df = get_dataframe_after_flattening(property_service_json)
