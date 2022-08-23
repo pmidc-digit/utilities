@@ -113,7 +113,7 @@ def elastic_dump_ws():
         outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
-def elastic_dump_collection():
+def elastic_dump_collection_pt():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('dss-collection_v2/_search', {
     "size": 300,
@@ -125,13 +125,20 @@ def elastic_dump_collection():
     "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
     "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
-    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
+    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType","domainObject.Department"],
     "query": {
         "bool": {
         "must_not": [
             {
             "term": {
                 "Data.tenantId.keyword": "pb.testing"
+            }
+            }
+        ],
+        "must": [
+            {
+            "term": {
+                "dataObject.paymentDetails.businessService.keyword": "PT"
             }
             }
         ]
@@ -143,13 +150,109 @@ def elastic_dump_collection():
             "order": "desc"
         }
         }
-    ] 
+    ]
     }
     ) 
     logging.info(resp['hits']['hits'])
-    with open("dss_collection.json", "w") as outfile:
+    with open("dss_collection_pt.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
+
+def elastic_dump_collection_tl():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('dss-collection_v2/_search', {
+    "size": 300,
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
+    "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
+    "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
+    "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
+    "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
+    "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType","domainObject.Department"],
+    "query": {
+        "bool": {
+        "must_not": [
+            {
+            "term": {
+                "Data.tenantId.keyword": "pb.testing"
+            }
+            }
+        ],
+        "must": [
+            {
+            "term": {
+                "dataObject.paymentDetails.businessService.keyword": "TL"
+            }
+            }
+        ]
+        }
+    },
+    "sort": [
+        {
+        "dataObject.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ]
+    }
+    ) 
+    logging.info(resp['hits']['hits'])
+    with open("dss_collection_tl.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
+    return resp['hits']['hits']
+
+def elastic_dump_collection_ws():
+    hook = ElasticHook('GET', 'es_conn')
+    resp = hook.search('dss-collection_v2/_search', {
+    "size": 300,
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
+    "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
+    "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
+    "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
+    "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
+    "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType","domainObject.Department"],
+    "query": {
+        "bool": {
+        "must_not": [
+            {
+            "term": {
+                "Data.tenantId.keyword": "pb.testing"
+            }
+            }
+        ],
+        "must": [
+            {
+            "terms": {
+                "dataObject.paymentDetails.businessService.keyword": [
+                "WS",
+                "WS.ONE_TIME_FEE",
+                "SW.ONE_TIME_FEE",
+                "SW"
+                ]
+            }
+            }
+        ]
+        }
+    },
+    "sort": [
+        {
+        "dataObject.@timestamp": {
+            "order": "desc"
+        }
+        }
+    ]
+    }
+    ) 
+    logging.info(resp['hits']['hits'])
+    with open("dss_collection_ws.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
+    return resp['hits']['hits']
+
 
 def elastic_dump_meter():
     hook = ElasticHook('GET', 'es_conn')
@@ -171,12 +274,14 @@ def elastic_dump_meter():
     logging.info(resp['hits']['hits'])
     return resp['hits']['hits']
 
-def collect_data():
+def collectdata():
     elastic_dump_pt()
     elastic_dump_tl()
     elastic_dump_ws()
     #elastic_dump_meter()
-    elastic_dump_collection()
+    elastic_dump_collection_pt()
+    elastic_dump_collection_tl()
+    elastic_dump_collection_ws()
 
 def replace_empty_objects_with_null_value(df):
 
@@ -197,7 +302,7 @@ def replace_empty_objects_with_null_value(df):
 
 def convert_dataframe_to_csv(dataframe, file_name):
     dataframe.to_csv(
-       f"""/opt/airflow/dags/csv/{file_name}.csv""", index=False
+       f"""/opt/airflow/{file_name}.csv""", index=False
     )
     logging.info(dataframe)
 
@@ -261,7 +366,6 @@ def trade_and_property_services(trade_services, property_services):
     )
 
 def dss_collection_and_water(dss_collection,water_services):
-
     collection_and_water = dss_collection.merge(
         water_services,
         how="inner",
@@ -297,92 +401,110 @@ def dss_collection_and_trade(trade_services, dss_collection):
         dataframe=collection_and_trade, file_name="collection_and_trade"
     )
 
-# property_service_json = open("/opt/airflow/dags/json/property_service.json")
+property_service_json = open("/opt/airflow/property_service.json")
+water_service_json = open("/opt/airflow/water_service.json")
+dss_collection_pt_json = open("/opt/airflow/dags/dss_collection_pt.json")
+dss_collection_tl_json = open("/opt/airflow/dags/dss_collection_tl.json")
+dss_collection_ws_json = open("/opt/airflow/dags/dss_collection_ws.json")
+trade_licence_json = open("/opt/airflow/dags/json/trade_license.json")
+#meter_service_json = open("/opt/airflow/dags/json/meter_service.json")
 
-# water_service_json = open("/opt/airflow/dags/json/water_service.json")
+#property_service csv
+df = get_dataframe_after_flattening(property_service_json)
+convert_dataframe_to_csv(dataframe=df,file_name="property_service")
 
-# dss_service_json = open("/opt/airflow/dags/dss_collection.json")
+# water_service csv
+df = get_dataframe_after_flattening(water_service_json)
+convert_dataframe_to_csv(dataframe=df,file_name="water_service")
 
-# meter_service_json = open("/opt/airflow/dags/json/meter_service.json")
+# trade service csv
+df = get_dataframe_after_flattening(trade_licence_json)
+convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license")
 
-# trade_licence_json = open("/opt/airflow/dags/jso# # property_service csv
-#     df = get_dataframe_after_flattening(property_service_json)
-#     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
-
-# # water_service csv
-#     df = get_dataframe_after_flattening(water_service_json)
-#     convert_dataframe_to_csv(dataframe=df,file_name="water_service")
-
-# # trade service csv
-#     df = get_dataframe_after_flattening(trade_licence_json)
-#     convert_dataframe_to_csv(dataframe=df,file_name="tradetrade_license_license")
-
-# # meter_service csv
+# meter_service csv
 #     df = get_dataframe_after_flattening(meter_service_json)
 #     convert_dataframe_to_csv(dataframe=df,file_name="meter_service")
 
+# dss_collection csv
+df = get_dataframe_after_flattening(dss_collection_pt_json)
+convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_pt")
+
+# dss_collection csv
+df = get_dataframe_after_flattening(dss_collection_tl_json)
+convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_tl")
+
 # # dss_collection csv
-#     df = get_dataframe_after_flattening(dss_service_json)
-#     convert_dataframe_to_csv(dataframe=df,file_name="dss_collection")
-#     logging.info('end')
-
-# def joindata():
-# #join water and meter
-#     water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
-
-# #join trade and property
-#     trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
-
-# #join water and property
-#     property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
-
-# #join water and collection
-#     dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_services_after_flattening)
-
-# #join property and collection
-#     dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_services_after_flattening)
-
-# #join trade and collection
-#     dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_services_after_flattening)
+df = get_dataframe_after_flattening(dss_collection_ws_json)
+convert_dataframe_to_csv(dataframe=df,file_name="dss_collection_ws")
 
 
-# property_service_after_flattening = get_dataframe_after_flattening(
-#     json_data=json.load(property_service_json)["hits"]
-# )
+def joindata():
+#join water and meter
+    #water_and_meter_services(water_services=water_service_after_flattening,meter_services=meter_services_after_flattening)
 
-# water_service_after_flattening = get_dataframe_after_flattening(
-#     json_data=json.load(water_service_json)["hits"]
-# )
+#join trade and property
+    trade_and_property_services(trade_services=trade_licence_after_flattening,property_services=property_service_after_flattening)
 
-# dss_services_after_flattening = get_dataframe_after_flattening(
-#     json_data=json.load(dss_service_json)["hits"]["hits"]
-# )
+#join water and property
+    property_and_water_services(water_services=water_service_after_flattening,property_services=property_service_after_flattening)
+
+#join water and collection
+    dss_collection_and_water(water_services=water_service_after_flattening,dss_collection=dss_collection_ws_after_flattening)
+
+#join property and collection
+    dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
+
+#join trade and collection
+    dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
+
+
+property_service_after_flattening = get_dataframe_after_flattening(
+    json_data=json.load(property_service_json)["hits"]
+)
+
+water_service_after_flattening = get_dataframe_after_flattening(
+    json_data=json.load(water_service_json)["hits"]
+)
+
+dss_collection_pt_after_flattening = get_dataframe_after_flattening(
+    json_data=json.load(dss_collection_pt_json)["hits"]["hits"]
+)
+
+
+dss_collection_tl_after_flattening = get_dataframe_after_flattening(
+    json_data=json.load(dss_collection_tl_json)["hits"]["hits"]
+)
+
+
+dss_collection_ws_after_flattening = get_dataframe_after_flattening(
+    json_data=json.load(dss_collection_ws_json)["hits"]["hits"]
+)
 
 # meter_services_after_flattening = get_dataframe_after_flattening(
 #     json_data=json.load(meter_service_json)["hits"]
 # )
 
-# trade_licence_after_flattening = get_dataframe_after_flattening(
-#     json_data=json.load(trade_licence_json)["hits"]
-# )
+trade_licence_after_flattening = get_dataframe_after_flattening(
+    json_data=json.load(trade_licence_json)["hits"]
+)
 
 
 
 flatten_data = PythonOperator(
-task_id='flatten_data',
-python_callable=collect_data,
+task_id='flatten data',
+python_callable=collectdata,
 provide_context=True,
 dag=dag)
 
-# join_data = PythonOperator(
-# task_id='flatten_data',
-# python_callable=join_data,
-# provide_context=True,
-# dag=dag)
+join_data = PythonOperator(
+task_id='join data',
+python_callable=joindata,
+provide_context=True,
+dag=dag)
 
 
 
-flatten_data
+flatten_data >> join_data
 
 
 
