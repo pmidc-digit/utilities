@@ -337,7 +337,7 @@ def dss_collection_and_trade(trade_services, dss_collection):
 
 # #join trade and collection
 #     dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_services_after_flattening)
-n/trade_license.json")
+
 
 # property_service_after_flattening = get_dataframe_after_flattening(
 #     json_data=json.load(property_service_json)["hits"]
@@ -367,11 +367,11 @@ python_callable=collect_data,
 provide_context=True,
 dag=dag)
 
-join_data = PythonOperator(
-task_id='flatten_data',
-python_callable=join_data,
-provide_context=True,
-dag=dag)
+# join_data = PythonOperator(
+# task_id='flatten_data',
+# python_callable=join_data,
+# provide_context=True,
+# dag=dag)
 
 
 
