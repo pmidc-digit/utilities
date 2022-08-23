@@ -23,7 +23,7 @@ dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
 def elastic_dump_pt():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('property-services/_search', {
-    "size": 10,
+    "size": 10000,
     "_source": ["Data.propertyId","data.superBuiltUpArea","Data.channel", "Data.tenantId", "Data.ward.name", 
     "Data.ward.code","Data.source", "Data.propertyType", "Data.accountId", "Data.noOfFloors", "Data.@timestamp", 
     "Data.ownershipCategory", "Data.acknowldgementNumber", "Data.usageCategory", "Data.status"],
@@ -80,14 +80,15 @@ def elastic_dump_tl():
     }
   ]
     })
-    logging.info(resp)
     logging.info(resp['hits']['hits'])
+    with open("trade_license.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
 def elastic_dump_ws():
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('wsapplications/_search', {
-        "size": 10,
+    resp = hook.search('water-services-enriched/_search', {
+        "size": 10000,
         "query": {
         "match_all": {}
          },
@@ -99,34 +100,53 @@ def elastic_dump_ws():
         }
     ]
     })
-    logging.info(resp)
     logging.info(resp['hits']['hits'])
+    with open("water_service.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
-def elastic_dump_collection_pt():
+def elastic_dump_collection():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('dss-collection_v2/_search', {
-        "size": 10,
-        "query": {
-        "match_all": {}
-         },
-        "sort": [
+    "size": 10000,
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
+    "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
+    "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
+    "dataObject.paymentDetails.bill.billDetails.toPeriod","dataObject.paymentDetails.bill.billDetails.demandId","dataObject.paymentDetails.bill.billDetails.billId", 
+    "dataObject.paymentDetails.bill.billDetails.id", "dataObject.paymentDetails.bill.billNumber", 
+    "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
+    "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward","domainObject.propertyId",
+    "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
+    "query": {
+        "bool": {
+        "must_not": [
+            {
+            "term": {
+                "Data.tenantId.keyword": "pb.testing"
+            }
+            }
+        ]
+        }
+    },
+    "sort": [
         {
         "Data.@timestamp": {
             "order": "desc"
         }
         }
-    ]
-    })
-    logging.info(resp)
+    ] 
+    }
+    ) 
     logging.info(resp['hits']['hits'])
+    with open("dss_collection.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
-
 
 def elastic_dump_meter():
     hook = ElasticHook('GET', 'es_conn')
     resp = hook.search('meter-services/_search', {
-        "size": 10,
+        "size": 10000,
         "query": {
         "match_all": {}
          },
@@ -138,13 +158,21 @@ def elastic_dump_meter():
         }
     ]
     })
-    logging.info(resp)
+    with open("meter_service.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
     logging.info(resp['hits']['hits'])
     return resp['hits']['hits']
 
+def collect_data():
+    elastic_dump_pt()
+    elastic_dump_tl()
+    elastic_dump_ws()
+    elastic_dump_meter()
+    elastic_dump_collection()
+
 flatten_data = PythonOperator(
 task_id='flatten_data',
-python_callable=elastic_dump_pt,
+python_callable=collect_data,
 provide_context=True,
 dag=dag)
 
