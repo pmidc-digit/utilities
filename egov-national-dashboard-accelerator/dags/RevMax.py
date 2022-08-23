@@ -49,7 +49,7 @@ def elastic_dump_pt():
     )
     logging.info(resp['hits']['hits'])
     with open("property_service.json", "w") as outfile:
-        outfile.write(resp['hits']['hits'])
+        outfile.write(json.dumps(resp['hits']['hits']))
     return resp['hits']['hits']
 
 def elastic_dump_tl():
