@@ -1,6 +1,6 @@
 
 import logging
-
+uuid = []
 def extract_pgr_closed_complaints(metrics, region_bucket):
   department_agg = region_bucket.get('department')
   department_buckets = department_agg.get('buckets')
@@ -200,9 +200,7 @@ pgr_resolved_complaints = {
 
 def extract_pgr_unique_citizens(metrics, region_bucket):
     uuid_agg = region_bucket.get('uuid')
-    uuid_buckets = uuid_agg.get('buckets')
-    uuid = []
-
+    uuid_buckets = uuid_agg.get('buckets')   
     for uuid_bucket in uuid_buckets:
       uuid_name = uuid_bucket.get('key')
       logging.info(uuid_name)
