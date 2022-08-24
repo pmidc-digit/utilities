@@ -201,6 +201,7 @@ pgr_resolved_complaints = {
 def extract_pgr_unique_citizens(metrics, region_bucket):
     uuid = []
     if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value'):
+      logging.info(region_bucket.get('uniqueCitizens').get('value'))
       if region_bucket.get('uniqueCitizens').get('value') in uuid:
         logging.info("exists {0}".format(region_bucket.get('uniqueCitizens').get('value')))
       else:
