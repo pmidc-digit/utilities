@@ -199,8 +199,14 @@ pgr_resolved_complaints = {
 
 
 def extract_pgr_unique_citizens(metrics, region_bucket):
-    metrics['uniqueCitizens'] = region_bucket.get('uniqueCitizens').get(
-        'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
+    uuid = []
+    if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value'):
+      if region_bucket.get('uniqueCitizens').get('value') in uuid:
+        logging.info(region_bucket.get('uniqueCitizens').get('value'))
+      else:
+        metrics['uniqueCitizens'] = region_bucket.get('uniqueCitizens').get(
+            'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
+        uuid.append(region_bucket.get('uniqueCitizens').get('value'))
     return metrics
 
 pgr_unique_citizens = {
