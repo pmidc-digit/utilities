@@ -209,7 +209,7 @@ def extract_pgr_unique_citizens(metrics, region_bucket):
         logging.info("exists {0}".format(uuid_name))
       else:
         value = uuid_bucket.get('uniqueCitizens').get('value')
-        metrics['uniqueCitizens'] = value
+        metrics['uniqueCitizens'] += value
         uuid.append(uuid_name)
         logging.info(len(uuid))
     return metrics
