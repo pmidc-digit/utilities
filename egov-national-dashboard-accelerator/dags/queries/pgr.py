@@ -206,10 +206,10 @@ def extract_pgr_unique_citizens(metrics, region_bucket):
     for uuid_bucket in uuid_buckets:
       uuid_name = uuid_bucket.get('key')
       logging.info(uuid_name)
-      if uuid_bucket.get('uniqueCitizens') and uuid_bucket.get('uniqueCitizens').get('value'):
-        if uuid_name in uuid:
+      logging.info(len(uuid))
+      if uuid_name in uuid:
           logging.info("exists {0}".format(uuid_name))
-        else:
+      else:
           metrics['uniqueCitizens'] = uuid_bucket.get('uniqueCitizens').get(
               'value') if uuid_bucket.get('uniqueCitizens') and uuid_bucket.get('uniqueCitizens').get('value') else 0
           uuid.append(uuid_name)
