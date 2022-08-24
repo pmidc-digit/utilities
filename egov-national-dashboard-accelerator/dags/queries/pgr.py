@@ -199,15 +199,19 @@ pgr_resolved_complaints = {
 
 
 def extract_pgr_unique_citizens(metrics, region_bucket):
+    uuid_agg = region_bucket.get('uuid')
+    uuid_buckets = uuid_agg.get('buckets')
     uuid = []
-    if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value'):
-      logging.info(region_bucket.get('uniqueCitizens').get('value'))
-      if region_bucket.get('uniqueCitizens').get('value') in uuid:
-        logging.info("exists {0}".format(region_bucket.get('uniqueCitizens').get('value')))
-      else:
-        metrics['uniqueCitizens'] = region_bucket.get('uniqueCitizens').get(
-            'value') if region_bucket.get('uniqueCitizens') and region_bucket.get('uniqueCitizens').get('value') else 0
-        uuid.append(region_bucket.get('uniqueCitizens').get('value'))
+
+    for uuid_bucket in uuid_buckets:
+      uuid_name = uuid_bucket.get('key')
+      if uuid_bucket.get('uniqueCitizens') and uuid_bucket.get('uniqueCitizens').get('value'):
+        if uuid_name in uuid:
+          logging.info("exists {0}".format(uuid_name))
+        else:
+          metrics['uniqueCitizens'] = uuid_bucket.get('uniqueCitizens').get(
+              'value') if uuid_bucket.get('uniqueCitizens') and uuid_bucket.get('uniqueCitizens').get('value') else 0
+          uuid.append(uuid_name)
     return metrics
 
 pgr_unique_citizens = {
@@ -257,6 +261,12 @@ pgr_unique_citizens = {
                   "size":10000
                 }},
             "aggs": {{
+                "uuid": {{
+                  "terms": {{
+                    "field": "Data.citizen.uuid.keyword",
+                    "size": 1000
+                  }},  
+            "aggs": {{
               "uniqueCitizens": {{
                 "cardinality": {{
                   "field": "Data.citizen.uuid.keyword"
@@ -270,7 +280,8 @@ pgr_unique_citizens = {
           }}
           }}
           }}
-
+}}
+}}
 
     """
 }
