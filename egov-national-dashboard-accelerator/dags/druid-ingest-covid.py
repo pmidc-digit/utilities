@@ -2,7 +2,7 @@
 ### HTTP operator and sensor to look for data and post to druid
 """
 from airflow import DAG, macros
-from airflow.operators import SimpleHttpOperator, HttpSensor, PythonOperator
+from airflow.operators import  HttpSensor, PythonOperator
 from airflow.macros import ds_format
 from datetime import datetime, timedelta
 import json
