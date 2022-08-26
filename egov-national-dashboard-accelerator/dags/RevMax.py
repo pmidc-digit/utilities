@@ -4,6 +4,7 @@ from airflow.hooks.base import BaseHook
 from airflow.operators.python_operator import PythonOperator
 from elasticsearch import Elasticsearch, helpers
 from datetime import datetime, timedelta
+from pydruid.client import *
 import logging
 import pandas as pd
 import numpy as np
@@ -11,6 +12,9 @@ import json
 import logging
 import os
 import csv
+import requests
+
+
 
 default_args = {
 'owner': 'airflow',
@@ -373,6 +377,84 @@ def join_data():
 def upload_data():
     logging.info("Upload data to Druid")
 
+url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
+
+payload = json.dumps({
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "inline",
+        "data": "{\"time\":\"2015-09-12T00:46:58.771Z\",\"channel\":\"#en.wikipedia\",\"cityName\":null,\"comment\":\"added project\",\"countryIsoCode\":null,\"countryName\":null,\"isAnonymous\":false,\"isMinor\":false,\"isNew\":false,\"isRobot\":false,\"isUnpatrolled\":false,\"metroCode\":null,\"namespace\":\"Talk\",\"page\":\"Talk:Oswald Tilghman\",\"regionIsoCode\":null,\"regionName\":null,\"user\":\"GELongstreet\",\"delta\":36,\"added\":36,\"deleted\":0}\n{\"time\":\"2015-09-12T00:47:00.496Z\",\"channel\":\"#ca.wikipedia\",\"cityName\":null,\"comment\":\"Robot inserta {{Commonscat}} que enllaça amb [[commons:category:Rallicula]]\",\"countryIsoCode\":null,\"countryName\":null,\"isAnonymous\":false,\"isMinor\":true,\"isNew\":false,\"isRobot\":true,\"isUnpatrolled\":false,\"metroCode\":null,\"namespace\":\"Main\",\"page\":\"Rallicula\",\"regionIsoCode\":null,\"regionName\":null,\"user\":\"PereBot\",\"delta\":17,\"added\":17,\"deleted\":0}"
+      },
+      "inputFormat": {
+        "type": "json"
+      }
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      }
+    },
+    "dataSchema": {
+      "dataSource": "test",
+      "timestampSpec": {
+        "column": "!!!_no_such_column_!!!",
+        "missingValue": "2010-01-01T00:00:00Z"
+      },
+      "transformSpec": {},
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type": "long",
+            "name": "added"
+          },
+          "channel",
+          "cityName",
+          "comment",
+          "countryIsoCode",
+          "countryName",
+          {
+            "type": "long",
+            "name": "deleted"
+          },
+          {
+            "type": "long",
+            "name": "delta"
+          },
+          "isAnonymous",
+          "isMinor",
+          "isNew",
+          "isRobot",
+          "isUnpatrolled",
+          "metroCode",
+          "namespace",
+          "page",
+          "regionIsoCode",
+          "regionName",
+          "time",
+          "user"
+        ]
+      },
+      "granularitySpec": {
+        "queryGranularity": "none",
+        "rollup": False,
+        "segmentGranularity": "day"
+      }
+    }
+  }
+})
+headers = {
+  'Content-Type': 'application/json'
+}
+
+response = requests.request("POST", url, headers=headers, data=payload)
+
+print(response.text)
+
+
 
 def replace_empty_objects_with_null_value(df):
     df_columns = df.columns.tolist()
@@ -522,4 +604,5 @@ python_callable=upload_data,
 provide_context=True,
 dag=dag)
 
-flatten_data
+
+upload_data
