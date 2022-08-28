@@ -139,6 +139,7 @@ def elastic_dump_ws(start,end):
           }}
         }}
       ]
+         }}
          }},
         "sort": [
         {{
