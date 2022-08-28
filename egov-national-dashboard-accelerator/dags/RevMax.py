@@ -466,11 +466,11 @@ def upload_data():
 url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
 
 data = ""
-# with open("property_service.csv") as csvfile:
-#      spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-#      for row in spamreader:
-#         data+=', '.join(row)
-#         data+='\\n'
+f= open("property_service.csv")
+spamreader = csv.reader(f, delimiter=',', quotechar='"')
+for row in spamreader:
+    data+=', '.join(row)
+    data+='\\n'
 
 # payload = json.dumps({
 #   "type": "index_parallel",
