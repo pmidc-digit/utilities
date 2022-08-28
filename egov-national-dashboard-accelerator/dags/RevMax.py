@@ -378,8 +378,8 @@ def collect_data(**kwargs):
     elastic_dump_ws(start,end)
     #elastic_dump_meter() - not in punjab prod
     elastic_dump_collection_pt(start,end)
-    elastic_dump_collection_tl(start.end)
-    elastic_dump_collection_ws(start.end)
+    elastic_dump_collection_tl(start,end)
+    elastic_dump_collection_ws(start,end)
 
 def join_data():
     f= open('property_service.json',"r")
