@@ -382,6 +382,7 @@ def collect_data(**kwargs):
     elastic_dump_collection_ws(start,end)
 
 def join_data():
+    logging.info("in join")
     f= open('property_service.json',"r")
     property_service_json = json.loads(f.read())
     f.close()
@@ -412,6 +413,7 @@ def join_data():
   
     #property_service.csv
     df = get_dataframe_after_flattening(property_service_json)
+    logging.info(df)
     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
     # water_service csv
     df = get_dataframe_after_flattening(water_service_json)
@@ -466,11 +468,11 @@ def upload_data():
 url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
 
 data = ""
-f= open("property_service.csv")
-spamreader = csv.reader(f, delimiter=',', quotechar='"')
-for row in spamreader:
-    data+=', '.join(row)
-    data+='\\n'
+# f= open("property_service.csv")
+# spamreader = csv.reader(f, delimiter=',', quotechar='"')
+# for row in spamreader:
+#     data+=', '.join(row)
+#     data+='\\n'
 
 # payload = json.dumps({
 #   "type": "index_parallel",
@@ -567,6 +569,9 @@ def convert_dataframe_to_csv(dataframe, file_name):
     dataframe.to_csv(
        f"""{file_name}.csv""", index=False
     )
+    logging.info("absolute path {0}".format(os.path.abspath(f"""{file_name}.csv"""))) 
+
+    
     logging.info(dataframe)
 
 def get_dataframe_after_flattening(json_data):
