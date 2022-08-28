@@ -455,7 +455,7 @@ def upload_data():
 url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
 
 data = ""
-with open("/home/dataphi/Documents/RevMax/files_data/CSV files/test.csv") as csvfile:
+with open("property_service.csv") as csvfile:
      spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
      for row in spamreader:
         data+=', '.join(row)
