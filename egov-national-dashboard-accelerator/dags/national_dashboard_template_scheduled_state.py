@@ -13,7 +13,7 @@ import requests
 from airflow.hooks.base import BaseHook
 import logging
 import json
-import urllib
+import uuid
 from queries.tl import *
 from queries.pgr import *
 from queries.ws import *
