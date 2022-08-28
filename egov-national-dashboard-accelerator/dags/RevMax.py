@@ -4,6 +4,8 @@ from airflow.hooks.base import BaseHook
 from airflow.operators.python_operator import PythonOperator
 from elasticsearch import Elasticsearch, helpers
 from datetime import datetime, timedelta, timezone
+from datetime import date
+from pytz import timezone
 from pydruid.client import *
 import logging
 import pandas as pd
@@ -13,6 +15,7 @@ import logging
 import os
 import csv
 import requests
+from pytz import timezone
 
 
 
@@ -262,7 +265,6 @@ def elastic_dump_collection_tl():
     
     logging.info("absolute path {0}".format(os.path.abspath("dss_collection_tl.json")))
     return resp['hits']['hits']
-
 
 def elastic_dump_collection_ws():
     hook = ElasticHook('GET', 'es_conn')
