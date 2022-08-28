@@ -271,23 +271,23 @@ def call_ingest_api(connection, access_token, user_info, payload, module,startda
     logging.info(response)
 
     #logging to the index adaptor_logs
-    q = {
-        'timestamp' : startdate,
-        'module' : module,
-        'severity' : 'Info',
-        'state' : 'Punjab', 
-        'message' : json.dumps(response)
-    }
-    es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
-    actions = [
-                {
-                    '_index':'adaptor_logs',
-                    '_type': '_doc',
-                    '_id': str(uuid.uuid1()),
-                    '_source': json.dumps(q),
-                }
-            ]
-    helpers.bulk(es, actions)
+    # q = {
+    #     'timestamp' : startdate,
+    #     'module' : module,
+    #     'severity' : 'Info',
+    #     'state' : 'Punjab', 
+    #     'message' : json.dumps(response)
+    # }
+    # es = Elasticsearch(host = "elasticsearch-data-v1.es-cluster", port = 9200)
+    # actions = [
+    #             {
+    #                 '_index':'adaptor_logs',
+    #                 '_type': '_doc',
+    #                 '_id': str(uuid.uuid1()),
+    #                 '_source': json.dumps(q),
+    #             }
+    #         ]
+    # helpers.bulk(es, actions)
     return response
 
 
