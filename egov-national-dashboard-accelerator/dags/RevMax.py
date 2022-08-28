@@ -72,93 +72,93 @@ def elastic_dump_pt(start,end):
     logging.info(resp['hits']['hits'])
     with open("property_service.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    
-    logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
     return resp['hits']['hits']
 
-def elastic_dump_tl():
+def elastic_dump_tl(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('tlindex-v1-enriched/_search', {
+    query = """
+    {{
     "size": 1000,
     "_source": [
     "Data.ward.name",
     "Data.ward.code",
     "Data.tradelicense"
     ],
-    "query": {
-        "bool": {
+    "query": {{
+        "bool": {{
         "must_not": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "Data.tradelicense.tenantId.keyword": "pb.testing"
-            }
-            }
+            }}
+            }}
         ],
         "must": [
-            {
-                "range": {
-                    "Data.tradelicense.@timestamp": {
+            {{
+                "range": {{
+                    "Data.tradelicense.@timestamp": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
-                }
-              }
-            }
+                }}
+              }}
+            }}
         ]
-        }
-    },
+        }}
+    }},
     "sort": [
-        {
-        "Data.tradelicense.@timestamp": {
+        {{
+        "Data.tradelicense.@timestamp": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ]
-    }
-    )
+    }}
+    """
+    resp = hook.search('tlindex-v1-enriched/_search', json.loads(query.format(start,end)))
     logging.info(resp['hits']['hits'])
     with open("trade_license.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    
-    logging.info("absolute path {0}".format(os.path.abspath("trade_license.json")))
     return resp['hits']['hits']
     
-def elastic_dump_ws():
+def elastic_dump_ws(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('water-services-enriched/_search', {
+    query="""
+    {{
         "size": 1000,
-        "query": {
-          "bool" :{
+        "query": {{
+          "bool" :{{
         "must": [
-        {
-          "range": {
-            "Data.@timestamp": {
+        {{
+          "range": {{
+            "Data.@timestamp": {{
               "gte": {0},
               "lte": {1},
               "format": "epoch_millis"
-            }
-          }
-        }
+            }}
+          }}
+        }}
       ]
          }},
         "sort": [
-        {
-        "Data.@timestamp": {
+        {{
+        "Data.@timestamp": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ]
-    })
+    }}
+    """
+    resp = hook.search('water-services-enriched/_search', json.loads(query.format(start,end)))
     logging.info(resp['hits']['hits'])
     with open("water_service.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    
-    logging.info("absolute path {0}".format(os.path.abspath("water_service.json")))
     return resp['hits']['hits']
 
-def elastic_dump_collection_pt():
+def elastic_dump_collection_pt(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('dss-collection_v2/_search', {
+    query="""
+    {{
     "size": 1000,
     "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
@@ -169,51 +169,52 @@ def elastic_dump_collection_pt():
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
     "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward.code","domainObject.ward.name","domainObject.propertyId",
     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
-    "query": {
-        "bool": {
+    "query": {{
+        "bool": {{
         "must_not": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "Data.tenantId.keyword": "pb.testing"
-            }
-            }
+            }}
+            }}
         ],
         "must": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "dataObject.paymentDetails.businessService.keyword": "PT"
-            }
-            },
-            {
-                "range": {
-                    "dataObject.@timestamp": {
+            }}
+            }},
+            {{
+                "range": {{
+                    "dataObject.@timestamp": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
-                }
-              }
-            }
+                }}
+              }}
+            }}
         ]
-        }
-    },
+        }}
+    }},
     "sort": [
-        {
-        "dataObject.@timestamp": {
+        {{
+        "dataObject.@timestamp": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ] 
-    }) 
+    }}
+    """
+    resp = hook.search('dss-collection_v2/_search', json.loads(query.format(start,end))) 
     logging.info(resp['hits']['hits'])
     with open("dss_collection_pt.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    
-    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_pt.json")))
     return resp['hits']['hits']
 
-def elastic_dump_collection_tl():
+def elastic_dump_collection_tl(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('dss-collection_v2/_search', {
+    query="""
+    {{
     "size": 1000,
     "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
@@ -224,51 +225,52 @@ def elastic_dump_collection_tl():
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
     "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward.code","domainObject.ward.name","domainObject.propertyId",
     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
-    "query": {
-        "bool": {
+    "query": {{
+        "bool": {{
         "must_not": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "Data.tenantId.keyword": "pb.testing"
-            }
-            }
+            }}
+            }}
         ],
         "must": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "dataObject.paymentDetails.businessService.keyword": "TL"
-            }
-            },
-            {
-                "range": {
-                    "dataObject.@timestamp": {
+            }}
+            }},
+            {{
+                "range": {{
+                    "dataObject.@timestamp": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
-                }
-              }
-            }
+                }}
+              }}
+            }}
         ]
-        }
-    },
+        }}
+    }},
     "sort": [
-        {
-        "dataObject.@timestamp": {
+        {{
+        "dataObject.@timestamp": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ] 
-    }) 
+    }}
+    """
+    resp = hook.search('dss-collection_v2/_search',json.loads(query.format(start,end))) 
     logging.info(resp['hits']['hits'])
     with open("dss_collection_tl.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    
-    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_tl.json")))
     return resp['hits']['hits']
 
-def elastic_dump_collection_ws():
+def elastic_dump_collection_ws(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('dss-collection_v2/_search', {
+    query="""
+    {
     "size": 1000,
     "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
@@ -279,85 +281,87 @@ def elastic_dump_collection_ws():
     "dataObject.paymentDetails.totalAmountPaid","dataObject.paymentDetails.receiptNumber","dataObject.payer.name",
     "dataObject.payer.id","dataObject.paymentStatus","domainObject.ward.code","domainObject.ward.name","domainObject.propertyId",
     "domainObject.usageCategory","domainObject.tradeLicense","domainObject.propertyUsageType"],
-    "query": {
-        "bool": {
+    "query": {{
+        "bool": {{
         "must_not": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "Data.tenantId.keyword": "pb.testing"
-            }
-            }
+            }}
+            }}
         ],
        "must": [
-        {
-          "terms": {
+        {{
+          "terms": {{
             "dataObject.paymentDetails.businessService.keyword": [
               "WS",
               "WS.ONE_TIME_FEE",
               "SW.ONE_TIME_FEE",
               "SW"
             ]
-          }
-        },
-        {
-                "range": {
-                    "dataObject.@timestamp": {
+          }}
+        }},
+        {{
+                "range": {{
+                    "dataObject.@timestamp": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
-                }
-              }
-        }
+                }}
+              }}
+        }}
    ]
-        }
-    },
+        }}
+    }},
     "sort": [
-        {
-        "dataObject.@timestamp": {
+        {{
+        "dataObject.@timestamp": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ] 
-    }) 
+    }}
+    """
+    resp = hook.search('dss-collection_v2/_search', json.loads(query.format(start,end))) 
     logging.info(resp['hits']['hits'])
     with open("dss_collection_ws.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    
-    logging.info("absolute path {0}".format(os.path.abspath("dss_collection_ws.json")))
     return resp['hits']['hits']
 
-def elastic_dump_meter():
+def elastic_dump_meter(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('meter-services/_search', {
+    query="""
+    {{
         "size": 1000,
-        "query": {
-            "bool": {
+        "query": {{
+            "bool": {{
             "must": [
-                {
-                "range": {
-                    "Data.currentReadingDate": {
+                {{
+                "range": {{
+                    "Data.currentReadingDate": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
-                    }
-                }
-                }
+                    }}
+                }}
+                }}
             ]
-            }
-         },
+            }}
+         }},
         "sort": [
-        {
-        "Data.currentReadingDate": {
+        {{
+        "Data.currentReadingDate": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ]
-    })
+    }}
+    """
+    resp = hook.search('meter-services/_search', json.loads(query.format(start,end)))
+    logging.info(resp['hits']['hits'])
     with open("meter_service.json", "w") as outfile:
         outfile.write(json.dumps(resp['hits']['hits']))
-    logging.info(resp['hits']['hits'])
 
-    logging.info("absolute path {0}".format(os.path.abspath("meter_service.json")))
     return resp['hits']['hits']
 
 def collect_data(**kwargs):
