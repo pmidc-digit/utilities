@@ -271,7 +271,7 @@ def elastic_dump_collection_tl(start,end):
 def elastic_dump_collection_ws(start,end):
     hook = ElasticHook('GET', 'es_conn')
     query="""
-    {
+    {{
     "size": 1000,
     "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
