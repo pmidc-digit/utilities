@@ -380,6 +380,7 @@ def collect_data(**kwargs):
     elastic_dump_collection_pt(start,end)
     elastic_dump_collection_tl(start,end)
     elastic_dump_collection_ws(start,end)
+    return 'Success'
 
 def join_data():
     logging.info("in join")
