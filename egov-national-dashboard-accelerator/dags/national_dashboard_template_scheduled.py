@@ -301,8 +301,9 @@ def load(**kwargs):
     logging.info(payload)
     payload_obj = json.loads(payload)
     logging.info("payload length {0} {1}".format(len(payload_obj),module))
+    today = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
     localtz = timezone('Asia/Kolkata')
-    dt_aware = localtz.localize(datetime.strptime(kwargs['dag_run'].conf.get('date'), "%d-%m-%Y"))
+    dt_aware = localtz.localize(datetime.strptime(today, "%d-%m-%Y"))
     startdate = int(dt_aware.timestamp() * 1000)
     logging.info(startdate)
     if access_token and refresh_token:
