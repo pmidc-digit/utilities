@@ -691,7 +691,7 @@ python_callable=collect_data,
 provide_context=True,
 dag=dag)
 
-join_data = PythonOperator(
+joindata = PythonOperator(
 task_id='join_data',
 python_callable=join_data,
 provide_context=True,
@@ -707,4 +707,4 @@ dag=dag)
 
 #upload_data
 
-flatten_data >> join_data
+flatten_data >> joindata
