@@ -49,7 +49,7 @@ module_map = {
 }
 
 
-dag = DAG('national_dashboard_template_scheduled_UPYOG', catchup = True, default_args=default_args, schedule_interval='@daily')
+dag = DAG('national_dashboard_template_scheduled_state', catchup = True, default_args=default_args, schedule_interval='@daily')
 log_endpoint = 'kibana/api/console/proxy'
 batch_size = 50
 
@@ -233,7 +233,7 @@ def get_auth_token(connection):
     data = {
         'grant_type' : 'password',
         'scope' : 'read',
-        'username' : Variable.get('username'),
+        'username' : Variable.get('username_state'),
         'password' : Variable.get('password'),
         'tenantId' : Variable.get('tenantid'),
         'userType' : Variable.get('usertype')
@@ -264,13 +264,12 @@ def call_ingest_api(connection, access_token, user_info, payload, module,startda
 
     }
 
-  
+   
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
-    logging.info(json.dumps(data))
     logging.info(response)
 
-    #logging to the index adaptor_logs
+     #logging to the index adaptor_logs
     q = {
         'timestamp' : startdate,
         'module' : module,
@@ -293,7 +292,7 @@ def call_ingest_api(connection, access_token, user_info, payload, module,startda
 
 
 def load(**kwargs):
-    connection = BaseHook.get_connection('digit-auth')
+    connection = BaseHook.get_connection('digit-auth-state')
     (access_token, refresh_token, user_info) = get_auth_token(connection)
     module = kwargs['module']
 
