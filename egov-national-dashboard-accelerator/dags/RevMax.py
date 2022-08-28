@@ -3,7 +3,7 @@ from hooks.elastic_hook import ElasticHook
 from airflow.hooks.base import BaseHook
 from airflow.operators.python_operator import PythonOperator
 from elasticsearch import Elasticsearch, helpers
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pydruid.client import *
 import logging
 import pandas as pd
@@ -26,39 +26,47 @@ default_args = {
 
 dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
  
-def elastic_dump_pt():
+def elastic_dump_pt(start,end):
     hook = ElasticHook('GET', 'es_conn')
-    resp = hook.search('property-services/_search', {
+    query = """
+    {{
     "size": 1000,
     "_source": ["Data.propertyId","data.superBuiltUpArea","Data.channel", "Data.tenantId", "Data.ward.name", 
     "Data.ward.code","Data.source", "Data.propertyType", "Data.accountId", "Data.noOfFloors", "Data.@timestamp", 
     "Data.ownershipCategory", "Data.acknowldgementNumber", "Data.usageCategory", "Data.status"],
-    "query": {
-        "bool": {
+    "query": {{
+        "bool": {{
         "must_not": [
-            {
-            "term": {
+            {{
+            "term": {{
                 "Data.tenantId.keyword": "pb.testing"
-            }
-            }
+            }}
+            }}
+        ],
+        "must": [
+            {{
+                "range": {{
+                    "Data.@timestamp": {{
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                }}
+              }}
+            }}
         ]
-        }
-    },
+        }}
+    }},
     "sort": [
-        {
-        "Data.@timestamp": {
+        {{
+        "Data.@timestamp": {{
             "order": "desc"
-        }
-        }
+        }}
+        }}
     ]
-    }
-    )
-    logging.info(resp['hits']['hits'])
-    with open("property_service.json", "w") as outfile:
-        json.dump(resp['hits']['hits'],outfile)
-        outfile.close()
+    }}"""
 
-    logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
+    resp = hook.search('property-services/_search', json.loads(query.format(start,end)))
+    logging.info(resp['hits']['hits'])
     return resp['hits']['hits']
 
 def elastic_dump_tl():
@@ -77,6 +85,17 @@ def elastic_dump_tl():
             "term": {
                 "Data.tradelicense.tenantId.keyword": "pb.testing"
             }
+            }
+        ],
+        "must": [
+            {
+                "range": {
+                    "Data.tradelicense.@timestamp": {
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                }
+              }
             }
         ]
         }
@@ -102,8 +121,19 @@ def elastic_dump_ws():
     resp = hook.search('water-services-enriched/_search', {
         "size": 1000,
         "query": {
-        "match_all": {}
-         },
+          "bool" :{
+        "must": [
+        {
+          "range": {
+            "Data.@timestamp": {
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }
+          }
+        }
+      ]
+         }},
         "sort": [
         {
         "Data.@timestamp": {
@@ -146,6 +176,15 @@ def elastic_dump_collection_pt():
             "term": {
                 "dataObject.paymentDetails.businessService.keyword": "PT"
             }
+            },
+            {
+                "range": {
+                    "dataObject.@timestamp": {
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                }
+              }
             }
         ]
         }
@@ -164,7 +203,6 @@ def elastic_dump_collection_pt():
     
     logging.info("absolute path {0}".format(os.path.abspath("dss_collection_pt.json")))
     return resp['hits']['hits']
-
 
 def elastic_dump_collection_tl():
     hook = ElasticHook('GET', 'es_conn')
@@ -193,6 +231,15 @@ def elastic_dump_collection_tl():
             "term": {
                 "dataObject.paymentDetails.businessService.keyword": "TL"
             }
+            },
+            {
+                "range": {
+                    "dataObject.@timestamp": {
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                }
+              }
             }
         ]
         }
@@ -245,6 +292,15 @@ def elastic_dump_collection_ws():
               "SW"
             ]
           }
+        },
+        {
+                "range": {
+                    "dataObject.@timestamp": {
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                }
+              }
         }
    ]
         }
@@ -269,7 +325,19 @@ def elastic_dump_meter():
     resp = hook.search('meter-services/_search', {
         "size": 1000,
         "query": {
-        "match_all": {}
+            "bool": {
+            "must": [
+                {
+                "range": {
+                    "Data.currentReadingDate": {
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                    }
+                }
+                }
+            ]
+            }
          },
         "sort": [
         {
@@ -286,14 +354,21 @@ def elastic_dump_meter():
     logging.info("absolute path {0}".format(os.path.abspath("meter_service.json")))
     return resp['hits']['hits']
 
-def collect_data():
-    elastic_dump_pt()
-    elastic_dump_tl()
-    elastic_dump_ws()
-    #elastic_dump_meter()
-    elastic_dump_collection_pt()
-    elastic_dump_collection_tl()
-    elastic_dump_collection_ws()
+def collect_data(**kwargs):
+    date = kwargs['dag_run'].conf.get('date')
+    localtz = timezone('Asia/Kolkata')
+    dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
+    start = int(dt_aware.timestamp() * 1000)
+    end = start + (24 * 60 * 60 * 1000) - 1000
+    logging.info(start)
+    logging.info(end)
+    elastic_dump_pt(start,end)
+    elastic_dump_tl(start,end)
+    elastic_dump_ws(start,end)
+    #elastic_dump_meter() - not in punjab prod
+    elastic_dump_collection_pt(start,end)
+    elastic_dump_collection_tl(start.end)
+    elastic_dump_collection_ws(start.end)
 
 def join_data():
     f= open('property_service.json',"r")
@@ -379,6 +454,13 @@ def upload_data():
 
 url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
 
+data = ""
+with open("/home/dataphi/Documents/RevMax/files_data/CSV files/test.csv") as csvfile:
+     spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+     for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+
 payload = json.dumps({
   "type": "index_parallel",
   "spec": {
@@ -386,7 +468,7 @@ payload = json.dumps({
       "type": "index_parallel",
       "inputSource": {
         "type": "inline",
-        "data": "{\"time\":\"2015-09-12T00:46:58.771Z\",\"channel\":\"#en.wikipedia\",\"cityName\":null,\"comment\":\"added project\",\"countryIsoCode\":null,\"countryName\":null,\"isAnonymous\":false,\"isMinor\":false,\"isNew\":false,\"isRobot\":false,\"isUnpatrolled\":false,\"metroCode\":null,\"namespace\":\"Talk\",\"page\":\"Talk:Oswald Tilghman\",\"regionIsoCode\":null,\"regionName\":null,\"user\":\"GELongstreet\",\"delta\":36,\"added\":36,\"deleted\":0}\n{\"time\":\"2015-09-12T00:47:00.496Z\",\"channel\":\"#ca.wikipedia\",\"cityName\":null,\"comment\":\"Robot inserta {{Commonscat}} que enllaça amb [[commons:category:Rallicula]]\",\"countryIsoCode\":null,\"countryName\":null,\"isAnonymous\":false,\"isMinor\":true,\"isNew\":false,\"isRobot\":true,\"isUnpatrolled\":false,\"metroCode\":null,\"namespace\":\"Main\",\"page\":\"Rallicula\",\"regionIsoCode\":null,\"regionName\":null,\"user\":\"PereBot\",\"delta\":17,\"added\":17,\"deleted\":0}"
+        "data": "{0}"
       },
       "inputFormat": {
         "type": "json"
@@ -446,11 +528,12 @@ payload = json.dumps({
     }
   }
 })
+q=payload.format(data)
 headers = {
   'Content-Type': 'application/json'
 }
 
-response = requests.request("POST", url, headers=headers, data=payload)
+response = requests.request("POST", url, headers=q, data=payload)
 
 print(response.text)
 
@@ -605,4 +688,7 @@ provide_context=True,
 dag=dag)
 
 
-upload_data
+
+#upload_data
+
+flatten_data >> join_data
