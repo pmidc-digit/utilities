@@ -67,6 +67,10 @@ def elastic_dump_pt(start,end):
 
     resp = hook.search('property-services/_search', json.loads(query.format(start,end)))
     logging.info(resp['hits']['hits'])
+    with open("property_service.json", "w") as outfile:
+        outfile.write(json.dumps(resp['hits']['hits']))
+    
+    logging.info("absolute path {0}".format(os.path.abspath("property_service.json")))
     return resp['hits']['hits']
 
 def elastic_dump_tl():
@@ -455,87 +459,87 @@ def upload_data():
 url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
 
 data = ""
-with open("property_service.csv") as csvfile:
-     spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
-     for row in spamreader:
-        data+=', '.join(row)
-        data+='\\n'
+# with open("property_service.csv") as csvfile:
+#      spamreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+#      for row in spamreader:
+#         data+=', '.join(row)
+#         data+='\\n'
 
-payload = json.dumps({
-  "type": "index_parallel",
-  "spec": {
-    "ioConfig": {
-      "type": "index_parallel",
-      "inputSource": {
-        "type": "inline",
-        "data": "{0}"
-      },
-      "inputFormat": {
-        "type": "json"
-      }
-    },
-    "tuningConfig": {
-      "type": "index_parallel",
-      "partitionsSpec": {
-        "type": "dynamic"
-      }
-    },
-    "dataSchema": {
-      "dataSource": "test",
-      "timestampSpec": {
-        "column": "!!!_no_such_column_!!!",
-        "missingValue": "2010-01-01T00:00:00Z"
-      },
-      "transformSpec": {},
-      "dimensionsSpec": {
-        "dimensions": [
-          {
-            "type": "long",
-            "name": "added"
-          },
-          "channel",
-          "cityName",
-          "comment",
-          "countryIsoCode",
-          "countryName",
-          {
-            "type": "long",
-            "name": "deleted"
-          },
-          {
-            "type": "long",
-            "name": "delta"
-          },
-          "isAnonymous",
-          "isMinor",
-          "isNew",
-          "isRobot",
-          "isUnpatrolled",
-          "metroCode",
-          "namespace",
-          "page",
-          "regionIsoCode",
-          "regionName",
-          "time",
-          "user"
-        ]
-      },
-      "granularitySpec": {
-        "queryGranularity": "none",
-        "rollup": False,
-        "segmentGranularity": "day"
-      }
-    }
-  }
-})
-q=payload.format(data)
-headers = {
-  'Content-Type': 'application/json'
-}
+# payload = json.dumps({
+#   "type": "index_parallel",
+#   "spec": {
+#     "ioConfig": {
+#       "type": "index_parallel",
+#       "inputSource": {
+#         "type": "inline",
+#         "data": "{0}"
+#       },
+#       "inputFormat": {
+#         "type": "json"
+#       }
+#     },
+#     "tuningConfig": {
+#       "type": "index_parallel",
+#       "partitionsSpec": {
+#         "type": "dynamic"
+#       }
+#     },
+#     "dataSchema": {
+#       "dataSource": "test",
+#       "timestampSpec": {
+#         "column": "!!!_no_such_column_!!!",
+#         "missingValue": "2010-01-01T00:00:00Z"
+#       },
+#       "transformSpec": {},
+#       "dimensionsSpec": {
+#         "dimensions": [
+#           {
+#             "type": "long",
+#             "name": "added"
+#           },
+#           "channel",
+#           "cityName",
+#           "comment",
+#           "countryIsoCode",
+#           "countryName",
+#           {
+#             "type": "long",
+#             "name": "deleted"
+#           },
+#           {
+#             "type": "long",
+#             "name": "delta"
+#           },
+#           "isAnonymous",
+#           "isMinor",
+#           "isNew",
+#           "isRobot",
+#           "isUnpatrolled",
+#           "metroCode",
+#           "namespace",
+#           "page",
+#           "regionIsoCode",
+#           "regionName",
+#           "time",
+#           "user"
+#         ]
+#       },
+#       "granularitySpec": {
+#         "queryGranularity": "none",
+#         "rollup": False,
+#         "segmentGranularity": "day"
+#       }
+#     }
+#   }
+# })
+# q=payload.format(data)
+# headers = {
+#   'Content-Type': 'application/json'
+# }
 
-response = requests.request("POST", url, headers=q, data=payload)
+# response = requests.request("POST", url, headers=q, data=payload)
 
-print(response.text)
+# print(response.text)
 
 
 
