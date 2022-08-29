@@ -1251,16 +1251,16 @@ def upload_dss_service():
 
 def upload_data():
     logging.info("Upload data to Druid")
-    # upload_property_service()
+    upload_property_service()
     # upload_trade_license()
-    # upload_water_service()
-    #upload_water_and_meter()
-    #upload_meter_service()
-    #upload_demand()
-    # upload_water_and_property()
+    upload_water_service()
+    #upload_water_and_meter() - data not in prod for punjab
+    #upload_meter_service() - data not in prod for punjab
+    #upload_demand() - data not in prod for punjab
+    upload_water_and_property()
     # upload_trade_and_property() 
     upload_rule_3()   
-    #upload_dss_service()
+    upload_dss_service()
 
 
     #url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
