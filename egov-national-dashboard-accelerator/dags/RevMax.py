@@ -614,7 +614,8 @@ def upload_trade_license():
         data+='\\n'
     f.close()
 
-    payload =  """{{
+    payload =  """
+    {{
     "type": "index_parallel",
     "spec": {{
         "ioConfig": {{
@@ -626,7 +627,8 @@ def upload_trade_license():
         "inputFormat": {{
             "type": "csv",
             "findColumnsFromHeader": true
-        }}
+        }},
+        "appendToExisting": true
         }},
         "tuningConfig": {{
         "type": "index_parallel",
@@ -635,46 +637,90 @@ def upload_trade_license():
         }}
         }},
         "dataSchema": {{
-        "dataSource": "test2",
+        "dataSource": "trade_license",
         "timestampSpec": {{
-            "column": "!!!_no_such_column_!!!",
-            "missingValue": "2010-01-01T00:00:00Z"
+            "column": "_source.Data.tradelicense.@timestamp",
+            "format": "iso"
         }},
         "dimensionsSpec": {{
             "dimensions": [
-            "additionaldetails",
-            "billexpirytime",
-            "businessservice",
-            "consumercode",
-            "consumertype",
-            "createdby",
+            "_id",
+            "_index",
+            "_score",
+            "_source.Data.history.0.businessService",
+            "_source.Data.history.1.businessService",
+            "_source.Data.history.2.businessService",
+            "_source.Data.history.3.businessService",
+            "_source.Data.history.4.businessService",
+            "_source.Data.history.5.businessService",
+            "_source.Data.history.6.businessService",
+            "_source.Data.history.7.businessService",
+            "_source.Data.history.8.businessService",
+            "_source.Data.history.9.businessService",
+            "_source.Data.history.10.businessService",
+            "_source.Data.history.11.businessService",
+            "_source.Data.history.12.businessService",
+            "_source.Data.history.13.businessService",
+            "_source.Data.history.14.businessService",
+            "_source.Data.history.15.businessService",
+            "_source.Data.history.16.businessService",
+            "_source.Data.history.17.businessService",
+            "_source.Data.tradelicense.accountId",
+            "_source.Data.tradelicense.action",
             {{
                 "type": "long",
-                "name": "createdtime"
+                "name": "_source.Data.tradelicense.applicationDate"
             }},
-            "fixedbillexpirydate",
-            "id",
-            "ispaymentcompleted",
-            "lastmodifiedby",
+            "_source.Data.tradelicense.applicationNumber",
+            "_source.Data.tradelicense.applicationType",
+            "_source.Data.tradelicense.financialYear",
+            "_source.Data.tradelicense.licenseNumber",
+            "_source.Data.tradelicense.licenseType",
+            "_source.Data.tradelicense.propertyId",
+            "_source.Data.tradelicense.status",
+            "_source.Data.tradelicense.tenantId",
             {{
                 "type": "long",
-                "name": "lastmodifiedtime"
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.channel",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.structureType",
+            "_source.Data.tradelicense.tradeName",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.validFrom"
             }},
             {{
                 "type": "long",
-                "name": "minimumamountpayable"
+                "name": "_source.Data.tradelicense.validTo"
             }},
-            "payer",
-            "status",
+            "_source.Data.tradelicense.workflowCode",
+            "_source.Data.ward.code",
+            "_source.Data.ward.name",
+            "_type",
             {{
                 "type": "long",
-                "name": "taxperiodfrom"
-            }},
-            {{
-                "type": "long",
-                "name": "taxperiodto"
-            }},
-            "tenantid"
+                "name": "sort.0"
+            }}
             ]
         }},
         "granularitySpec": {{
@@ -684,7 +730,9 @@ def upload_trade_license():
         }}
         }}
     }}
-    }}"""
+    }}
+
+    """
     q=payload.format(data)
     header = {
     'Content-Type': 'application/json'
@@ -943,7 +991,8 @@ def upload_trade_and_property():
         data+='\\n'
     f.close()
 
-    payload =  """{{
+    payload =  """
+    {{
     "type": "index_parallel",
     "spec": {{
         "ioConfig": {{
@@ -955,7 +1004,8 @@ def upload_trade_and_property():
         "inputFormat": {{
             "type": "csv",
             "findColumnsFromHeader": true
-        }}
+        }},
+        "appendToExisting": true
         }},
         "tuningConfig": {{
         "type": "index_parallel",
@@ -964,46 +1014,90 @@ def upload_trade_and_property():
         }}
         }},
         "dataSchema": {{
-        "dataSource": "test2",
+        "dataSource": "trade_and_property",
         "timestampSpec": {{
-            "column": "!!!_no_such_column_!!!",
-            "missingValue": "2010-01-01T00:00:00Z"
+            "column": "_source.Data.@timestamp",
+            "format": "iso"
         }},
         "dimensionsSpec": {{
             "dimensions": [
-            "additionaldetails",
-            "billexpirytime",
-            "businessservice",
-            "consumercode",
-            "consumertype",
-            "createdby",
+            "_id",
+            "_index",
+            "_score",
+            "_source.Data.history.0.businessService",
+            "_source.Data.history.1.businessService",
+            "_source.Data.history.2.businessService",
+            "_source.Data.history.3.businessService",
+            "_source.Data.history.4.businessService",
+            "_source.Data.history.5.businessService",
+            "_source.Data.history.6.businessService",
+            "_source.Data.history.7.businessService",
+            "_source.Data.history.8.businessService",
+            "_source.Data.history.9.businessService",
+            "_source.Data.history.10.businessService",
+            "_source.Data.history.11.businessService",
+            "_source.Data.history.12.businessService",
+            "_source.Data.history.13.businessService",
+            "_source.Data.history.14.businessService",
+            "_source.Data.history.15.businessService",
+            "_source.Data.history.16.businessService",
+            "_source.Data.history.17.businessService",
+            "_source.Data.tradelicense.accountId",
+            "_source.Data.tradelicense.action",
             {{
                 "type": "long",
-                "name": "createdtime"
+                "name": "_source.Data.tradelicense.applicationDate"
             }},
-            "fixedbillexpirydate",
-            "id",
-            "ispaymentcompleted",
-            "lastmodifiedby",
+            "_source.Data.tradelicense.applicationNumber",
+            "_source.Data.tradelicense.applicationType",
+            "_source.Data.tradelicense.financialYear",
+            "_source.Data.tradelicense.licenseNumber",
+            "_source.Data.tradelicense.licenseType",
+            "_source.Data.tradelicense.propertyId",
+            "_source.Data.tradelicense.status",
+            "_source.Data.tradelicense.tenantId",
             {{
                 "type": "long",
-                "name": "lastmodifiedtime"
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.channel",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
+            }},
+            "_source.Data.tradelicense.tradeLicenseDetail.structureType",
+            "_source.Data.tradelicense.tradeName",
+            {{
+                "type": "long",
+                "name": "_source.Data.tradelicense.validFrom"
             }},
             {{
                 "type": "long",
-                "name": "minimumamountpayable"
+                "name": "_source.Data.tradelicense.validTo"
             }},
-            "payer",
-            "status",
+            "_source.Data.tradelicense.workflowCode",
+            "_source.Data.ward.code",
+            "_source.Data.ward.name",
+            "_type",
             {{
                 "type": "long",
-                "name": "taxperiodfrom"
-            }},
-            {{
-                "type": "long",
-                "name": "taxperiodto"
-            }},
-            "tenantid"
+                "name": "sort.0"
+            }}
             ]
         }},
         "granularitySpec": {{
@@ -1013,7 +1107,8 @@ def upload_trade_and_property():
         }}
         }}
     }}
-    }}"""
+    }}
+    """
     q=payload.format(data)
     header = {
     'Content-Type': 'application/json'
@@ -1252,13 +1347,13 @@ def upload_dss_service():
 def upload_data():
     logging.info("Upload data to Druid")
     upload_property_service()
-    # upload_trade_license()
+    upload_trade_license()
     upload_water_service()
     #upload_water_and_meter() - data not in prod for punjab
     #upload_meter_service() - data not in prod for punjab
     #upload_demand() - data not in prod for punjab
     upload_water_and_property()
-    # upload_trade_and_property() 
+    upload_trade_and_property() 
     upload_rule_3()   
     upload_dss_service()
 
