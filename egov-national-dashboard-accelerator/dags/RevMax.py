@@ -529,8 +529,7 @@ def upload_property_service():
     f= open("property_service.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        str =', '.join(row)
-        data+=json.dumps(str)
+        data+=', '.join(row)
         data+='\\n'
     f.close()
   
@@ -612,10 +611,9 @@ def upload_trade_license():
     f= open("trade_license.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        str =', '.join(row)
-        data+=json.dumps(str)
+        data+=', '.join(row)
         data+='\\n'
-    f.close()  
+    f.close() 
 
     payload =  """
     {{
@@ -985,8 +983,8 @@ def upload_trade_and_property():
         "type": "index_parallel",
         "inputSource": {{
             "type": "inline",
-            "data": "_index_trade,_type_trade,_id_trade,_score_trade,_source.Data.tradelicense.businessService,_source.Data.tradelicense.applicationType,_source.Data.tradelicense.applicationNumber,_source.Data.tradelicense.validFrom,_source.Data.tradelicense.financialYear,_source.Data.tradelicense.workflowCode,_source.Data.tradelicense.licenseType,_source.Data.tradelicense.accountId,_source.Data.tradelicense.tradeName,_source.Data.tradelicense.@timestamp,_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason,_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty,_source.Data.tradelicense.tradeLicenseDetail.structureType,_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime,_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy,_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy,_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime,_source.Data.tradelicense.tradeLicenseDetail.channel,_source.Data.tradelicense.tradeLicenseDetail.adhocExemption,_source.Data.tradelicense.tradeLicenseDetail.operationalArea,_source.Data.tradelicense.tenantId,_source.Data.tradelicense.action,_source.Data.tradelicense.licenseNumber,_source.Data.tradelicense.propertyId,_source.Data.tradelicense.validTo,_source.Data.tradelicense.applicationDate,_source.Data.tradelicense.status,_source.Data.ward.code_trade,_source.Data.ward.name_trade,sort.0_trade,_index_property,_type_property,_id_property,_score_property,_source.Data.channel,_source.Data.source,_source.Data.ward.code_property,_source.Data.ward.name_property,_source.Data.accountId,_source.Data.noOfFloors,_source.Data.@timestamp,_source.Data.ownershipCategory,_source.Data.propertyType,_source.Data.tenantId,_source.Data.propertyId,_source.Data.acknowldgementNumber,_source.Data.usageCategory,_source.Data.status,sort.0_property\ntlindex-v1-enriched,general,5d3fefd0-60b2-4c08-bad6-aeb8e9db256bpb.amritsar,,TL,RENEWAL,PB-TL-2022-05-27-096790,1648751400000,2022-23,DIRECTRENEWAL,PERMANENT,40eaff6a-573c-48c7-ad2a-4292697512fc,SOFIA TRADING CO,2022-05-27T11:57:55.083Z,,,IMMOVABLE.PUCCA,1653652675083,40eaff6a-573c-48c7-ad2a-4292697512fc,40eaff6a-573c-48c7-ad2a-4292697512fc,1653652675083,,,3150.0,pb.amritsar,INITIATE,PB-TL-2021-07-02-039413,PT-107-966521,1680201000000,1653652675083,PENDINGPAYMENT,ALOC1222,VERKA BATALA ROAD - W - W-21 - A3,1653652675083,property-services,general,PT-107-966521pb.amritsar,,CFC_COUNTER,MUNICIPAL_RECORDS,W-21,WARD-21,4d9b0e12-6ad2-4d9c-950d-2624c3fc6e65,2,2022-05-31T08:18:26.466Z,INDIVIDUAL.SINGLEOWNER,BUILTUP.INDEPENDENTPROPERTY,pb.amritsar,PT-107-966521,AC-2022-05-31-1379635,Industrial,INWORKFLOW,1653985106466"
-        }},
+            "data": "{0}"
+             }},
         "inputFormat": {{
             "type": "csv",
             "findColumnsFromHeader": true
@@ -1316,15 +1314,15 @@ def upload_dss_service():
 
 def upload_data():
     logging.info("Upload data to Druid")
-    upload_property_service()
+    #upload_property_service()
     upload_trade_license()
-    upload_water_service()
+    #upload_water_service()
     #upload_water_and_meter() - data not in prod for punjab
     #upload_meter_service() - data not in prod for punjab
     #upload_demand() - data not in prod for punjab
-    upload_water_and_property()
-    upload_trade_and_property() 
-    upload_rule_3()   
+    #upload_water_and_property()
+    #upload_trade_and_property() 
+    #upload_rule_3()   
     #upload_dss_service()
 
 
