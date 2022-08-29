@@ -960,7 +960,7 @@ def upload_rule_3():
         }},
         "tuningConfig": {{
         "type": "index_parallel",
-        "partitionsSpec": {
+        "partitionsSpec": {{
             "type": "dynamic"
         }}
         }},
