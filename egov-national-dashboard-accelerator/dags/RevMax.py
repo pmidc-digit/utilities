@@ -601,7 +601,7 @@ def upload_property_service():
 
     q=payload.format(data)
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
     }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -719,7 +719,7 @@ def upload_trade_license():
     q=payload.format(data)
     logging.info(q)
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -840,7 +840,7 @@ def upload_water_service():
     """
     q=payload.format(data)
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -961,7 +961,7 @@ def upload_water_and_property():
     """
     q=payload.format(data)
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -1079,7 +1079,7 @@ def upload_trade_and_property():
     q=payload.format(data)
     logging.info(q)
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -1160,7 +1160,7 @@ def upload_rule_3():
     """
     q=payload.format(data)
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -1168,7 +1168,7 @@ def upload_rule_3():
 def upload_dss_service():
     data = ""
     header = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
     payload =  """
     {{
