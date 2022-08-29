@@ -187,7 +187,7 @@ def elastic_dump_collection_pt(start,end):
             }},
             {{
                 "range": {{
-                    "dataObject.@timestamp": {{
+                    "dataObject.paymentDetails.receiptDate": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
@@ -199,7 +199,7 @@ def elastic_dump_collection_pt(start,end):
     }},
     "sort": [
         {{
-        "dataObject.@timestamp": {{
+        "dataObject.paymentDetails.receiptDate": {{
             "order": "desc"
         }}
         }}
@@ -243,7 +243,7 @@ def elastic_dump_collection_tl(start,end):
             }},
             {{
                 "range": {{
-                    "dataObject.@timestamp": {{
+                    "dataObject.paymentDetails.receiptDate": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
@@ -255,7 +255,7 @@ def elastic_dump_collection_tl(start,end):
     }},
     "sort": [
         {{
-        "dataObject.@timestamp": {{
+        "dataObject.paymentDetails.receiptDate": {{
             "order": "desc"
         }}
         }}
@@ -304,7 +304,7 @@ def elastic_dump_collection_ws(start,end):
         }},
         {{
                 "range": {{
-                    "dataObject.@timestamp": {{
+                   "dataObject.paymentDetails.receiptDate": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
@@ -316,7 +316,7 @@ def elastic_dump_collection_ws(start,end):
     }},
     "sort": [
         {{
-        "dataObject.@timestamp": {{
+        "dataObject.paymentDetails.receiptDate": {{
             "order": "desc"
         }}
         }}
