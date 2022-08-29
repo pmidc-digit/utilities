@@ -475,81 +475,80 @@ def upload_data():
         data+='\\n'
     f.close()
 
-# payload = json.dumps({
-#   "type": "index_parallel",
-#   "spec": {
-#     "ioConfig": {
-#       "type": "index_parallel",
-#       "inputSource": {
-#         "type": "inline",
-#         "data": "{0}"
-#       },
-#       "inputFormat": {
-#         "type": "json"
-#       }
-#     },
-#     "tuningConfig": {
-#       "type": "index_parallel",
-#       "partitionsSpec": {
-#         "type": "dynamic"
-#       }
-#     },
-#     "dataSchema": {
-#       "dataSource": "test",
-#       "timestampSpec": {
-#         "column": "!!!_no_such_column_!!!",
-#         "missingValue": "2010-01-01T00:00:00Z"
-#       },
-#       "transformSpec": {},
-#       "dimensionsSpec": {
-#         "dimensions": [
-#           {
-#             "type": "long",
-#             "name": "added"
-#           },
-#           "channel",
-#           "cityName",
-#           "comment",
-#           "countryIsoCode",
-#           "countryName",
-#           {
-#             "type": "long",
-#             "name": "deleted"
-#           },
-#           {
-#             "type": "long",
-#             "name": "delta"
-#           },
-#           "isAnonymous",
-#           "isMinor",
-#           "isNew",
-#           "isRobot",
-#           "isUnpatrolled",
-#           "metroCode",
-#           "namespace",
-#           "page",
-#           "regionIsoCode",
-#           "regionName",
-#           "time",
-#           "user"
-#         ]
-#       },
-#       "granularitySpec": {
-#         "queryGranularity": "none",
-#         "rollup": False,
-#         "segmentGranularity": "day"
-#       }
-#     }
-#   }
-# })
-# q=payload.format(data)
-# headers = {
-#   'Content-Type': 'application/json'
-# }
+    payload = json.dumps({
+    "type": "index_parallel",
+    "spec": {
+        "ioConfig": {
+        "type": "index_parallel",
+        "inputSource": {
+            "type": "inline",
+            "data": "{0}"
+        },
+        "inputFormat": {
+            "type": "json"
+        }
+        },
+        "tuningConfig": {
+        "type": "index_parallel",
+        "partitionsSpec": {
+            "type": "dynamic"
+        }
+        },
+        "dataSchema": {
+        "dataSource": "test_airflow",
+        "timestampSpec": {
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        },
+        "transformSpec": {},
+        "dimensionsSpec": {
+            "dimensions": [
+            {
+                "type": "long",
+                "name": "added"
+            },
+            "channel",
+            "cityName",
+            "comment",
+            "countryIsoCode",
+            "countryName",
+            {
+                "type": "long",
+                "name": "deleted"
+            },
+            {
+                "type": "long",
+                "name": "delta"
+            },
+            "isAnonymous",
+            "isMinor",
+            "isNew",
+            "isRobot",
+            "isUnpatrolled",
+            "metroCode",
+            "namespace",
+            "page",
+            "regionIsoCode",
+            "regionName",
+            "time",
+            "user"
+            ]
+        },
+        "granularitySpec": {
+            "queryGranularity": "none",
+            "rollup": False,
+            "segmentGranularity": "day"
+        }
+        }
+    }
+    })
+    q=payload.format(data)
+    headers = {
+    'Content-Type': 'application/json'
+    }
 
-# response = requests.request("POST", url, headers=q, data=payload)
-
-# print(response.text)
+    response = requests.request("POST", url, headers=q, data=payload)
+    print(response.text)
 
 
 
