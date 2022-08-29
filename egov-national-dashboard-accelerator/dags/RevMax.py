@@ -466,16 +466,14 @@ def join_data():
 
 def upload_data():
     logging.info("Upload data to Druid")
-
-url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
-
-data = ""
-f= open("property_service.csv","r")
-spamreader = csv.reader(f, delimiter=',', quotechar='"')
-for row in spamreader:
-    data+=', '.join(row)
-    data+='\\n'
-f.close()
+    url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
+    data = ""
+    f= open("property_service.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
 
 # payload = json.dumps({
 #   "type": "index_parallel",
