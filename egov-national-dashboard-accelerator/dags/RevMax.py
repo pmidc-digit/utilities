@@ -600,6 +600,7 @@ def upload_property_service():
     """
 
     q=payload.format(data)
+    logging.info(q)
     header = {
     'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
     }
@@ -839,6 +840,7 @@ def upload_water_service():
     }}
     """
     q=payload.format(data)
+    logging.info(q)
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
@@ -1314,9 +1316,9 @@ def upload_dss_service():
 
 def upload_data():
     logging.info("Upload data to Druid")
-    #upload_property_service()
+    upload_property_service()
     upload_trade_license()
-    #upload_water_service()
+    upload_water_service()
     #upload_water_and_meter() - data not in prod for punjab
     #upload_meter_service() - data not in prod for punjab
     #upload_demand() - data not in prod for punjab
