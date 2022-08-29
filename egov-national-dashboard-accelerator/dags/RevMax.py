@@ -888,7 +888,7 @@ def upload_water_and_property():
         }},
         "tuningConfig": {{
         "type": "index_parallel",
-        "partitionsSpec": {
+        "partitionsSpec": {{
             "type": "dynamic"
         }}
         }},
