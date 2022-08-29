@@ -126,21 +126,53 @@ def elastic_dump_ws(start,end):
     query="""
     {{
         "size": 1000,
+        "_source": [
+                "Data.applicationType",
+                "Data.applicationNo",
+                "Data.oldConnectionNo",
+                "Data.proposedPipeSize",
+                "Data.pipeSize",
+                "Data.channel",
+                "Data.channel",
+                "Data.propertyUsageType",
+                "Data.ward.name",
+                "Data.ward.code",
+                "Data.connectionType",
+                "Data.applicationStatus",
+                "Data.roadCuttingArea",
+                "Data.rainWaterHarvesting",
+                "Data.id",
+                "Data.dateEffectiveFrom",
+                "Data.propertyId",
+                "Data.connectionNo",
+                "Data.plumberInfo",
+                "Data.proposedTaps",
+                "Data.noOfTaps",
+                "Data.waterSource",
+                "Data.connectionCategory",
+                "Data.connectionHolders",
+                "Data.roadCuttingInfo",
+                "Data.roadType",
+                "Data.@timestamp",
+                "data.meterId",
+                "Data.tenantId",
+                "Data.status"
+            ],
         "query": {{
           "bool" :{{
-        "must": [
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
+            "must": [
+            {{
+            "range": {{
+                "Data.@timestamp": {{
+                "gte": {0},
+                "lte": {1},
+                "format": "epoch_millis"
+                }}
             }}
-          }}
-        }}
-      ]
-         }}
-         }},
+            }}
+          ]
+            }}
+            }},
         "sort": [
         {{
         "Data.@timestamp": {{
@@ -161,7 +193,7 @@ def elastic_dump_collection_pt(start,end):
     query="""
     {{
     "size": 1000,
-    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
     "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
     "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
@@ -217,7 +249,7 @@ def elastic_dump_collection_tl(start,end):
     query="""
     {{
     "size": 1000,
-    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
     "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
     "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
@@ -273,7 +305,7 @@ def elastic_dump_collection_ws(start,end):
     query="""
     {{
     "size": 1000,
-    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId","dataObject.tenantData",
+    "_source":["dataObject.paymentMode","dataObject.transactionNumber","dataObject.tenantId",
     "dataObject.paymentDetails.businessService","dataObject.paymentDetails.totalDue","dataObject.paymentDetails.receiptType",
     "dataObject.paymentDetails.receiptDate","dataObject.paymentDetails.bill.consumerCode","dataObject.paymentDetails.bill.billNumber",
     "dataObject.paymentDetails.bill.status","dataObject.paymentDetails.bill.billDate","dataObject.paymentDetails.bill.billDetails.fromPeriod",
@@ -554,7 +586,6 @@ def upload_data():
 
     response = requests.request("POST", url, headers=header, data=q)
     print(response.text)
-
 
 
 def replace_empty_objects_with_null_value(df):
