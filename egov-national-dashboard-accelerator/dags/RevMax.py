@@ -475,79 +475,84 @@ def upload_data():
         data+='\\n'
     f.close()
 
-    payload = json.dumps({
+    payload =  """{{
     "type": "index_parallel",
-    "spec": {
-        "ioConfig": {
+    "spec": {{
+        "ioConfig": {{
         "type": "index_parallel",
-        "inputSource": {
+        "inputSource": {{
             "type": "inline",
             "data": "{0}"
-        },
-        "inputFormat": {
-            "type": "json"
-        }
-        },
-        "tuningConfig": {
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
         "type": "index_parallel",
-        "partitionsSpec": {
+        "partitionsSpec": {{
             "type": "dynamic"
-        }
-        },
-        "dataSchema": {
-        "dataSource": "test_airflow",
-        "timestampSpec": {
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
             "column": "!!!_no_such_column_!!!",
             "missingValue": "2010-01-01T00:00:00Z"
-        },
-        "transformSpec": {},
-        "dimensionsSpec": {
+        }},
+        "dimensionsSpec": {{
             "dimensions": [
-            {
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
                 "type": "long",
-                "name": "added"
-            },
-            "channel",
-            "cityName",
-            "comment",
-            "countryIsoCode",
-            "countryName",
-            {
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
                 "type": "long",
-                "name": "deleted"
-            },
-            {
+                "name": "lastmodifiedtime"
+            }},
+            {{
                 "type": "long",
-                "name": "delta"
-            },
-            "isAnonymous",
-            "isMinor",
-            "isNew",
-            "isRobot",
-            "isUnpatrolled",
-            "metroCode",
-            "namespace",
-            "page",
-            "regionIsoCode",
-            "regionName",
-            "time",
-            "user"
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
             ]
-        },
-        "granularitySpec": {
+        }},
+        "granularitySpec": {{
             "queryGranularity": "none",
-            "rollup": False,
+            "rollup": false,
             "segmentGranularity": "day"
-        }
-        }
-    }
-    })
+        }}
+        }}
+    }}
+    }}"""
+
     q=payload.format(data)
-    headers = {
+    header = {
     'Content-Type': 'application/json'
     }
 
-    response = requests.request("POST", url, headers=q, data=payload)
+    response = requests.request("POST", url, headers=header, data=q)
     print(response.text)
 
 
