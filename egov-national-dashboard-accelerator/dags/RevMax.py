@@ -1008,6 +1008,7 @@ def upload_rule_3():
     }}
     """
     q=payload.format(data)
+    logging.info(q)
     header = {
     'Content-Type': 'application/json'
     }
