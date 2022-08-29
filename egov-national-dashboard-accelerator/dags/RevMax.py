@@ -616,9 +616,9 @@ def upload_trade_license():
     f.close()
 
     payload =  """
-    {{
+   {{
     "type": "index_parallel",
-    "spec": {{
+    "spec": {
         "ioConfig": {{
         "type": "index_parallel",
         "inputSource": {{
@@ -645,65 +645,7 @@ def upload_trade_license():
         }},
         "transformSpec": {{   }},
         "dimensionsSpec": {{
-            "dimensions": [
-            "_id",
-            "_index",
-            "_score",
-            "_source.Data.tradelicense.@timestamp",
-            "_source.Data.tradelicense.accountId",
-            "_source.Data.tradelicense.action",
-            "_source.Data.tradelicense.applicationNumber",
-            "_source.Data.tradelicense.applicationType",
-            "_source.Data.tradelicense.businessService",
-            "_source.Data.tradelicense.financialYear",
-            "_source.Data.tradelicense.licenseNumber",
-            "_source.Data.tradelicense.licenseType",
-            "_source.Data.tradelicense.propertyId",
-            "_source.Data.tradelicense.status",
-            "_source.Data.tradelicense.tenantId",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.channel",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.structureType",
-            "_source.Data.tradelicense.tradeName",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.validFrom"
-            }},
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.validTo"
-            }},
-            "_source.Data.tradelicense.workflowCode",
-            "_source.Data.ward.code",
-            "_source.Data.ward.name",
-            "_type",
-            {{
-                "type": "long",
-                "name": "sort.0"
-            }}
-            ]
+            "dimensions": []
         }},
         "granularitySpec": {{
             "queryGranularity": "none",
@@ -713,7 +655,6 @@ def upload_trade_license():
         }}
     }}
     }}
-
     """
     q=payload.format(data)
     logging.info(q)
