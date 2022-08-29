@@ -28,7 +28,8 @@ default_args = {
 }
 
 dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
- 
+druid_url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
+
 def elastic_dump_pt(start,end):
     hook = ElasticHook('GET', 'es_conn')
     query = """
@@ -495,10 +496,10 @@ def join_data():
     dss_collection_and_property(property_services=property_service_after_flattening,dss_collection=dss_collection_pt_after_flattening)
     #join trade and collection
     dss_collection_and_trade(trade_services=trade_licence_after_flattening,dss_collection=dss_collection_tl_after_flattening)
+    #join water and property for rule3
+    rule3(property_services=property_service_after_flattening,water_services=water_service_after_flattening)
 
-def upload_data():
-    logging.info("Upload data to Druid")
-    url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
+def upload_property_service():
     data = ""
     f= open("property_service.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
@@ -578,14 +579,653 @@ def upload_data():
         }}
     }}
     }}"""
-
     q=payload.format(data)
     header = {
     'Content-Type': 'application/json'
     }
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
 
-    response = requests.request("POST", url, headers=header, data=q)
-    print(response.text)
+def upload_trade_license():
+    data = ""
+    f= open("trade_license.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+
+    payload =  """{{
+    "type": "index_parallel",
+    "spec": {{
+        "ioConfig": {{
+        "type": "index_parallel",
+        "inputSource": {{
+            "type": "inline",
+            "data": "{0}"
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
+        "type": "index_parallel",
+        "partitionsSpec": {{
+            "type": "dynamic"
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        }},
+        "dimensionsSpec": {{
+            "dimensions": [
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
+                "type": "long",
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
+                "type": "long",
+                "name": "lastmodifiedtime"
+            }},
+            {{
+                "type": "long",
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
+            ]
+        }},
+        "granularitySpec": {{
+            "queryGranularity": "none",
+            "rollup": false,
+            "segmentGranularity": "day"
+        }}
+        }}
+    }}
+    }}"""
+    q=payload.format(data)
+    header = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_water_service():
+    data = ""
+    f= open("water_service.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+
+    payload =  """{{
+    "type": "index_parallel",
+    "spec": {{
+        "ioConfig": {{
+        "type": "index_parallel",
+        "inputSource": {{
+            "type": "inline",
+            "data": "{0}"
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
+        "type": "index_parallel",
+        "partitionsSpec": {{
+            "type": "dynamic"
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        }},
+        "dimensionsSpec": {{
+            "dimensions": [
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
+                "type": "long",
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
+                "type": "long",
+                "name": "lastmodifiedtime"
+            }},
+            {{
+                "type": "long",
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
+            ]
+        }},
+        "granularitySpec": {{
+            "queryGranularity": "none",
+            "rollup": false,
+            "segmentGranularity": "day"
+        }}
+        }}
+    }}
+    }}"""
+    q=payload.format(data)
+    header = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_water_and_property():
+    data = ""
+    f= open("water_and_property.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+
+    payload =  """{{
+    "type": "index_parallel",
+    "spec": {{
+        "ioConfig": {{
+        "type": "index_parallel",
+        "inputSource": {{
+            "type": "inline",
+            "data": "{0}"
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
+        "type": "index_parallel",
+        "partitionsSpec": {{
+            "type": "dynamic"
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        }},
+        "dimensionsSpec": {{
+            "dimensions": [
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
+                "type": "long",
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
+                "type": "long",
+                "name": "lastmodifiedtime"
+            }},
+            {{
+                "type": "long",
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
+            ]
+        }},
+        "granularitySpec": {{
+            "queryGranularity": "none",
+            "rollup": false,
+            "segmentGranularity": "day"
+        }}
+        }}
+    }}
+    }}"""
+    q=payload.format(data)
+    header = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_trade_and_property():
+    data = ""
+    f= open("trade_and_property.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+
+    payload =  """{{
+    "type": "index_parallel",
+    "spec": {{
+        "ioConfig": {{
+        "type": "index_parallel",
+        "inputSource": {{
+            "type": "inline",
+            "data": "{0}"
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
+        "type": "index_parallel",
+        "partitionsSpec": {{
+            "type": "dynamic"
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        }},
+        "dimensionsSpec": {{
+            "dimensions": [
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
+                "type": "long",
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
+                "type": "long",
+                "name": "lastmodifiedtime"
+            }},
+            {{
+                "type": "long",
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
+            ]
+        }},
+        "granularitySpec": {{
+            "queryGranularity": "none",
+            "rollup": false,
+            "segmentGranularity": "day"
+        }}
+        }}
+    }}
+    }}"""
+    q=payload.format(data)
+    header = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_rule_3():
+    data = ""
+    f= open("rule_3.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+
+    payload =  """{{
+    "type": "index_parallel",
+    "spec": {{
+        "ioConfig": {{
+        "type": "index_parallel",
+        "inputSource": {{
+            "type": "inline",
+            "data": "{0}"
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
+        "type": "index_parallel",
+        "partitionsSpec": {{
+            "type": "dynamic"
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        }},
+        "dimensionsSpec": {{
+            "dimensions": [
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
+                "type": "long",
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
+                "type": "long",
+                "name": "lastmodifiedtime"
+            }},
+            {{
+                "type": "long",
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
+            ]
+        }},
+        "granularitySpec": {{
+            "queryGranularity": "none",
+            "rollup": false,
+            "segmentGranularity": "day"
+        }}
+        }}
+    }}
+    }}"""
+    q=payload.format(data)
+    header = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_dss_service():
+    data = ""
+    header = {
+    'Content-Type': 'application/json'
+    }
+    payload =  """{{
+    "type": "index_parallel",
+    "spec": {{
+        "ioConfig": {{
+        "type": "index_parallel",
+        "inputSource": {{
+            "type": "inline",
+            "data": "{0}"
+        }},
+        "inputFormat": {{
+            "type": "csv",
+            "findColumnsFromHeader": true
+        }}
+        }},
+        "tuningConfig": {{
+        "type": "index_parallel",
+        "partitionsSpec": {{
+            "type": "dynamic"
+        }}
+        }},
+        "dataSchema": {{
+        "dataSource": "test2",
+        "timestampSpec": {{
+            "column": "!!!_no_such_column_!!!",
+            "missingValue": "2010-01-01T00:00:00Z"
+        }},
+        "dimensionsSpec": {{
+            "dimensions": [
+            "additionaldetails",
+            "billexpirytime",
+            "businessservice",
+            "consumercode",
+            "consumertype",
+            "createdby",
+            {{
+                "type": "long",
+                "name": "createdtime"
+            }},
+            "fixedbillexpirydate",
+            "id",
+            "ispaymentcompleted",
+            "lastmodifiedby",
+            {{
+                "type": "long",
+                "name": "lastmodifiedtime"
+            }},
+            {{
+                "type": "long",
+                "name": "minimumamountpayable"
+            }},
+            "payer",
+            "status",
+            {{
+                "type": "long",
+                "name": "taxperiodfrom"
+            }},
+            {{
+                "type": "long",
+                "name": "taxperiodto"
+            }},
+            "tenantid"
+            ]
+        }},
+        "granularitySpec": {{
+            "queryGranularity": "none",
+            "rollup": false,
+            "segmentGranularity": "day"
+        }}
+        }}
+    }}
+    }}"""
+   
+
+    f= open("dss_collection_ws.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+    data = ""
+    f= open("dss_collection_pt.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+    data=""
+    f= open("dss_collection_tl.csv","r")
+    spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    for row in spamreader:
+        data+=', '.join(row)
+        data+='\\n'
+    f.close()
+    q=payload.format(data)
+
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_data():
+    logging.info("Upload data to Druid")
+    upload_property_service()
+    upload_trade_license()
+    upload_water_service()
+    #upload_water_and_meter()
+    #upload_meter_service()
+    #upload_demand()
+    upload_water_and_property()
+    upload_trade_and_property() 
+    upload_rule_3()   
+    upload_dss_service()
+
+
+    #url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
+    # data = ""
+    # f= open("property_service.csv","r")
+    # spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    # for row in spamreader:
+    #     data+=', '.join(row)
+    #     data+='\\n'
+    # f.close()
+
+    # payload =  """{{
+    # "type": "index_parallel",
+    # "spec": {{
+    #     "ioConfig": {{
+    #     "type": "index_parallel",
+    #     "inputSource": {{
+    #         "type": "inline",
+    #         "data": "{0}"
+    #     }},
+    #     "inputFormat": {{
+    #         "type": "csv",
+    #         "findColumnsFromHeader": true
+    #     }}
+    #     }},
+    #     "tuningConfig": {{
+    #     "type": "index_parallel",
+    #     "partitionsSpec": {{
+    #         "type": "dynamic"
+    #     }}
+    #     }},
+    #     "dataSchema": {{
+    #     "dataSource": "test2",
+    #     "timestampSpec": {{
+    #         "column": "!!!_no_such_column_!!!",
+    #         "missingValue": "2010-01-01T00:00:00Z"
+    #     }},
+    #     "dimensionsSpec": {{
+    #         "dimensions": [
+    #         "additionaldetails",
+    #         "billexpirytime",
+    #         "businessservice",
+    #         "consumercode",
+    #         "consumertype",
+    #         "createdby",
+    #         {{
+    #             "type": "long",
+    #             "name": "createdtime"
+    #         }},
+    #         "fixedbillexpirydate",
+    #         "id",
+    #         "ispaymentcompleted",
+    #         "lastmodifiedby",
+    #         {{
+    #             "type": "long",
+    #             "name": "lastmodifiedtime"
+    #         }},
+    #         {{
+    #             "type": "long",
+    #             "name": "minimumamountpayable"
+    #         }},
+    #         "payer",
+    #         "status",
+    #         {{
+    #             "type": "long",
+    #             "name": "taxperiodfrom"
+    #         }},
+    #         {{
+    #             "type": "long",
+    #             "name": "taxperiodto"
+    #         }},
+    #         "tenantid"
+    #         ]
+    #     }},
+    #     "granularitySpec": {{
+    #         "queryGranularity": "none",
+    #         "rollup": false,
+    #         "segmentGranularity": "day"
+    #     }}
+    #     }}
+    # }}
+    # }}"""
 
 
 def replace_empty_objects_with_null_value(df):
@@ -733,11 +1373,11 @@ python_callable=join_data,
 provide_context=True,
 dag=dag)
 
-uploaddata = PythonOperator(
-task_id='upload_data',
-python_callable=upload_data,
-provide_context=True,
-dag=dag)
+# uploaddata = PythonOperator(
+# task_id='upload_data',
+# python_callable=upload_data,
+# provide_context=True,
+# dag=dag)
 
 
-flattendata >> joindata >> uploaddata
+flattendata >> joindata 
