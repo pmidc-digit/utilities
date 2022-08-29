@@ -78,68 +78,103 @@ def elastic_dump_pt(start,end):
 def elastic_dump_tl(start,end):
     hook = ElasticHook('GET', 'es_conn')
     query = """
-    {{
-    "size": 1000,
-    "_source": [
-        "Data.ward.name",
-        "Data.ward.code",
-        "Data.tradelicense.applicationDate",
-        "Data.tradelicense.applicationNumber",
-        "Data.tradelicense.applicationType",
-        "Data.tradelicense.validFrom",
-        "Data.tradelicense.validTo",
-        "Data.tradelicense.financialYear",
-        "Data.tradelicense.licenseType",
-        "Data.tradelicense.tradeName",
-        "Data.tradelicense.tradeLicenseDetail.auditDetails",
-        "Data.tradelicense.action",
-        "Data.tradelicense.licenseNumber",
-        "data.tradelicence.id",
-        "Data.tradelicense.propertyId",
-        "Data.tradelicense.businessService",
-        "Data.tradelicense.workflowCode",
-        "Data.tradelicense.accountId",
-        "Data.tradelicense.@timestamp",
-        "Data.tradelicense.tenantId",
-        "Data.tradelicense.applicationDate",
-        "Data.tradelicense.status",
-        "Data.tradelicense.tradeLicenseDetail.channel",
-        "Data.tradelicense.tradeLicenseDetail.adhocExemption",
-        "Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
-        "Data.tradelicense.tradeLicenseDetail.adhocPenalty",
-        "Data.tradelicense.tradeLicenseDetail.structureType",
-        "Data.tradelicense.tradeLicenseDetail.operationalArea"
-    ],
-    "query": {{
-        "bool": {{
-        "must_not": [
-            {{
-            "term": {{
-                "Data.tradelicense.tenantId.keyword": "pb.testing"
-            }}
-            }}
-        ],
-        "must": [
-            {{
-                "range": {{
-                    "Data.tradelicense.@timestamp": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}
+    {
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "inline",
+        "data": "{0}"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      }
+    },
+    "dataSchema": {
+      "dataSource": "trade_license",
+      "timestampSpec": {
+        "column": "_source.Data.tradelicense.applicationDate",
+        "format": "millis"
+      },
+      "transformSpec": {},
+      "dimensionsSpec": {
+        "dimensions": [
+          "_id",
+          "_index",
+          "_score",
+          "_source.Data.tradelicense.@timestamp",
+          "_source.Data.tradelicense.accountId",
+          "_source.Data.tradelicense.action",
+          "_source.Data.tradelicense.applicationNumber",
+          "_source.Data.tradelicense.applicationType",
+          "_source.Data.tradelicense.businessService",
+          "_source.Data.tradelicense.financialYear",
+          "_source.Data.tradelicense.licenseNumber",
+          "_source.Data.tradelicense.licenseType",
+          "_source.Data.tradelicense.propertyId",
+          "_source.Data.tradelicense.status",
+          "_source.Data.tradelicense.tenantId",
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
+          },
+          "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
+          },
+          "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
+          },
+          "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
+          },
+          "_source.Data.tradelicense.tradeLicenseDetail.channel",
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
+          },
+          "_source.Data.tradelicense.tradeLicenseDetail.structureType",
+          "_source.Data.tradelicense.tradeName",
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.validFrom"
+          },
+          {
+            "type": "long",
+            "name": "_source.Data.tradelicense.validTo"
+          },
+          "_source.Data.tradelicense.workflowCode",
+          "_source.Data.ward.code",
+          "_source.Data.ward.name",
+          "_type",
+          {
+            "type": "long",
+            "name": "sort.0"
+          }
         ]
-        }}
-    }},
-    "sort": [
-        {{
-        "Data.tradelicense.@timestamp": {{
-            "order": "desc"
-        }}
-        }}
-    ]
-    }}
+      },
+      "granularitySpec": {
+        "queryGranularity": "none",
+        "rollup": false,
+        "segmentGranularity": "trade_license"
+      }
+    }
+  }
+}
     """
     resp = hook.search('tlindex-v1-enriched/_search', json.loads(query.format(start,end)))
     logging.info(resp['hits']['hits'])
@@ -998,7 +1033,7 @@ def upload_trade_and_property():
     "spec": {{
         "ioConfig": {{
         "type": "index_parallel",
-        "inputSource": {{
+        "inputSource": {
             "type": "inline",
             "data": "{0}"
         }},
@@ -1010,7 +1045,7 @@ def upload_trade_and_property():
         }},
         "tuningConfig": {{
         "type": "index_parallel",
-        "partitionsSpec": {{
+        "partitionsSpec": {
             "type": "dynamic"
         }}
         }},
@@ -1020,37 +1055,18 @@ def upload_trade_and_property():
             "column": "_source.Data.@timestamp",
             "format": "iso"
         }},
+        "transformSpec": {},
         "dimensionsSpec": {{
             "dimensions": [
             "_id",
             "_index",
             "_score",
-            "_source.Data.history.0.businessService",
-            "_source.Data.history.1.businessService",
-            "_source.Data.history.2.businessService",
-            "_source.Data.history.3.businessService",
-            "_source.Data.history.4.businessService",
-            "_source.Data.history.5.businessService",
-            "_source.Data.history.6.businessService",
-            "_source.Data.history.7.businessService",
-            "_source.Data.history.8.businessService",
-            "_source.Data.history.9.businessService",
-            "_source.Data.history.10.businessService",
-            "_source.Data.history.11.businessService",
-            "_source.Data.history.12.businessService",
-            "_source.Data.history.13.businessService",
-            "_source.Data.history.14.businessService",
-            "_source.Data.history.15.businessService",
-            "_source.Data.history.16.businessService",
-            "_source.Data.history.17.businessService",
+            "_source.Data.tradelicense.@timestamp",
             "_source.Data.tradelicense.accountId",
             "_source.Data.tradelicense.action",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.applicationDate"
-            }},
             "_source.Data.tradelicense.applicationNumber",
             "_source.Data.tradelicense.applicationType",
+            "_source.Data.tradelicense.businessService",
             "_source.Data.tradelicense.financialYear",
             "_source.Data.tradelicense.licenseNumber",
             "_source.Data.tradelicense.licenseType",
@@ -1104,7 +1120,7 @@ def upload_trade_and_property():
         "granularitySpec": {{
             "queryGranularity": "none",
             "rollup": false,
-            "segmentGranularity": "day"
+            "segmentGranularity": "trade_and_property"
         }}
         }}
     }}
