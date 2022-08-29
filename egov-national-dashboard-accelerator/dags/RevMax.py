@@ -734,8 +734,7 @@ def upload_water_service():
     for row in spamreader:
         str = ', '.join(row)
         data+=str.replace('\t','')
-        data+='\\n' data+=', '.join(row)
-        data+='\\n'
+        data+='\\n' 
     f.close()
 
     payload =  """
@@ -858,8 +857,7 @@ def upload_water_and_property():
     for row in spamreader:
         str = ', '.join(row)
         data+=str.replace('\t','')
-        data+='\\n' data+=', '.join(row)
-        data+='\\n'
+        data+='\\n' 
     f.close()
 
     payload =  """
