@@ -529,7 +529,8 @@ def upload_property_service():
     f= open("property_service.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
         data+='\\n'
     f.close()
   
@@ -612,7 +613,8 @@ def upload_trade_license():
     f= open("trade_license.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
         data+='\\n'
     f.close() 
 
