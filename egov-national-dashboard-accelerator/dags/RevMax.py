@@ -1329,7 +1329,7 @@ def upload_data():
     upload_water_and_property()
     upload_trade_and_property() 
     upload_rule_3()   
-    #upload_dss_service()
+    upload_dss_service()
 
 def replace_empty_objects_with_null_value(df):
     df_columns = df.columns.tolist()
