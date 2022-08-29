@@ -708,4 +708,4 @@ dag=dag)
 
 #upload_data
 
-flatten_data >> joindata
+joindata
