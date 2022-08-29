@@ -96,7 +96,7 @@ def elastic_dump_tl(start,end):
         "Data.tradelicense.licenseNumber",
         "data.tradelicence.id",
         "Data.tradelicense.propertyId",
-        "Data.history.businessService",
+        "Data.tradelicense.businessService",
         "Data.tradelicense.workflowCode",
         "Data.tradelicense.accountId",
         "Data.tradelicense.@timestamp",
@@ -598,9 +598,7 @@ def upload_property_service():
     }}
     }}
     """
-    """
-    
-    """
+
     q=payload.format(data)
     header = {
     'Content-Type': 'application/json'
@@ -1194,7 +1192,6 @@ def upload_rule_3():
     }}
     """
     q=payload.format(data)
-    logging.info(q)
     header = {
     'Content-Type': 'application/json'
     }
@@ -1320,6 +1317,7 @@ def upload_dss_service():
         data+=', '.join(row)
         data+='\\n'
     f.close()
+    
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
@@ -1350,15 +1348,15 @@ def upload_dss_service():
 def upload_data():
     logging.info("Upload data to Druid")
     upload_property_service()
-    upload_trade_license()
+    #upload_trade_license()
     upload_water_service()
     #upload_water_and_meter() - data not in prod for punjab
     #upload_meter_service() - data not in prod for punjab
     #upload_demand() - data not in prod for punjab
     upload_water_and_property()
-    upload_trade_and_property() 
+    #upload_trade_and_property() 
     upload_rule_3()   
-    upload_dss_service()
+    #upload_dss_service()
 
 
     #url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
