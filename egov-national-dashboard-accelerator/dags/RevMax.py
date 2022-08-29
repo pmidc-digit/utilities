@@ -966,7 +966,7 @@ def upload_rule_3():
         }},
         "dataSchema": {{
         "dataSource": "rule_3",
-        "timestampSpec": {
+        "timestampSpec": {{
             "column": "_source.Data.@timestamp",
             "format": "iso"
         }},
@@ -998,7 +998,7 @@ def upload_rule_3():
             }}
             ]
         }},
-        "granularitySpec": {
+        "granularitySpec": {{
             "queryGranularity": "none",
             "rollup": false,
             "segmentGranularity": "day"
