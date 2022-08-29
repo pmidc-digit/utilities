@@ -380,7 +380,7 @@ def collect_data(**kwargs):
     elastic_dump_collection_pt(start,end)
     elastic_dump_collection_tl(start,end)
     elastic_dump_collection_ws(start,end)
-    return 'Success'
+    return 'done collecting data'
 
 def join_data():
     logging.info("in join")
@@ -686,11 +686,11 @@ def rule3(property_services, water_services):
     ]
     convert_dataframe_to_csv(dataframe=property_services, file_name="rule_3")
 
-flatten_data = PythonOperator(
-task_id='flatten_data',
-python_callable=collect_data,
-provide_context=True,
-dag=dag)
+# flattendata = PythonOperator(
+# task_id='flatten_data',
+# python_callable=collect_data,
+# provide_context=True,
+# dag=dag)
 
 joindata = PythonOperator(
 task_id='join_data',
@@ -698,14 +698,11 @@ python_callable=join_data,
 provide_context=True,
 dag=dag)
 
-upload_data = PythonOperator(
-task_id='upload_data',
-python_callable=upload_data,
-provide_context=True,
-dag=dag)
+# uploaddata = PythonOperator(
+# task_id='upload_data',
+# python_callable=upload_data,
+# provide_context=True,
+# dag=dag)
 
-
-
-#upload_data
 
 joindata
