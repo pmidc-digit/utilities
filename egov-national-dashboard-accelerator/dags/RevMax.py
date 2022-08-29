@@ -732,7 +732,9 @@ def upload_water_service():
     f= open("water_service.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
+        data+='\\n' data+=', '.join(row)
         data+='\\n'
     f.close()
 
@@ -854,7 +856,9 @@ def upload_water_and_property():
     f= open("water_and_property.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
+        data+='\\n' data+=', '.join(row)
         data+='\\n'
     f.close()
 
@@ -975,7 +979,8 @@ def upload_trade_and_property():
     f= open("trade_and_property.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
         data+='\\n'
     f.close()
 
@@ -1093,7 +1098,8 @@ def upload_rule_3():
     f= open("rule_3.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
         data+='\\n'
     f.close()
 
@@ -1285,7 +1291,8 @@ def upload_dss_service():
     f= open("dss_collection_ws.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
         data+='\\n'
     f.close()
     
@@ -1297,8 +1304,9 @@ def upload_dss_service():
     f= open("dss_collection_pt.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
-        data+='\\n'
+        str = ', '.join(row)
+        data+=str.replace('\t','')
+        data+='\\n' 
     f.close()
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
@@ -1308,7 +1316,8 @@ def upload_dss_service():
     f= open("dss_collection_tl.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str = ', '.join(row)
+        data+=str.replace('\t','')
         data+='\\n'
     f.close()
     q=payload.format(data)
@@ -1324,93 +1333,10 @@ def upload_data():
     #upload_water_and_meter() - data not in prod for punjab
     #upload_meter_service() - data not in prod for punjab
     #upload_demand() - data not in prod for punjab
-    #upload_water_and_property()
-    #upload_trade_and_property() 
-    #upload_rule_3()   
+    upload_water_and_property()
+    upload_trade_and_property() 
+    upload_rule_3()   
     #upload_dss_service()
-
-
-    #url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
-    # data = ""
-    # f= open("property_service.csv","r")
-    # spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    # for row in spamreader:
-    #     data+=', '.join(row)
-    #     data+='\\n'
-    # f.close()
-
-    # payload =  """{{
-    # "type": "index_parallel",
-    # "spec": {{
-    #     "ioConfig": {{
-    #     "type": "index_parallel",
-    #     "inputSource": {{
-    #         "type": "inline",
-    #         "data": "{0}"
-    #     }},
-    #     "inputFormat": {{
-    #         "type": "csv",
-    #         "findColumnsFromHeader": true
-    #     }}
-    #     }},
-    #     "tuningConfig": {{
-    #     "type": "index_parallel",
-    #     "partitionsSpec": {{
-    #         "type": "dynamic"
-    #     }}
-    #     }},
-    #     "dataSchema": {{
-    #     "dataSource": "test2",
-    #     "timestampSpec": {{
-    #         "column": "!!!_no_such_column_!!!",
-    #         "missingValue": "2010-01-01T00:00:00Z"
-    #     }},
-    #     "dimensionsSpec": {{
-    #         "dimensions": [
-    #         "additionaldetails",
-    #         "billexpirytime",
-    #         "businessservice",
-    #         "consumercode",
-    #         "consumertype",
-    #         "createdby",
-    #         {{
-    #             "type": "long",
-    #             "name": "createdtime"
-    #         }},
-    #         "fixedbillexpirydate",
-    #         "id",
-    #         "ispaymentcompleted",
-    #         "lastmodifiedby",
-    #         {{
-    #             "type": "long",
-    #             "name": "lastmodifiedtime"
-    #         }},
-    #         {{
-    #             "type": "long",
-    #             "name": "minimumamountpayable"
-    #         }},
-    #         "payer",
-    #         "status",
-    #         {{
-    #             "type": "long",
-    #             "name": "taxperiodfrom"
-    #         }},
-    #         {{
-    #             "type": "long",
-    #             "name": "taxperiodto"
-    #         }},
-    #         "tenantid"
-    #         ]
-    #     }},
-    #     "granularitySpec": {{
-    #         "queryGranularity": "none",
-    #         "rollup": false,
-    #         "segmentGranularity": "day"
-    #     }}
-    #     }}
-    # }}
-    # }}"""
-
 
 def replace_empty_objects_with_null_value(df):
     df_columns = df.columns.tolist()
