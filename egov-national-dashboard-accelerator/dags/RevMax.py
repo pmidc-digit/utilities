@@ -700,11 +700,11 @@ python_callable=join_data,
 provide_context=True,
 dag=dag)
 
-# uploaddata = PythonOperator(
-# task_id='upload_data',
-# python_callable=upload_data,
-# provide_context=True,
-# dag=dag)
+uploaddata = PythonOperator(
+task_id='upload_data',
+python_callable=upload_data,
+provide_context=True,
+dag=dag)
 
 
-flattendata >> joindata
+flattendata >> joindata >> uploaddata
