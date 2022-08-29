@@ -641,6 +641,7 @@ def upload_property_service():
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
+
 def upload_trade_license():
     data = ""
     f= open("trade_license.csv","r")
