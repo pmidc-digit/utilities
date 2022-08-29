@@ -366,11 +366,13 @@ def elastic_dump_meter(start,end):
     return resp['hits']['hits']
 
 def collect_data(**kwargs):
-    date = kwargs['dag_run'].conf.get('date')
+    date = kwargs['dag_run'].conf.get('start')
+    enddate = kwargs['dag_run'].conf.get('end')
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(date, "%d-%m-%Y"))
     start = int(dt_aware.timestamp() * 1000)
-    end = start + (24 * 60 * 60 * 1000) - 1000
+    dt_aware = localtz.localize(datetime.strptime(enddate, "%d-%m-%Y"))
+    end = int(dt_aware.timestamp()*1000) + (24 * 60 * 60 * 1000) - 1000
     logging.info(start)
     logging.info(end)
     elastic_dump_pt(start,end)
@@ -414,7 +416,6 @@ def join_data():
   
     #property_service.csv
     df = get_dataframe_after_flattening(property_service_json)
-    logging.info(df)
     convert_dataframe_to_csv(dataframe=df,file_name="property_service")
     # water_service csv
     df = get_dataframe_after_flattening(water_service_json)
@@ -686,11 +687,11 @@ def rule3(property_services, water_services):
     ]
     convert_dataframe_to_csv(dataframe=property_services, file_name="rule_3")
 
-# flattendata = PythonOperator(
-# task_id='flatten_data',
-# python_callable=collect_data,
-# provide_context=True,
-# dag=dag)
+flattendata = PythonOperator(
+task_id='flatten_data',
+python_callable=collect_data,
+provide_context=True,
+dag=dag)
 
 joindata = PythonOperator(
 task_id='join_data',
@@ -705,4 +706,4 @@ dag=dag)
 # dag=dag)
 
 
-joindata
+flattendata >> joindata
