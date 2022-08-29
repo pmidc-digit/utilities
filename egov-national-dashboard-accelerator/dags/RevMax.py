@@ -943,7 +943,8 @@ def upload_rule_3():
         data+='\\n'
     f.close()
 
-    payload =  """{{
+    payload =  """
+    {{
     "type": "index_parallel",
     "spec": {{
         "ioConfig": {{
@@ -959,61 +960,53 @@ def upload_rule_3():
         }},
         "tuningConfig": {{
         "type": "index_parallel",
-        "partitionsSpec": {{
+        "partitionsSpec": {
             "type": "dynamic"
         }}
         }},
         "dataSchema": {{
-        "dataSource": "test2",
-        "timestampSpec": {{
-            "column": "!!!_no_such_column_!!!",
-            "missingValue": "2010-01-01T00:00:00Z"
+        "dataSource": "rule_3",
+        "timestampSpec": {
+            "column": "_source.Data.@timestamp",
+            "format": "iso"
         }},
         "dimensionsSpec": {{
             "dimensions": [
-            "additionaldetails",
-            "billexpirytime",
-            "businessservice",
-            "consumercode",
-            "consumertype",
-            "createdby",
+            "_id",
+            "_index",
+            "_score",
+            "_source.Data.accountId",
+            "_source.Data.acknowldgementNumber",
+            "_source.Data.channel",
             {{
                 "type": "long",
-                "name": "createdtime"
+                "name": "_source.Data.noOfFloors"
             }},
-            "fixedbillexpirydate",
-            "id",
-            "ispaymentcompleted",
-            "lastmodifiedby",
+            "_source.Data.ownershipCategory",
+            "_source.Data.propertyId",
+            "_source.Data.propertyType",
+            "_source.Data.source",
+            "_source.Data.status",
+            "_source.Data.tenantId",
+            "_source.Data.usageCategory",
+            "_source.Data.ward.code",
+            "_source.Data.ward.name",
+            "_type",
             {{
                 "type": "long",
-                "name": "lastmodifiedtime"
-            }},
-            {{
-                "type": "long",
-                "name": "minimumamountpayable"
-            }},
-            "payer",
-            "status",
-            {{
-                "type": "long",
-                "name": "taxperiodfrom"
-            }},
-            {{
-                "type": "long",
-                "name": "taxperiodto"
-            }},
-            "tenantid"
+                "name": "sort.0"
+            }}
             ]
         }},
-        "granularitySpec": {{
+        "granularitySpec": {
             "queryGranularity": "none",
             "rollup": false,
             "segmentGranularity": "day"
         }}
         }}
     }}
-    }}"""
+    }}
+    """
     q=payload.format(data)
     header = {
     'Content-Type': 'application/json'
@@ -1134,16 +1127,16 @@ def upload_dss_service():
 
 def upload_data():
     logging.info("Upload data to Druid")
-    upload_property_service()
-    upload_trade_license()
-    upload_water_service()
+    # upload_property_service()
+    # upload_trade_license()
+    # upload_water_service()
     #upload_water_and_meter()
     #upload_meter_service()
     #upload_demand()
-    upload_water_and_property()
-    upload_trade_and_property() 
+    # upload_water_and_property()
+    # upload_trade_and_property() 
     upload_rule_3()   
-    upload_dss_service()
+    #upload_dss_service()
 
 
     #url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
