@@ -956,7 +956,8 @@ def upload_rule_3():
         "inputFormat": {{
             "type": "csv",
             "findColumnsFromHeader": true
-        }}
+        }},
+        "appendToExisting": true
         }},
         "tuningConfig": {{
         "type": "index_parallel",
