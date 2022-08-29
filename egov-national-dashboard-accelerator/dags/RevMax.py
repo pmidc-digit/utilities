@@ -78,103 +78,68 @@ def elastic_dump_pt(start,end):
 def elastic_dump_tl(start,end):
     hook = ElasticHook('GET', 'es_conn')
     query = """
-    {
-  "type": "index_parallel",
-  "spec": {
-    "ioConfig": {
-      "type": "index_parallel",
-      "inputSource": {
-        "type": "inline",
-        "data": "{0}"
-      },
-      "inputFormat": {
-        "type": "csv",
-        "findColumnsFromHeader": true
-      },
-      "appendToExisting": true
-    },
-    "tuningConfig": {
-      "type": "index_parallel",
-      "partitionsSpec": {
-        "type": "dynamic"
-      }
-    },
-    "dataSchema": {
-      "dataSource": "trade_license",
-      "timestampSpec": {
-        "column": "_source.Data.tradelicense.applicationDate",
-        "format": "millis"
-      },
-      "transformSpec": {},
-      "dimensionsSpec": {
-        "dimensions": [
-          "_id",
-          "_index",
-          "_score",
-          "_source.Data.tradelicense.@timestamp",
-          "_source.Data.tradelicense.accountId",
-          "_source.Data.tradelicense.action",
-          "_source.Data.tradelicense.applicationNumber",
-          "_source.Data.tradelicense.applicationType",
-          "_source.Data.tradelicense.businessService",
-          "_source.Data.tradelicense.financialYear",
-          "_source.Data.tradelicense.licenseNumber",
-          "_source.Data.tradelicense.licenseType",
-          "_source.Data.tradelicense.propertyId",
-          "_source.Data.tradelicense.status",
-          "_source.Data.tradelicense.tenantId",
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
-          },
-          "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
-          },
-          "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
-          },
-          "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
-          },
-          "_source.Data.tradelicense.tradeLicenseDetail.channel",
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
-          },
-          "_source.Data.tradelicense.tradeLicenseDetail.structureType",
-          "_source.Data.tradelicense.tradeName",
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.validFrom"
-          },
-          {
-            "type": "long",
-            "name": "_source.Data.tradelicense.validTo"
-          },
-          "_source.Data.tradelicense.workflowCode",
-          "_source.Data.ward.code",
-          "_source.Data.ward.name",
-          "_type",
-          {
-            "type": "long",
-            "name": "sort.0"
-          }
+    {{
+    "size": 1000,
+    "_source": [
+        "Data.ward.name",
+        "Data.ward.code",
+        "Data.tradelicense.applicationDate",
+        "Data.tradelicense.applicationNumber",
+        "Data.tradelicense.applicationType",
+        "Data.tradelicense.validFrom",
+        "Data.tradelicense.validTo",
+        "Data.tradelicense.financialYear",
+        "Data.tradelicense.licenseType",
+        "Data.tradelicense.tradeName",
+        "Data.tradelicense.tradeLicenseDetail.auditDetails",
+        "Data.tradelicense.action",
+        "Data.tradelicense.licenseNumber",
+        "data.tradelicence.id",
+        "Data.tradelicense.propertyId",
+        "Data.tradelicense.businessService",
+        "Data.tradelicense.workflowCode",
+        "Data.tradelicense.accountId",
+        "Data.tradelicense.@timestamp",
+        "Data.tradelicense.tenantId",
+        "Data.tradelicense.applicationDate",
+        "Data.tradelicense.status",
+        "Data.tradelicense.tradeLicenseDetail.channel",
+        "Data.tradelicense.tradeLicenseDetail.adhocExemption",
+        "Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
+        "Data.tradelicense.tradeLicenseDetail.adhocPenalty",
+        "Data.tradelicense.tradeLicenseDetail.structureType",
+        "Data.tradelicense.tradeLicenseDetail.operationalArea"
+    ],
+    "query": {{
+        "bool": {{
+        "must_not": [
+            {{
+            "term": {{
+                "Data.tradelicense.tenantId.keyword": "pb.testing"
+            }}
+            }}
+        ],
+        "must": [
+            {{
+                "range": {{
+                    "Data.tradelicense.@timestamp": {{
+                    "gte": {0},
+                    "lte": {1},
+                    "format": "epoch_millis"
+                }}
+              }}
+            }}
         ]
-      },
-      "granularitySpec": {
-        "queryGranularity": "none",
-        "rollup": false,
-        "segmentGranularity": "trade_license"
-      }
-    }
-  }
-}
+        }}
+    }},
+    "sort": [
+        {{
+        "Data.tradelicense.@timestamp": {{
+            "order": "desc"
+        }}
+        }}
+    ]
+    }}
     """
     resp = hook.search('tlindex-v1-enriched/_search', json.loads(query.format(start,end)))
     logging.info(resp['hits']['hits'])
@@ -641,7 +606,6 @@ def upload_property_service():
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
-
 def upload_trade_license():
     data = ""
     f= open("trade_license.csv","r")
@@ -679,7 +643,7 @@ def upload_trade_license():
         "column": "_source.Data.tradelicense.@timestamp",
         "format": "iso"
       },
-      "transformSpec": {},
+      "transformSpec": {{}},
       "dimensionsSpec": {
         "dimensions": [
           "_id",
@@ -1011,102 +975,102 @@ def upload_trade_and_property():
 
     payload =  """
      {{
-    "type": "index_parallel",
-    "spec": {{
-        "ioConfig": {{
-        "type": "index_parallel",
-        "inputSource": {
-            "type": "inline",
-            "data": "{0}"
-        }},
-        "inputFormat": {{
-            "type": "csv",
-            "findColumnsFromHeader": true
-        }},
-        "appendToExisting": true
-        }},
-        "tuningConfig": {{
-        "type": "index_parallel",
-        "partitionsSpec": {{
-            "type": "dynamic"
-        }}
-        }},
-        "dataSchema": {{
-        "dataSource": "trade_and_property",
-        "timestampSpec": {{
-            "column": "_source.Data.@timestamp",
-            "format": "iso"
-        }},
-        "transformSpec": {},
-        "dimensionsSpec": {{
-            "dimensions": [
-            "_id",
-            "_index",
-            "_score",
-            "_source.Data.tradelicense.@timestamp",
-            "_source.Data.tradelicense.accountId",
-            "_source.Data.tradelicense.action",
-            "_source.Data.tradelicense.applicationNumber",
-            "_source.Data.tradelicense.applicationType",
-            "_source.Data.tradelicense.businessService",
-            "_source.Data.tradelicense.financialYear",
-            "_source.Data.tradelicense.licenseNumber",
-            "_source.Data.tradelicense.licenseType",
-            "_source.Data.tradelicense.propertyId",
-            "_source.Data.tradelicense.status",
-            "_source.Data.tradelicense.tenantId",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.channel",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
-            }},
-            "_source.Data.tradelicense.tradeLicenseDetail.structureType",
-            "_source.Data.tradelicense.tradeName",
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.validFrom"
-            }},
-            {{
-                "type": "long",
-                "name": "_source.Data.tradelicense.validTo"
-            }},
-            "_source.Data.tradelicense.workflowCode",
-            "_source.Data.ward.code",
-            "_source.Data.ward.name",
-            "_type",
-            {{
-                "type": "long",
-                "name": "sort.0"
-            }}
-            ]
-        }},
-        "granularitySpec": {{
-            "queryGranularity": "none",
-            "rollup": false,
-            "segmentGranularity": "trade_and_property"
-        }}
-        }}
+  "type": "index_parallel",
+  "spec": {{
+    "ioConfig": {{
+      "type": "index_parallel",
+      "inputSource": {{
+        "type": "inline",
+        "data": "{0}"
+      }},
+      "inputFormat": {{
+        "type": "csv",
+        "findColumnsFromHeader": true
+      }},
+      "appendToExisting": true
+    }},
+    "tuningConfig": {{
+      "type": "index_parallel",
+      "partitionsSpec": {{
+        "type": "dynamic"
+      }}
+    }},
+    "dataSchema": {{
+      "dataSource": "trade_and_property",
+      "timestampSpec": {{
+        "column": "_source.Data.@timestamp",
+        "format": "iso"
+      }},
+      "transformSpec": {{}},
+      "dimensionsSpec": {{
+        "dimensions": [
+          "_id",
+          "_index",
+          "_score",
+          "_source.Data.tradelicense.@timestamp",
+          "_source.Data.tradelicense.accountId",
+          "_source.Data.tradelicense.action",
+          "_source.Data.tradelicense.applicationNumber",
+          "_source.Data.tradelicense.applicationType",
+          "_source.Data.tradelicense.businessService",
+          "_source.Data.tradelicense.financialYear",
+          "_source.Data.tradelicense.licenseNumber",
+          "_source.Data.tradelicense.licenseType",
+          "_source.Data.tradelicense.propertyId",
+          "_source.Data.tradelicense.status",
+          "_source.Data.tradelicense.tenantId",
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocExemption"
+          }},
+          "_source.Data.tradelicense.tradeLicenseDetail.adhocExemptionReason",
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.adhocPenalty"
+          }},
+          "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdBy",
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.createdTime"
+          }},
+          "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedBy",
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.auditDetails.lastModifiedTime"
+          }},
+          "_source.Data.tradelicense.tradeLicenseDetail.channel",
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.tradeLicenseDetail.operationalArea"
+          }},
+          "_source.Data.tradelicense.tradeLicenseDetail.structureType",
+          "_source.Data.tradelicense.tradeName",
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.validFrom"
+          }},
+          {{
+            "type": "long",
+            "name": "_source.Data.tradelicense.validTo"
+          }},
+          "_source.Data.tradelicense.workflowCode",
+          "_source.Data.ward.code",
+          "_source.Data.ward.name",
+          "_type",
+          {{
+            "type": "long",
+            "name": "sort.0"
+          }}
+        ]
+      }},
+      "granularitySpec": {{
+        "queryGranularity": "none",
+        "rollup": false,
+        "segmentGranularity": "trade_and_property"
+      }}
     }}
-    }}
+  }}
+}}
     """
     q=payload.format(data)
     header = {
