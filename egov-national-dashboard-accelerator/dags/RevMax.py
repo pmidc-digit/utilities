@@ -529,7 +529,8 @@ def upload_property_service():
     f= open("property_service.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str =', '.join(row)
+        data+=json.dumps(str)
         data+='\\n'
     f.close()
   
@@ -603,7 +604,7 @@ def upload_property_service():
     header = {
     'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
     }
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_trade_license():
@@ -611,9 +612,10 @@ def upload_trade_license():
     f= open("trade_license.csv","r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
-        data+=', '.join(row)
+        str =', '.join(row)
+        data+=json.dumps(str)
         data+='\\n'
-    f.close()
+    f.close()  
 
     payload =  """
     {{
@@ -721,7 +723,7 @@ def upload_trade_license():
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_water_service():
@@ -842,7 +844,7 @@ def upload_water_service():
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_water_and_property():
@@ -963,7 +965,7 @@ def upload_water_and_property():
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_trade_and_property():
@@ -1081,7 +1083,7 @@ def upload_trade_and_property():
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_rule_3():
@@ -1162,7 +1164,7 @@ def upload_rule_3():
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_dss_service():
@@ -1286,7 +1288,7 @@ def upload_dss_service():
     f.close()
     
     q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
     data = ""
@@ -1297,7 +1299,7 @@ def upload_dss_service():
         data+='\\n'
     f.close()
     q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
     data=""
@@ -1309,7 +1311,7 @@ def upload_dss_service():
     f.close()
     q=payload.format(data)
 
-    response = requests.request("POST", druid_url, headers=header, data=json.dumps(q))
+    response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_data():
