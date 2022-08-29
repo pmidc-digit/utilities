@@ -601,7 +601,6 @@ def upload_property_service():
     """
 
     q=payload.format(data)
-    logging.info(q)
     header = {
     'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
     }
@@ -720,7 +719,6 @@ def upload_trade_license():
     }}
     """
     q=payload.format(data)
-    logging.info(q)
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
@@ -843,7 +841,6 @@ def upload_water_service():
     }}
     """
     q=payload.format(data)
-    logging.info(q)
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
@@ -1084,7 +1081,6 @@ def upload_trade_and_property():
     }}
     """
     q=payload.format(data)
-    logging.info(q)
     header = {
     'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
     }
@@ -1292,8 +1288,7 @@ def upload_dss_service():
         str = ', '.join(row)
         data+=str.replace('\t','')
         data+='\\n'
-    f.close()
-    
+    f.close() 
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
