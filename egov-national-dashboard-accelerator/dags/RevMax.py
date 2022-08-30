@@ -1053,7 +1053,7 @@ def empty_water_and_property_payload():
     }}
     """
 
-def empty_trade_and_property():
+def empty_trade_and_property_payload():
     return """
     {{
     "type": "index_parallel",
@@ -1361,7 +1361,7 @@ def upload_water_and_property():
 
 def upload_trade_and_property():
     data = readfile("trade_and_property.csv")
-    payload =  empty_water_and_property_payload()
+    payload =  empty_trade_and_property_payload()
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
