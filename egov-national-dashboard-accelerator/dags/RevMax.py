@@ -669,17 +669,18 @@ def readfile(filename):
     f.close()
     return data
 
-def upload_property_service():
-    data = readfile("property_service.csv")
-    # f= open("property_service.csv","r")
-    # spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    # for row in spamreader:
-    #     str = ', '.join(row)
-    #     data+=str.replace('\t','')
-    #     data+='\\n'
-    # f.close()
-  
-    payload =  """
+# queries_map = {
+#     'TL' : (empty_tl_payload),
+#     'WSPT' : (empty_pgr_payload),
+#     'WS' : (empty_ws_payload),
+#     'TLPT' : (empty_ws_digit_payload),
+#     'PT' : (empty_pt_payload),
+#     'RULE3' : (empty_rule3_payload),
+#     'DSS' : (empty_dss_payload)
+# }
+
+def empty_pt_payload():
+    return """
     {{
     "type": "index_parallel",
     "spec":{{
@@ -745,23 +746,16 @@ def upload_property_service():
     }}
     """
 
+
+def upload_property_service():
+    data = readfile("property_service.csv") 
+    payload = empty_pt_payload()
     q=payload.format(data)
-    # header = {
-    # 'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
-    # }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_trade_license():
-    data = ""
-    f= open("trade_license.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n'
-    f.close() 
-
+    data = readfile("trade_license.csv") 
     payload =  """
     {{
     "type": "index_parallel",
@@ -864,22 +858,11 @@ def upload_trade_license():
     }}
     """
     q=payload.format(data)
-    header = {
-    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
-    }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_water_service():
-    data = ""
-    f= open("water_service.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n' 
-    f.close()
-
+    data = readfile("water_service.csv")
     payload =  """
     {{
     "type": "index_parallel",
@@ -986,22 +969,11 @@ def upload_water_service():
     }}
     """
     q=payload.format(data)
-    header = {
-    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
-    }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_water_and_property():
-    data = ""
-    f= open("water_and_property.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n' 
-    f.close()
-
+    data = readfile("water_and_property.csv")
     payload =  """
     {{
     "type": "index_parallel",
@@ -1108,22 +1080,11 @@ def upload_water_and_property():
     }}
     """
     q=payload.format(data)
-    header = {
-    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
-    }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_trade_and_property():
-    data = ""
-    f= open("trade_and_property.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n'
-    f.close()
-
+    data = readfile("trade_and_property.csv")
     payload =  """
     {{
     "type": "index_parallel",
@@ -1226,22 +1187,11 @@ def upload_trade_and_property():
     }}
     """
     q=payload.format(data)
-    header = {
-    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
-    }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_rule_3():
-    data = ""
-    f= open("rule_3.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n'
-    f.close()
-
+    data = readfile("rule_3.csv","r")
     payload =  """
     {{
     "type": "index_parallel",
@@ -1308,17 +1258,10 @@ def upload_rule_3():
     }}
     """
     q=payload.format(data)
-    header = {
-    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
-    }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
 def upload_dss_service():
-    data = ""
-    header = {
-    'Content-Type': 'application/json','Accept-Charset': 'UTF-8'
-    }
     payload =  """
     {{
     "type": "index_parallel",
@@ -1427,39 +1370,17 @@ def upload_dss_service():
     """
    
 
-    f= open("dss_collection_ws.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n'
-    f.close() 
+    data= readfile("dss_collection_ws.csv")
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
-    data = ""
-    f= open("dss_collection_pt.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n' 
-    f.close()
+    data =readfile("dss_collection_pt.csv")
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
-    data=""
-    f= open("dss_collection_tl.csv","r")
-    spamreader = csv.reader(f, delimiter=',', quotechar='"')
-    for row in spamreader:
-        str = ', '.join(row)
-        data+=str.replace('\t','')
-        data+='\\n'
-    f.close()
-    q=payload.format(data)
-
+    data=readfile("dss_collection_tl.csv")
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
