@@ -1409,7 +1409,7 @@ def upload_data():
     logging.info("Done uploading data to Druid")
 
 
-flattendata = PythonOperator(
+collectdata = PythonOperator(
 task_id='flatten_data',
 python_callable=collect_data,
 provide_context=True,
@@ -1428,4 +1428,4 @@ provide_context=True,
 dag=dag)
 
 
-flattendata >> joindata >> uploaddata
+collectdata >> joindata >> uploaddata
