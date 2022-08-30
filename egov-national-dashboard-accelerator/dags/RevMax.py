@@ -1410,7 +1410,7 @@ def upload_data():
 
 
 collectdata = PythonOperator(
-task_id='flatten_data',
+task_id='collect_data',
 python_callable=collect_data,
 provide_context=True,
 dag=dag)
