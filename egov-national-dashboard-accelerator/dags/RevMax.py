@@ -29,6 +29,53 @@ default_args = {
 
 dag = DAG('rev_max', default_args=default_args, schedule_interval=None)
 druid_url = "https://druid-qa.ifix.org.in/druid/indexer/v1/task"
+header = {'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'}
+
+def replace_empty_objects_with_null_value(df):
+    df_columns = df.columns.tolist()
+    for cols in df_columns:
+        try:
+            unique_values = df[cols].unique().tolist()
+            if (len(unique_values) == 1) and (
+                unique_values == "{}" or unique_values == "[]"
+            ):
+                df[cols] = np.NaN
+        except Exception as e:
+            df[cols] = np.NaN
+    return df
+
+def convert_dataframe_to_csv(dataframe, file_name):
+    dataframe.to_csv(
+       f"""{file_name}.csv""", index=False
+    )
+    logging.info("absolute path {0}".format(os.path.abspath(f"""{file_name}.csv"""))) 
+
+    
+    logging.info(dataframe)
+
+def get_dataframe_after_flattening(json_data):
+    logging.info(json_data)  
+    df = [flatten_json(d) for d in json_data]  
+    df = pd.DataFrame(df)
+    df = replace_empty_objects_with_null_value(df)
+    return df
+
+def flatten_json(y):
+    out = {}
+    def flatten(x, name =''):
+        if type(x) is dict:            
+            for a in x:
+                flatten(x[a], name + a + '.')
+        elif type(x) is list:          
+            i = 0        
+            for a in x:                
+                flatten(a, name + str(i) + '.')
+                i += 1
+        else:
+            out[name[:-1]] = x
+  
+    flatten(y)
+    return out
 
 def elastic_dump_pt(start,end):
     hook = ElasticHook('GET', 'es_conn')
@@ -424,6 +471,7 @@ def elastic_dump_meter(start,end):
     return resp['hits']['hits']
 
 def collect_data(**kwargs):
+    logging.info("Start extracting data")
     date = kwargs['dag_run'].conf.get('start')
     enddate = kwargs['dag_run'].conf.get('end')
     localtz = timezone('Asia/Kolkata')
@@ -436,14 +484,100 @@ def collect_data(**kwargs):
     elastic_dump_pt(start,end)
     elastic_dump_tl(start,end)
     elastic_dump_ws(start,end)
-    #elastic_dump_meter() - not in punjab prod
     elastic_dump_collection_pt(start,end)
     elastic_dump_collection_tl(start,end)
     elastic_dump_collection_ws(start,end)
-    return 'done collecting data'
+    #elastic_dump_meter() - not in punjab prod
+    logging.info("Done extracting data")
+
+def property_and_water_services(water_services, property_services):
+    water_and_property = water_services.merge(
+        property_services,
+        how="inner",
+        left_on="_source.Data.propertyId",
+        right_on="_source.Data.propertyId",
+        suffixes=("_water", "_property"),
+    )
+    convert_dataframe_to_csv(dataframe=water_and_property, file_name="water_and_property"
+    )
+
+def trade_and_property_services(trade_services, property_services):
+    trade_and_property = trade_services.merge(
+        property_services,
+        how="inner",
+        left_on="_source.Data.tradelicense.propertyId",
+        right_on="_source.Data.propertyId",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(dataframe=trade_and_property, file_name="trade_and_property"
+    )
+
+def dss_collection_and_water(dss_collection,water_services):
+    collection_and_water = dss_collection.merge(
+        water_services,
+        how="inner",
+        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+        right_on="_source.Data.applicationNo",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(dataframe=collection_and_water, file_name="collection_and_water"
+    )
+
+def dss_collection_and_property(dss_collection,property_services):
+    collection_and_property = dss_collection.merge(
+        property_services,
+        how="inner",
+        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+        right_on="_source.Data.propertyId",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(
+        dataframe=collection_and_property, file_name="collection_and_property"
+    )
+
+def dss_collection_and_trade(trade_services, dss_collection):
+    collection_and_trade = dss_collection.merge(
+        trade_services,
+        how="inner",
+        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
+        right_on="_source.Data.tradelicense.applicationNumber",
+        suffixes=("_trade", "_property"),
+    )
+    convert_dataframe_to_csv(
+        dataframe=collection_and_trade, file_name="collection_and_trade"
+    )
+
+def rule3(property_services, water_services):
+    water_and_property = water_services.merge(
+        property_services,
+        how="inner",
+        left_on="_source.Data.propertyId",
+        right_on="_source.Data.propertyId",
+        suffixes=("_water", "_property"),
+    )
+
+    water_and_property = water_and_property["_source.Data.propertyId"]
+
+    query = f"""(`_source.Data.propertyType`.str.upper() != 'VACANT')"""
+
+    property_services = property_services.query(query)
+
+    property_services = property_services[
+        (~(property_services["_source.Data.propertyId"].isin(water_and_property)))
+    ]
+    convert_dataframe_to_csv(dataframe=property_services, file_name="rule_3")
+
+# def water_and_meter_services(water_services, meter_services):
+#     water_and_meter = water_services.merge(
+#         meter_services,
+#         how="inner",
+#         left_on="_source.Data.connectionNo",
+#         right_on="_source.Data.connectionNo",
+#         suffixes=("_water", "_meter"),
+#     )
+#     convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
 
 def join_data():
-    logging.info("in join")
     f= open('property_service.json',"r")
     property_service_json = json.loads(f.read())
     f.close()
@@ -524,15 +658,26 @@ def join_data():
     #join water and property for rule3
     rule3(property_services=property_service_after_flattening,water_services=water_service_after_flattening)
 
-def upload_property_service():
+def readfile(filename):
     data = ""
-    f= open("property_service.csv","r")
+    f= open(filename,"r")
     spamreader = csv.reader(f, delimiter=',', quotechar='"')
     for row in spamreader:
         str = ', '.join(row)
         data+=str.replace('\t','')
         data+='\\n'
     f.close()
+    return data
+
+def upload_property_service():
+    data = readfile("property_service.csv")
+    # f= open("property_service.csv","r")
+    # spamreader = csv.reader(f, delimiter=',', quotechar='"')
+    # for row in spamreader:
+    #     str = ', '.join(row)
+    #     data+=str.replace('\t','')
+    #     data+='\\n'
+    # f.close()
   
     payload =  """
     {{
@@ -601,9 +746,9 @@ def upload_property_service():
     """
 
     q=payload.format(data)
-    header = {
-    'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
-    }
+    # header = {
+    # 'Content-Type': 'application/json', 'Accept-Charset': 'UTF-8'
+    # }
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
@@ -1323,146 +1468,15 @@ def upload_data():
     upload_property_service()
     upload_trade_license()
     upload_water_service()
-    #upload_water_and_meter() - data not in prod for punjab
-    #upload_meter_service() - data not in prod for punjab
-    #upload_demand() - data not in prod for punjab
     upload_water_and_property()
     upload_trade_and_property() 
     upload_rule_3()   
     upload_dss_service()
+    #upload_water_and_meter() - data not in prod for punjab
+    #upload_meter_service() - data not in prod for punjab
+    #upload_demand() - data not in prod for punjab
+    logging.info("Done uploading data to Druid")
 
-def replace_empty_objects_with_null_value(df):
-    df_columns = df.columns.tolist()
-    for cols in df_columns:
-        try:
-            unique_values = df[cols].unique().tolist()
-            if (len(unique_values) == 1) and (
-                unique_values == "{}" or unique_values == "[]"
-            ):
-                df[cols] = np.NaN
-        except Exception as e:
-            df[cols] = np.NaN
-    return df
-
-def convert_dataframe_to_csv(dataframe, file_name):
-    dataframe.to_csv(
-       f"""{file_name}.csv""", index=False
-    )
-    logging.info("absolute path {0}".format(os.path.abspath(f"""{file_name}.csv"""))) 
-
-    
-    logging.info(dataframe)
-
-def get_dataframe_after_flattening(json_data):
-    logging.info(json_data)  
-    df = [flatten_json(d) for d in json_data]  
-    df = pd.DataFrame(df)
-    df = replace_empty_objects_with_null_value(df)
-    return df
-
-def flatten_json(y):
-    out = {}
-    def flatten(x, name =''):
-        if type(x) is dict:            
-            for a in x:
-                flatten(x[a], name + a + '.')
-        elif type(x) is list:          
-            i = 0        
-            for a in x:                
-                flatten(a, name + str(i) + '.')
-                i += 1
-        else:
-            out[name[:-1]] = x
-  
-    flatten(y)
-    return out
-
-# def water_and_meter_services(water_services, meter_services):
-#     water_and_meter = water_services.merge(
-#         meter_services,
-#         how="inner",
-#         left_on="_source.Data.connectionNo",
-#         right_on="_source.Data.connectionNo",
-#         suffixes=("_water", "_meter"),
-#     )
-#     convert_dataframe_to_csv(dataframe=water_and_meter, file_name="water_and_meter")
-
-def property_and_water_services(water_services, property_services):
-    water_and_property = water_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_water", "_property"),
-    )
-    convert_dataframe_to_csv(dataframe=water_and_property, file_name="water_and_property"
-    )
-
-def trade_and_property_services(trade_services, property_services):
-    trade_and_property = trade_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.tradelicense.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(dataframe=trade_and_property, file_name="trade_and_property"
-    )
-
-def dss_collection_and_water(dss_collection,water_services):
-    collection_and_water = dss_collection.merge(
-        water_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.applicationNo",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(dataframe=collection_and_water, file_name="collection_and_water"
-    )
-
-def dss_collection_and_property(dss_collection,property_services):
-    collection_and_property = dss_collection.merge(
-        property_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.propertyId",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(
-        dataframe=collection_and_property, file_name="collection_and_property"
-    )
-
-def dss_collection_and_trade(trade_services, dss_collection):
-    collection_and_trade = dss_collection.merge(
-        trade_services,
-        how="inner",
-        left_on="_source.dataObject.paymentDetails.bill.consumerCode",
-        right_on="_source.Data.tradelicense.applicationNumber",
-        suffixes=("_trade", "_property"),
-    )
-    convert_dataframe_to_csv(
-        dataframe=collection_and_trade, file_name="collection_and_trade"
-    )
-
-def rule3(property_services, water_services):
-    water_and_property = water_services.merge(
-        property_services,
-        how="inner",
-        left_on="_source.Data.propertyId",
-        right_on="_source.Data.propertyId",
-        suffixes=("_water", "_property"),
-    )
-
-    water_and_property = water_and_property["_source.Data.propertyId"]
-
-    query = f"""(`_source.Data.propertyType`.str.upper() != 'VACANT')"""
-
-    property_services = property_services.query(query)
-
-    property_services = property_services[
-        (~(property_services["_source.Data.propertyId"].isin(water_and_property)))
-    ]
-    convert_dataframe_to_csv(dataframe=property_services, file_name="rule_3")
 
 flattendata = PythonOperator(
 task_id='flatten_data',
