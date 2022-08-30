@@ -669,16 +669,6 @@ def readfile(filename):
     f.close()
     return data
 
-# queries_map = {
-#     'TL' : (empty_tl_payload),
-#     'WSPT' : (empty_pgr_payload),
-#     'WS' : (empty_ws_payload),
-#     'TLPT' : (empty_ws_digit_payload),
-#     'PT' : (empty_pt_payload),
-#     'RULE3' : (empty_rule3_payload),
-#     'DSS' : (empty_dss_payload)
-# }
-
 def empty_pt_payload():
     return """
     {{
@@ -746,17 +736,8 @@ def empty_pt_payload():
     }}
     """
 
-
-def upload_property_service():
-    data = readfile("property_service.csv") 
-    payload = empty_pt_payload()
-    q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=q)
-    logging.info(response.text)
-
-def upload_trade_license():
-    data = readfile("trade_license.csv") 
-    payload =  """
+def empty_tl_payload():
+    return """
     {{
     "type": "index_parallel",
     "spec": {{
@@ -857,13 +838,9 @@ def upload_trade_license():
     }}
     }}
     """
-    q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=q)
-    logging.info(response.text)
 
-def upload_water_service():
-    data = readfile("water_service.csv")
-    payload =  """
+def empty_ws_payload():
+    return """
     {{
     "type": "index_parallel",
     "spec": {{
@@ -968,13 +945,9 @@ def upload_water_service():
     }}
     }}
     """
-    q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=q)
-    logging.info(response.text)
 
-def upload_water_and_property():
-    data = readfile("water_and_property.csv")
-    payload =  """
+def empty_water_and_property_payload():
+    return """
     {{
     "type": "index_parallel",
     "spec": {{
@@ -1079,13 +1052,9 @@ def upload_water_and_property():
     }}
     }}
     """
-    q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=q)
-    logging.info(response.text)
 
-def upload_trade_and_property():
-    data = readfile("trade_and_property.csv")
-    payload =  """
+def empty_trade_and_property():
+    return """
     {{
     "type": "index_parallel",
     "spec": {{
@@ -1186,13 +1155,9 @@ def upload_trade_and_property():
     }}
     }}
     """
-    q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=q)
-    logging.info(response.text)
 
-def upload_rule_3():
-    data = readfile("rule_3.csv","r")
-    payload =  """
+def empty_rule3_payload():
+    return """
     {{
     "type": "index_parallel",
     "spec": {{
@@ -1257,12 +1222,9 @@ def upload_rule_3():
     }}
     }}
     """
-    q=payload.format(data)
-    response = requests.request("POST", druid_url, headers=header, data=q)
-    logging.info(response.text)
 
-def upload_dss_service():
-    payload =  """
+def empty_dss_payload():
+    return """
     {{
     "type": "index_parallel",
     "spec": {{
@@ -1368,7 +1330,51 @@ def upload_dss_service():
     }}
     
     """
-   
+
+def upload_property_service():
+    data = readfile("property_service.csv") 
+    payload = empty_pt_payload()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_trade_license():
+    data = readfile("trade_license.csv") 
+    payload =  empty_tl_payload()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_water_service():
+    data = readfile("water_service.csv")
+    payload =  empty_ws_payload()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_water_and_property():
+    data = readfile("water_and_property.csv")
+    payload =  empty_water_and_property_payload()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_trade_and_property():
+    data = readfile("trade_and_property.csv")
+    payload =  empty_water_and_property_payload()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_rule_3():
+    data = readfile("rule_3.csv")
+    payload =  empty_rule3_payload()
+    q=payload.format(data)
+    response = requests.request("POST", druid_url, headers=header, data=q)
+    logging.info(response.text)
+
+def upload_dss_service():
+    payload =  empty_dss_payload()
 
     data= readfile("dss_collection_ws.csv")
     q=payload.format(data)
