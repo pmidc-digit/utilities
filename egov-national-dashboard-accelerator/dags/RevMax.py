@@ -1377,16 +1377,20 @@ def upload_dss_service():
     payload =  empty_dss_payload()
 
     data= readfile("dss_collection_ws.csv")
+    logging.info(data)
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
     data =readfile("dss_collection_pt.csv")
+    logging.info(data)
     q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
     data=readfile("dss_collection_tl.csv")
+    logging.info(data)
+    q=payload.format(data)
     response = requests.request("POST", druid_url, headers=header, data=q)
     logging.info(response.text)
 
