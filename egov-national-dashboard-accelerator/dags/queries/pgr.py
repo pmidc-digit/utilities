@@ -35,7 +35,7 @@ pgr_closed_complaints = {
           "must": [
             {{
                 "range": {{
-                    "Data.auditDetails.lastModifiedTime": {{
+                    "Data.dateOfComplaint": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
