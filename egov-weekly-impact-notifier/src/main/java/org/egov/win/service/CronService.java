@@ -344,6 +344,7 @@ public class CronService {
 			EmailRequest request = EmailRequest.builder().email(email.getTo()).subject(email.getSubject()).isHTML(true)
 					.body(content).build();
 			log.info("Sending email.......");
+			log.info("email......."+email);
 			producer.push(emailTopic, request);
 		}
 	}
