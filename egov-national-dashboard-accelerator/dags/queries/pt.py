@@ -819,7 +819,7 @@ pt_properties_registered_by_year = {'path': 'property-assessments/_search',
                   }},
                   "aggs": {{
                     "propertiesRegistered": {{
-                      "value_count": {{
+                      "cardinality": {{
                         "field": "Data.propertyId.keyword"
                       }}
                     }}
