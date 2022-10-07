@@ -213,6 +213,9 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
         ward = ward_bucket.get('key')
         logging.info("ward info")
         logging.info(ward)
+        ward= ward.replace("'", "")
+        logging.info(" arfter replce ward info")
+        logging.info(ward)
         ulb_agg = ward_bucket.get('ulb')
         ulb_buckets = ulb_agg.get('buckets')
         for ulb_bucket in ulb_buckets:
