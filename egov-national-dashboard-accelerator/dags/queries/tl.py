@@ -430,7 +430,7 @@ tl_todays_trade_licenses = {'path': 'tlindex-v1-enriched/_search',
                         }},
                         "aggs": {{
                           "todaysTradeLicenses": {{
-                           "cardinality": {{
+                           "value_count": {{
                              "field": "Data.tradelicense.licenseNumber.keyword"
                            }}
                           }}
