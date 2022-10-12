@@ -749,15 +749,27 @@ tl_license_issued_within_sla = {'path': 'tlindex-v1-enriched/_search',
             }}
           ],
           "must": [
-            {{
+              {{
                 "range": {{
-                "Data.tradelicense.@timestamp": {{
+                "Data.tradelicense.auditDetails.lastModifiedTime": {{
                 "gte": {0},
                 "lte": {1},
                 "format": "epoch_millis"
               }}
             }}
-            }}
+            }},
+              {{
+                 
+               "terms": {{
+               "Data.tradelicense.status.keyword": [
+               "CANCELLED",
+               "APPROVED",
+               "REJECTED",
+               "PAID"
+                 ]
+               }}
+                
+              }}
           ]
         }}
       }},
