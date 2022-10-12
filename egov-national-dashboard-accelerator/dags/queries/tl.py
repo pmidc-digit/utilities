@@ -395,7 +395,7 @@ tl_todays_trade_licenses = {'path': 'tlindex-v1-enriched/_search',
       "must": [
             {{
                 "range": {{
-                    "Data.tradelicense.issuedDate": {{
+                    "Data.tradelicense.applicationDate": {{
                     "gte": {0},
                     "lte": {1},
                     "format": "epoch_millis"
