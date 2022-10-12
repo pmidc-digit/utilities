@@ -744,7 +744,7 @@ tl_license_issued_within_sla = {'path': 'tlindex-v1-enriched/_search',
           "must_not": [
             {{
               "term": {{
-                "Data.tenantId.keyword": "pb.testing"
+               "Data.tradelicense.tenantId.keyword": "pb.testing"
               }}
             }}
           ],
