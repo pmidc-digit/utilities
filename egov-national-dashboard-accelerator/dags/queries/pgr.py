@@ -964,8 +964,8 @@ pgr_avg_solution_time = {
                           "aggs": {{
                             "averageSolutionTime": {{
                             "avg": {{
-                              "script": {{
-                                "source": "(doc['Data.addressDetail.auditDetails.lastModifiedTime'].value - doc['Data.addressDetail.auditDetails.createdTime'].value)/(3600*1000)"
+                               "script": {{
+                                "source": "(doc['Data.actionHistory.actions.when'].value - doc['Data.dateOfComplaint'].value)/(3600*1000)"
                               }}
                           }}
                         }}
