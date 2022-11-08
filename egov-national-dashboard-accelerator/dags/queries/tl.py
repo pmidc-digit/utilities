@@ -668,7 +668,7 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
                 "dataObject.paymentDetails.businessService.keyword": "TL"
               }}
             }},
-            {{liveUlbsCount
+            {{
               "range": {{
                       "dataObject.paymentDetails.receiptDate": {{
                       "gte": {0},
