@@ -919,7 +919,12 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
                   "aggs": {{
                     "todaysCollection": {{
                       "sum": {{
-                        "field": "dataObject.paymentDetails.totalAmountPaid"
+                         "script": {{
+                          "lang": "painless",
+                         "source": "(params._source.dataObject.paymentDetails.totalAmountPaid)/(params._source.domainObject.tradelicense.tradeLicenseDetail.tradeUnits.length)"
+                        
+                         
+                        }}
                       }}
                     }}
                   }}
