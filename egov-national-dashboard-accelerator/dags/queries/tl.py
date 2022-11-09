@@ -707,8 +707,13 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
                       }},
                   "aggs": {{
                     "Total Collection": {{
-                      "sum": {{
-                        "field": "dataObject.paymentDetails.totalAmountPaid"
+                        "sum": {{
+                        "script": {{
+                          "lang": "painless",
+                         "source": "(params._source.dataObject.paymentDetails.totalAmountPaid)/(params._source.domainObject.tradelicense.tradeLicenseDetail.tradeUnits.length)"
+                        
+                         
+                        }}
                       }}
                     }}
                   }}
