@@ -289,6 +289,9 @@ def call_ingest_api(connection, access_token, user_info, payload, module,startda
     r = requests.post(url, data=json.dumps(data), headers={'Content-Type' : 'application/json'})
     response = r.json()
     logging.info(json.dumps(data))
+    logging.info("Data to ingest----"+json.dumps(data))
+    logging.info("=============================================")
+    logging.info("Ingested Data----"+response)
     logging.info(response)
 
     #logging to the index adaptor_logs
