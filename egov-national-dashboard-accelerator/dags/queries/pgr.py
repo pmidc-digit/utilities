@@ -968,24 +968,9 @@ pgr_avg_solution_time = {
       "avg": {{
         "script": {{
           "lang": "painless",
-          "source": "
-             start = 0;
+          "source": " start = 0;
              end = 0;
-            for (int i = 0; i < params['_source']['Data']['actionHistory']['actions'].length; ++i) {{
-              if(params['_source']['Data']['actionHistory']['actions'][i]['status'] == 'resolved'){{
-                end = params['_source']['Data']['actionHistory']['actions'][i]['when'];
-              }}
-              if(params['_source']['Data']['actionHistory']['actions'][i]['status'] == 'open'){{
-                start = params['_source']['Data']['actionHistory']['actions'][i]['when'];
-              }}
-            }}
-            if(end!=0){{
-              return (start);
-            }}
-            else{{
-            return (end - start);
-            }}
-          "
+               "
         }}
       }}
     }}
