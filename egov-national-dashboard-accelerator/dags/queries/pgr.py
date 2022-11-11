@@ -915,29 +915,27 @@ pgr_avg_solution_time = {
     'name': 'pgr_avg_solution_time',
     'lambda': extract_pgr_avg_solution_time,
     'query': """
-  {{
-  "size": 0, 
+ {{
+    "size":0,
     "query": {{
           "bool": {{
             "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
+              {{
+                "term": {{
+                  "Data.tenantId.keyword": "pb.testing"
+                }}
               }}
-            }}
-          ],
-           "filter": [
-        {{
-          "term": {{
-            "Data.actionHistory.actions.status.keyword": "resolved"
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.actionHistory.actions.status.keyword": "open"
-          }}
-        }}
-      ]
+            ],
+          "must":[
+              {{
+                 "range": {{
+                      "Data.dateOfComplaint": {{
+                      "gte": {0},
+                      "lte": {1},
+                      "format": "epoch_millis"
+                  }}
+                }}
+              }}]
           }}
       }},
     "aggs": {{
@@ -961,31 +959,26 @@ pgr_avg_solution_time = {
                   "aggs":{{
                      "department": {{
                        "terms": {{
-                        "field": "Data.department.keyword"
-                       }},
-                     "aggs": {{
-    "averageSolutionTime": {{
-      "avg": {{
-        "script": {{
-          "lang": "painless",
-          "source": "print("Heloo World")"
-        }}
-      }}
-    }}
-  }}
+                      "field": "Data.department.keyword"
+                       }}, 
+                          "aggs": {{
+                            "averageSolutionTime": {{
+                            "avg": {{
+                              "script": {{
+                                "source": "(doc['Data.addressDetail.auditDetails.lastModifiedTime'].value - doc['Data.addressDetail.auditDetails.createdTime'].value)/(3600*1000)"
+                              }}
+                          }}
+                        }}
+                      }}
                     }}
                   }}
-                }}
-              }}
-            }}
-          }}
-        }}
-    }}
-}}
-
-
-
-
+  }}
+  }}
+  }}
+  }}
+  }}
+  }}
+  }}
     """
 }
 
