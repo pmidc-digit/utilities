@@ -968,9 +968,7 @@ pgr_avg_solution_time = {
       "avg": {{
         "script": {{
           "lang": "painless",
-          "source": " start = 0;
-             end = 0;
-               "
+          "source": "print("Heloo World")"
         }}
       }}
     }}
