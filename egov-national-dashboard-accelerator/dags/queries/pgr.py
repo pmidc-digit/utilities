@@ -935,7 +935,14 @@ pgr_avg_solution_time = {
                       "format": "epoch_millis"
                   }}
                 }}
-              }}]
+              }}],
+                "filter": [
+        {{
+          "term": {{
+            "Data.actionHistory.actions.status.keyword": "resolved"
+          }}
+        }}
+      ]
           }}
       }},
     "aggs": {{
@@ -965,7 +972,8 @@ pgr_avg_solution_time = {
                             "averageSolutionTime": {{
                             "avg": {{
                               "script": {{
-                                "source": "(doc['Data.addressDetail.auditDetails.lastModifiedTime'].value - doc['Data.addressDetail.auditDetails.createdTime'].value)/(3600*1000)"
+                                "lang": "painless",
+                                "source": "(doc['Data.actionHistory.actions.when'].value- doc['Data.addressDetail.auditDetails.createdTime'].value)"
                               }}
                           }}
                         }}
