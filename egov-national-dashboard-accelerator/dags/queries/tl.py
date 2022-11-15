@@ -638,10 +638,7 @@ def extract_collections_by_trade_category(metrics, region_bucket):
     for tradeType_bucket in tradeType_buckets:
         grouped_by.append({'name': tradeType_bucket.get('key'), 'value': tradeType_bucket.get(
             'todaysCollection').get('value') if tradeType_bucket.get('todaysCollection') else 0})
-	logging.info("grouped_by_data")
-        logging.info(grouped_by)
-        logging.info("metrics_data")
-        logging.info(metrics)
+	
     metrics['todaysCollection'] = [{'groupBy': 'tradeType', 'buckets': grouped_by}]
   
     return metrics
