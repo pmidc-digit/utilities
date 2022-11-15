@@ -209,6 +209,8 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
     empty_lambda = module_config[1]
     ward_agg = single_document.get('ward')
     ward_buckets = ward_agg.get('buckets')
+    logging.info(" ward_buckets")
+    logging.info(ward_buckets)
     for ward_bucket in ward_buckets:
         ward = ward_bucket.get('key')
         logging.info("ward info")
