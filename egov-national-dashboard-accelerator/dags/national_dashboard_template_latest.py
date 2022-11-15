@@ -226,10 +226,12 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
                 else:
                     ward_payload = empty_lambda(region, ulb, ward, date)         
                 metrics = ward_payload.get('metrics')
-                logging.info("metrics {0}",format(metrics))
+                logging.info("metrics")                
+                logging.info(metrics)
                 metrics = lambda_function(metrics, region_bucket)
                 ward_payload['metrics'] = metrics
-                logging.info("ward_payload {0}",format(ward_payload))
+                logging.info("Ward payload")                
+                logging.info(ward_payload)
                 ward_map[get_key(ward, ulb)] = ward_payload
     return ward_map
 
