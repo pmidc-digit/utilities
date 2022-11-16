@@ -920,9 +920,9 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
               "aggs": {{
                 "tradeType": {{
                   "terms": {{
-                    "field": "domainObject.tradelicense.tradeLicenseDetail.tradeUnits.tradeType.keyword"
-
-                  }},
+                    "field": "domainObject.tradelicense.tradeLicenseDetail.tradeUnits.tradeType.keyword",
+                      "size": 10000
+                      }},
                   "aggs": {{
                     "todaysCollection": {{
                       "sum": {{
