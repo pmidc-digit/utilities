@@ -1038,10 +1038,22 @@ def empty_pgr_payload(region, ulb, ward, date):
                       {
                           "groupBy": "department",
                           "buckets": [
-                              
+                              {
+                                  "name": "DEPT1",
+                                  "value": 5
+                              },
+                              {
+                                  "name": "DEPT2",
+                                  "value": 8
+                              },
+                              {
+                                  "name": "DEPT3",
+                                  "value": 6
+                              }
                           ]
                       }
                   ],
+
             "todaysRejectedComplaints": [
                     
                   ],
