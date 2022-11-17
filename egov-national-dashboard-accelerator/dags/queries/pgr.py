@@ -966,7 +966,7 @@ pgr_avg_solution_time = {
       "avg": {{
         "script": {{
           "lang": "painless",
-          "source": "
+          "source":  """  """
             long start = 0;
             long end = 0;
             for (int i = 0; i < params['_source']['Data']['actionHistory']['actions'].length; ++i) {{
@@ -982,7 +982,7 @@ pgr_avg_solution_time = {
               return(0);
             }}
             return (end - start)/(1000*60*60*24);
-          "
+          
         }}
       }}
     }}
