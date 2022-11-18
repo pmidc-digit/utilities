@@ -979,7 +979,7 @@ pgr_avg_solution_time = {
   }}
   }}
   }}
-}}
+
     """
 }
 
