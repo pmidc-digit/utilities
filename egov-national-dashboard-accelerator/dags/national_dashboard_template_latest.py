@@ -219,7 +219,7 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
             ulb = ulb_bucket.get('key')
             region_agg = ulb_bucket.get('region')
             region_buckets = region_agg.get('buckets')
-             for region_bucket in region_buckets:
+            for region_bucket in region_buckets:
                 region = region_bucket.get('key')
                 if ward_map.get(get_key(ward,ulb)):
                     ward_payload = ward_map.get(get_key(ward,ulb))
