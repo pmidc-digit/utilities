@@ -842,6 +842,8 @@ pt_properties_registered_by_year = {'path': 'property-assessments/_search',
 def extract_pt_properties_assessments(metrics, region_bucket):
   metrics['assessments'] = region_bucket.get('assesments').get(
         'value') if region_bucket.get('assesments') else 0
+  logging.info("PT total Assessment")
+  logging.info(metrics)
   return metrics
   
 pt_properties_assessments = {'path': 'property-assessments/_search',
