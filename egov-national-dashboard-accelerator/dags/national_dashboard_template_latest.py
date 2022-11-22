@@ -55,7 +55,7 @@ module_map = {
 
 dag = DAG('national_dashboard_template_manual', default_args=default_args, schedule_interval=None)
 log_endpoint = 'kibana/api/console/proxy'
-batch_size = 200
+batch_size = 50
 
 ulbs = {}
 modules = {}
