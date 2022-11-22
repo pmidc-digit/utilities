@@ -28,6 +28,7 @@ from airflow.models import Variable
 from elasticsearch import Elasticsearch, helpers
 from csv import reader
 import uuid
+import re
 
 
 default_args = {
@@ -213,6 +214,7 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
     for ward_bucket in ward_buckets:
         ward = ward_bucket.get('key')
         ward= ward.replace("'", "")
+        ward=re.sub('[^a-zA-z0-9 ' ' - _]','',ward)
         ulb_agg = ward_bucket.get('ulb')
         ulb_buckets = ulb_agg.get('buckets')
         for ulb_bucket in ulb_buckets:
