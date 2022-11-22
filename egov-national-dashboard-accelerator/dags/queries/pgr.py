@@ -71,7 +71,12 @@ pgr_closed_complaints = {
                 "terms": {{
                   "field": "Data.tenantData.city.districtName.keyword",
                   "size":10000
-                }},
+               }},
+                            "aggs": {{
+              "department": {{
+                "terms": {{
+                  "field": "Data.department.keyword"
+                }},   
                        "aggs": {{
                           	"closedComplaints": {{
                             "value_count": {{
