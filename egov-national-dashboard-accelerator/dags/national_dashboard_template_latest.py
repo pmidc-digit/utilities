@@ -215,14 +215,24 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
         ward = ward_bucket.get('key')
         ward= ward.replace("'", "")
         ward= re.sub(r"[^a-zA-Z0-9 . _ () / & : , \\ -]","",ward)
+        logging.info("ward")
+        logging.info(ward)
         ulb_agg = ward_bucket.get('ulb')
         ulb_buckets = ulb_agg.get('buckets')
         for ulb_bucket in ulb_buckets:
             ulb = ulb_bucket.get('key')
+            ulb=ulb.replace("'", "")
+            ulb=re.sub('[^a-zA-z0-9 ' ' - _]','',ulb)
+            logging.info("ulb")
+            logging.info(ulb)
             region_agg = ulb_bucket.get('region')
             region_buckets = region_agg.get('buckets')
             for region_bucket in region_buckets:
                 region = region_bucket.get('key')
+                region = region.replace("'", "")
+                region=re.sub('[^a-zA-z0-9 ' ' - _]','',region)
+                logging.info("region")
+                logging.info(region)
                 if ward_map.get(get_key(ward,ulb)):
                     ward_payload = ward_map.get(get_key(ward,ulb))
                 else:
