@@ -262,7 +262,7 @@ pgr_unique_citizens = {
                 "uuid": {{
                   "terms": {{
                     "field": "Data.citizen.uuid.keyword",
-                    "size": 1000
+                    "size": 10000
                   }},  
             "aggs": {{
               "uniqueCitizens": {{
