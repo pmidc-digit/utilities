@@ -499,6 +499,8 @@ def extract_pt_collection_cess(metrics, region_bucket):
     usage_buckets = region_bucket.get('byUsageType').get('buckets')
     for usage_bucket in usage_buckets:
       usage = usage_bucket.get('key')
+      logging.info("all_matching_docs")
+      logging.info(usage_bucket.get('all_matching_docs').get('buckets').get('all'))
       transaction_value = usage_bucket.get('all_matching_docs').get('buckets').get('all').get('cess').get('value') if usage_bucket.get('all_matching_docs').get('buckets').get('all').get('cess').get('value')  else 0
       groupby_transactions.append({ 'name' : usage.upper(), 'value' : transaction_value})
 
