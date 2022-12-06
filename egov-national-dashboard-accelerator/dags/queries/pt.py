@@ -631,12 +631,13 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
                                             }}
                                           }}
                                         }},
-                        "cess": {{
+                           "cess": {{
                           "bucket_script": {{
                             "buckets_path": {{
+                              "closed": "FireCess>aggrFilter>value",
                               "total": "CancerCess>aggrFilter>value"
                             }},
-                            "script": "params.total"
+                            "script": "params.closed + params.total"
                           }}
         }}
       }}
