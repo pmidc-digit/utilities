@@ -495,7 +495,7 @@ def extract_pt_collection_cess(metrics, region_bucket):
   collections =  []
   transactions = []
   logging.info("Data byUsageType")
-  logging.info(region_bucket.get('byUsageType'))
+  logging.info( region_bucket.get('byUsageType'))
   if region_bucket.get('byUsageType'):
     usage_buckets = region_bucket.get('byUsageType').get('buckets')
     for usage_bucket in usage_buckets:
