@@ -507,8 +507,8 @@ def extract_pt_collection_cess(metrics, region_bucket):
 
   
 
-  collections.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_collections})
-  metrics['transactions'] = transactions
+  collections.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_transactions})
+  metrics['"cess"'] = collections
   
   
   return metrics
