@@ -46,9 +46,7 @@ pgr_closed_complaints = {
           "filter" :{{
               "terms": {{
                 "Data.status.keyword": [
-                    "closed",
-                    "rejected",
-                    "resolved"
+                    "closed"
                 ]
               }}
             }}
@@ -497,9 +495,7 @@ pgr_completion_rate = {
                           "filter": {{
                             "terms": {{
                               "Data.status.keyword": [
-                                "closed",
-                                "resolved",
-                                "rejected"
+                                "closed"
                               ]
                             }}
                           }},
