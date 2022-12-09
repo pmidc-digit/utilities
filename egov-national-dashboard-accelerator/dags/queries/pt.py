@@ -397,7 +397,8 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "filter": {{
                             "terms": {{
                               "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
-                                "PT_TAX"
+                                "PT_TAX",
+                                "PT_ROUNDOFF",
                               ]
                             }}
                           }},
@@ -420,7 +421,11 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "filter": {{
                             "terms": {{
                               "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
-                                "PT_TIME_REBATE"
+                                "PT_TIME_REBATE",
+                               "PT_ADHOC_REBATE",
+                               "PT_ADVANCE_CARRYFORWARD",
+                               "PT_UNIT_USAGE_EXEMPTION",
+                                "PT_OWNER_EXEMPTION"
                               ]
                             }}
                           }},
@@ -443,7 +448,8 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "filter": {{
                             "terms": {{
                               "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
-                                "PT_TIME_PENALTY"
+                                "PT_TIME_PENALTY",
+                                "PT_ADHOC_PENALTY"
                               ]
                             }}
                           }},
