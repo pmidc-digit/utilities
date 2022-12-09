@@ -398,7 +398,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                             "terms": {{
                               "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
                                 "PT_TAX",
-                                "PT_ROUNDOFF",
+                                "PT_ROUNDOFF"
                               ]
                             }}
                           }},
