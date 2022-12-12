@@ -248,7 +248,7 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
                       }},
                       "aggs": {{
                         "todaysCollection": {{
-                         "sum":{"field":"dataObject.paymentDetails.totalAmountPaid"
+                         "sum":{{"field":"dataObject.paymentDetails.totalAmountPaid"
                   }}
                         }},
                         "transactions": {{
