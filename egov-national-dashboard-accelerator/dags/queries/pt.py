@@ -389,7 +389,11 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                             "terms": {{
                               "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
                                 "PT_TAX",
-                                "PT_ROUNDOFF"
+                                "PT_ROUNDOFF",
+                                "PT_ADVANCE_CARRYFORWARD",
+                                "FIRENOC_FEES",
+                                "PT_DECIMAL_CEILING_CREDIT",
+                                "PT_DECIMAL_CEILING_DEBIT"
                               ]
                             }}
                           }},
@@ -414,7 +418,6 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                               "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
                                 "PT_TIME_REBATE",
                                "PT_ADHOC_REBATE",
-                               "PT_ADVANCE_CARRYFORWARD",
                                "PT_UNIT_USAGE_EXEMPTION",
                                 "PT_OWNER_EXEMPTION"
                               ]
