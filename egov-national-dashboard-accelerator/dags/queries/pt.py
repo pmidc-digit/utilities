@@ -154,6 +154,7 @@ pt_total_applications = {'path': 'property-services/_search',
                                  }
 
 
+
 def extract_pt_collection_transactions_by_usage(metrics, region_bucket):
   groupby_transactions = []
   groupby_collections = []
@@ -166,7 +167,7 @@ def extract_pt_collection_transactions_by_usage(metrics, region_bucket):
       usage = usage_bucket.get('key')
       transaction_value = usage_bucket.get('transactions').get('value') if usage_bucket.get('transactions') else 0
       groupby_transactions.append({ 'name' : usage.upper(), 'value' : transaction_value})
-      collection_value = usage_bucket.get('todaysCollection').get('value') if usage_bucket.get('todaysCollection').get("value") else 0
+      collection_value = usage_bucket.get('todaysCollection').get("amount").get('value') if usage_bucket.get('todaysCollection').get("amount") else 0
       groupby_collections.append({ 'name' : usage.upper(), 'value' : collection_value})
   
  
@@ -248,7 +249,15 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
                       }},
                       "aggs": {{
                         "todaysCollection": {{
-                         "sum":{{"field":"dataObject.paymentDetails.totalAmountPaid"
+                                "nested": {{
+                "path": "dataObject.paymentDetails.bill.billDetails.billAccountDetails"
+                 }},
+                         "aggs": {{
+                    "amount": {{
+                      "sum": {{
+                        "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                      }}
+                    }}
                   }}
                         }},
                         "transactions": {{
@@ -271,7 +280,6 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
 
 """
                                  }
-
 
 def extract_pt_collection_taxes(metrics, region_bucket):
   groupby_rebate = []
