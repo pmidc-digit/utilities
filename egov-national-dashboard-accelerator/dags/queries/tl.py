@@ -667,7 +667,8 @@ tl_collections_by_trade_category = {'path': 'dss-collection_v2/_search',
             {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled"
+                  "Cancelled",
+		  "CANCELLED"
                 ]
               }}
             }}
@@ -875,7 +876,8 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
         {{
           "terms": {{
             "dataObject.paymentDetails.bill.status.keyword": [
-              "Cancelled"
+              "Cancelled",
+	      "CANCELLED"
             ]
           }}
         }}
