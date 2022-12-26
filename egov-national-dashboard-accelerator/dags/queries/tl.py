@@ -150,7 +150,7 @@ tl_collection_adhoc_penalty = {
                       "aggs": {{
                         "amount" : {{
                           "sum": {{
-                            "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                            "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                           }}
                         }}
                       }}
@@ -248,7 +248,7 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
                       "aggs": {{
                         "amount" : {{
                           "sum": {{
-                            "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                            "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                           }}
                         }}
                       }}
@@ -350,7 +350,7 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
                       "aggs": {{
                         "amount" : {{
                           "sum": {{
-                            "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                            "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                           }}
                         }}
                       }}
