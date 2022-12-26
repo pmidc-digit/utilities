@@ -255,7 +255,7 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
                          "aggs": {{
                     "amount": {{
                       "sum": {{
-                        "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                        "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                       }}
                     }}
                   }}
@@ -408,7 +408,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "aggs": {{
                             "amount": {{
                               "sum": {{
-                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                               }}
                             }}
                           }}
@@ -434,7 +434,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "aggs": {{
                             "amount": {{
                               "sum": {{
-                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                               }}
                             }}
                           }}
@@ -458,7 +458,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "aggs": {{
                             "amount": {{
                               "sum": {{
-                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                               }}
                             }}
                           }}
@@ -481,7 +481,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                           "aggs": {{
                             "amount": {{
                               "sum": {{
-                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                                "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                               }}
                             }}
                           }}
@@ -616,7 +616,7 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
                                               "aggs": {{
                                                 "value": {{
                                                   "sum": {{
-                                                    "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                                                    "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                                                   }}
                                                 }}
                                               }}
@@ -639,7 +639,7 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
                                               "aggs": {{
                                                 "value": {{
                                                   "sum": {{
-                                                    "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.amount"
+                                                    "field": "dataObject.paymentDetails.bill.billDetails.billAccountDetails.adjustedAmount"
                                                   }}
                                                 }}
                                               }}
