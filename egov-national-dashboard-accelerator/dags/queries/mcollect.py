@@ -26,7 +26,7 @@ mcollect_total_by_categories = {
         {{
           "terms": {{
             "dataObject.paymentDetails.bill.status.keyword": [
-              "Cancelled"
+              "CANCELLED"
             ]
           }}
         }},
@@ -153,7 +153,7 @@ mcollect_todays_collection = {
         {{
           "terms": {{
             "dataObject.paymentDetails.bill.status.keyword": [
-              "Cancelled"
+              "CANCELLED"
             ]
           }}
         }},
@@ -312,7 +312,7 @@ mcollect_receipts = {
         {{
           "terms": {{
             "dataObject.paymentDetails.bill.status.keyword": [
-              "Cancelled"
+              "CANCELLED"
             ]
           }}
         }},
@@ -466,7 +466,7 @@ mcollect_challans = {
         {{
           "terms": {{
             "dataObject.paymentDetails.bill.status.keyword": [
-              "Cancelled"
+              "CANCELLED"
             ]
           }}
         }},
