@@ -828,6 +828,13 @@ firenoc_collections_by_department = {
           "term": {{
             "dataObject.tenantId.keyword": "pb.testing"
           }}
+        }},
+        {{
+          "terms": {{
+            "dataObject.paymentDetails.bill.status.keyword": [
+              "CANCELLED"
+            ]
+          }}
         }}
       ]
     }}
