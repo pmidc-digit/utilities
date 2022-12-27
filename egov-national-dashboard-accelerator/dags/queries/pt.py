@@ -198,8 +198,7 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
             {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled",
-                  "CANCELLED"
+                      "CANCELLED"
                 ]
               }}
             }}
@@ -339,8 +338,7 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
             {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled",
-                  "CANCELLED"
+                          "CANCELLED"
                 ]
               }}
             }}
@@ -544,8 +542,7 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
             {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled",
-                  "CANCELLED"
+                          "CANCELLED"
                 ]
               }}
             }}
