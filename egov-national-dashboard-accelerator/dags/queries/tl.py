@@ -95,7 +95,7 @@ tl_collection_adhoc_penalty = {
         }}, {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled"
+                  "CANCELLED"
                 ]
               }}
             }}
@@ -149,7 +149,7 @@ tl_collection_adhoc_penalty = {
                         "terms": {{
                           "dataObject.paymentDetails.bill.billDetails.billAccountDetails.taxHeadCode.keyword": [
                             "TL_ADHOC_PENALTY",
-			                     "TL_RENEWAL_PENALTY"
+			     "TL_RENEWAL_PENALTY"
                           ]
                         }}
                       }},
@@ -198,7 +198,7 @@ tl_collection_adhoc_rebate = {'path': 'dss-collection_v2/_search',
         }}, {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled"
+                  "CANCELLED"
                 ]
               }}
             }}
@@ -307,7 +307,7 @@ tl_collection_tax = {'path': 'dss-collection_v2/_search',
         }}, {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled"
+                  "CANCELLED"
                 ]
               }}
             }}
@@ -498,7 +498,7 @@ tl_total_transactions = {'path': 'dss-collection_v2/_search',
             {{
               "terms": {{
                 "dataObject.paymentDetails.bill.status.keyword": [
-                  "Cancelled"
+                  "CANCELLED"
                 ]
               }}
             }}
