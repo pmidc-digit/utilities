@@ -86,7 +86,7 @@ def extract_pt_total_applications(metrics, region_bucket):
   metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get('value')  if region_bucket.get('todaysTotalApplications')  else 0
   return metrics
 
-pt_total_applications = {'path': 'property-services/_search',
+pt_total_applications = {'path': 'property-application/_search',
                                  'name': 'pt_total_applications',
                                  'lambda': extract_pt_total_applications,
                                  'query':
