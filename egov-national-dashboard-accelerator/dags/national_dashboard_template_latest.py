@@ -205,7 +205,7 @@ def transform_response_sample(merged_document, date, module):
                 ward_map = transform_single(single_document, ward_map, date, lambda_function, module)
         else:
             if single_document!='pt_assessed_properties_by_usage_legacy': 
-              logging.info(single_document+" is running")           
+              logging.info(" {0} is running".format(len(single_document)))           
               ward_map = transform_single(single_document, ward_map, date, lambda_function, module)
     ward_list = [ward_map[k] for k in ward_map.keys()]
     return ward_list
