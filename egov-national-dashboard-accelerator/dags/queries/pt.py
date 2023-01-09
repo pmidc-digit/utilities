@@ -848,6 +848,80 @@ pt_assessed_properties = {'path':'property-services/_search',
 }
 
 
+pt_assessed_properties_lagecy = {'path':'property-services/_search',
+                                 'name': 'pt_assessed_properties_by_usage_legacy',
+                                 'lambda': extract_pt_assessed_properties,
+                                 'query':
+                                 """
+{{
+  "size": 0,
+    "query": {{
+        "bool": {{
+          "must_not": [
+            {{
+              "term": {{
+                "Data.tenantId.keyword": "pb.testing"
+              }}
+            }}
+          ],
+          "must": [
+            {{
+                   "range":{{
+                   "Data.@timestamp": {{
+                    "lte": 1648751399000,                    
+                    "format": "epoch_millis"
+                   }}
+            }}
+            }}
+            ]
+        }}
+        }},
+   "aggs" : {{
+            "ward": {{
+              "terms": {{
+                "field": "Data.ward.name.keyword",
+                "size":10000
+              }},
+        "aggs": {{
+          "ulb": {{
+              "terms": {{
+                "field": "Data.tenantId.keyword",
+                "size":10000
+              }},
+                "aggs": {{
+               "region": {{
+                  "terms": {{
+                    "field": "Data.tenantData.city.districtName.keyword",
+                    "size":10000
+                }},
+                "aggs": {{
+                    "byUsageType": {{
+                      "terms": {{
+                        "field": "Data.usageCategory.keyword"
+                        }},
+                "aggs": {{	
+                  "assessedProperties": {{
+                    "value_count": {{
+                      "field": "Data.propertyId.keyword"
+                    }}
+                  }}
+                }}
+    }}
+  }}
+}}
+}}
+}}
+}}
+}}
+}}
+}}
+
+
+
+
+"""
+}
+
 def extract_pt_properties_registered_by_year(metrics, region_bucket):
   fy_agg = region_bucket.get('financialYear')
   fy_buckets = fy_agg.get('buckets')
@@ -1013,7 +1087,7 @@ pt_properties_assessments = {'path': 'property-assessments/_search',
 pt_queries = [pt_closed_applications, pt_total_applications,
               pt_collection_transactions_by_usage, pt_collection_taxes, pt_collection_cess, 
               pt_assessed_properties,pt_properties_registered_by_year,pt_properties_assessments,
-              pt_no_of_properties_paid  ]
+              pt_no_of_properties_paid,pt_assessed_properties_lagecy]
 
 
 #the default payload for PT
