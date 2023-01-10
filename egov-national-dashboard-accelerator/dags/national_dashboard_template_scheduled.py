@@ -1,4 +1,4 @@
-
+import re
 from numpy import sinc
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -195,6 +195,11 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
     ward_buckets = ward_agg.get('buckets')
     for ward_bucket in ward_buckets:
         ward = ward_bucket.get('key')
+        ward= ward.replace("'", "")
+        ward= re.sub(r"[^a-zA-Z0-9 . _ () / & : , \\ -]","",ward)
+        ward= ward.replace("\\", "")
+        logging.info("ward")
+        logging.info(ward)
         ulb_agg = ward_bucket.get('ulb')
         ulb_buckets = ulb_agg.get('buckets')
         for ulb_bucket in ulb_buckets:
@@ -203,6 +208,7 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
             region_buckets = region_agg.get('buckets')
             for region_bucket in region_buckets:
                 region = region_bucket.get('key')
+                region = region.replace("'", "")
                 if ward_map.get(get_key(ward,ulb)):
                     ward_payload = ward_map.get(get_key(ward,ulb))
                 else:
