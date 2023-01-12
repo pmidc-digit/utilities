@@ -141,7 +141,7 @@ def extract_ws_collection_by_tax_head_connection_type(metrics, region_bucket):
     
  
   collection.append({ 'groupBy': 'taxHeads', 'buckets' : groupby_tax_heads})
-  metrics['todaysCollection'] = collection
+  metrics['todaysCollectionForTaxHeads'] = collection
   
   
   return metrics
@@ -1446,10 +1446,10 @@ ws_queries = [ws_collection_by_payment_channel_type,
               ws_todays_applications, 
               ws_closed_applications,  
               ws_connections_created_by_channel_type,
-              ws_connections_created_by_connection_type,
-              ws_total_transactions,
+               ws_total_transactions,
               ws_todays_sla_compliance,
-              ws_todays_completed_application_withinSLA]
+              ws_todays_completed_application_withinSLA,
+              ws_collection_by_tax_head_connection_type]
 
 #the default payload for WS
 def empty_ws_payload(region, ulb, ward, date):
@@ -1480,7 +1480,8 @@ def empty_ws_payload(region, ulb, ward, date):
              "slaCompliance": 0,
              "todaysTotalApplications": 0, 
              "todaysClosedApplications": 0, 
-             "todaysCompletedApplicationsWithinSLA": 0 
+             "todaysCompletedApplicationsWithinSLA": 0 ,
+             "todaysCollectionForTaxHeads":0
         }
     }
 
