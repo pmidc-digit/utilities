@@ -25,6 +25,8 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
   collection.append({ 'groupBy': 'paymentChannelType', 'buckets' : groupby_channel})
   metrics['todaysCollection'] = collection
+  metrics['todaysCollectionForTaxHeads']=value
+
   
   
   return metrics
