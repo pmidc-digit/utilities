@@ -457,7 +457,7 @@ tl_todays_trade_licenses = {'path': 'tlindex-v1-enriched/_search',
                       "value_count": {{
                         "script": {{
                           "lang": "painless",
-                          "source": "if((params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime']  >= {0})&& (params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime'] <= {1})){{ if(params['_source']['Data']['history'][0]['state']['applicationStatus']=='APPROVED'){{ return (params['_source']['Data']['tradelicense']['licenseNumber'] ); }}}}"
+                          "source": "if((params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime']  >= {0})&& (params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime'] <= {1})){{  return (params['_source']['Data']['tradelicense']['licenseNumber'] ); }}"
                         }}
                       }}
                     }}
