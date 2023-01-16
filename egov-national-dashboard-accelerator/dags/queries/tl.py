@@ -405,69 +405,72 @@ tl_todays_trade_licenses = {'path': 'tlindex-v1-enriched/_search',
                             'lambda': extract_tl_todays_trade_licenses,
                             'query': """
 {{
-  "size":0 ,
-    "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tradelicense.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ],
-      "must": [
-            {{
-                "range": {{
-                    "Data.tradelicense.applicationDate": {{
-                    "gte": {0},
-                    "lte": {1},
-                    "format": "epoch_millis"
-                }}
-              }}
-            }}
-          ]
+  
+  "size": 0,
+  "query": {{
+    "bool": {{
+      "must_not": [
+        {{
+          "term": {{
+            "Data.tradelicense.tenantId.keyword": "pb.testing"
+          }}
         }}
+      ],
+      "must": [
+        {{
+          "range": {{
+            "Data.tradelicense.applicationDate": {{
+              "gte": {0},
+              "lte": {1},
+              "format": "epoch_millis"
+            }}
+          }}
+        }}
+      ]
+    }}
+  }},
+  "aggs": {{
+    "ward": {{
+      "terms": {{
+        "field": "Data.ward.name.keyword",
+        "size": 10000
       }},
       "aggs": {{
-                "ward": {{
-                  "terms": {{
-                    "field": "Data.ward.name.keyword",
-                    "size":10000
-                  }},
-         "aggs": {{
-            "ulb": {{
-              "terms": {{
-                "field": "Data.tradelicense.tenantId.keyword",
-                "size":10000
-              }},
-        "aggs": {{
-         "region": {{
+        "ulb": {{
           "terms": {{
-          "field": "Data.tenantData.city.districtName.keyword",
-          "size":10000
+            "field": "Data.tradelicense.tenantId.keyword",
+            "size": 10000
           }},
-            "aggs": {{
-                      "Status": {{
-                        "terms": {{
-                          "field": "Data.tradelicense.status.keyword"
-                        }},
-                        "aggs": {{
-                          "todaysTradeLicenses": {{
-                           "value_count": {{
-                             "field": "Data.tradelicense.licenseNumber.keyword"
-                           }}
-                          }}
+          "aggs": {{
+            "region": {{
+              "terms": {{
+                "field": "Data.tenantData.city.districtName.keyword",
+                "size": 10000
+              }},
+              "aggs": {{
+                "Status": {{
+                  "terms": {{
+                    "field": "Data.tradelicense.status.keyword"
+                  }},
+                  "aggs": {{
+                    "todaysTradeLicenses": {{
+                      "value_count": {{
+                        "script": {{
+                          "lang": "painless",
+                          "source": "if((params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime']  >= {0})&& (params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime'] <= {1})){{ if(params['_source']['Data']['history'][0]['state']['applicationStatus']=='APPROVED'){{ return (params['_source']['Data']['tradelicense']['licenseNumber'] ); }}}}"
                         }}
                       }}
                     }}
-                 }}
+                  }}
+                }}
               }}
             }}
           }}
-         }}
-         }}
-         }}
-
+        }}
+      }}
+    }}
+  }}
+}}
 
 
 
