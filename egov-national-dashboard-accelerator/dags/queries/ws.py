@@ -22,6 +22,9 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
       usage_type = usage_type_bucket.get('key')
       value = usage_type_bucket.get('byUsageType').get('value') if usage_type_bucket.get('byUsageType') else 0
       groupby_usage.append({ 'name' : usage_type, 'value' : value})
+      if not groupby_taxHeads:
+        groupby_taxHeads.append({'name':'CURRENT.CHARGES','value':value})
+
       
   
 
