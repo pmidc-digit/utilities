@@ -630,7 +630,7 @@ tl_applications_moved_today = {'path': 'tlindex-v1-enriched/_search',
                   "value_count": {{
                      "script": {{
                           "lang": "painless",
-                          "source": "params._source.Data.history.sort((o1,o2)->(int)o2.auditDetails.lastModifiedTime-(int)o1.auditDetails.lastModifiedTime); if((params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime']  >= {0})&& (params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime'] <= {1})){{  return (params['_source']['Data']['tradelicense']['applicationNumber'] ); }}"
+                          "source": "params._source.Data.history.sort((o1,o2)->(int)o1.auditDetails.lastModifiedTime-(int)o2.auditDetails.lastModifiedTime); if((params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime']  >= {0})&& (params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime'] <= {1})){{  return (params['_source']['Data']['tradelicense']['applicationNumber'] ); }}"
                         }}
                   }}
                 }}
