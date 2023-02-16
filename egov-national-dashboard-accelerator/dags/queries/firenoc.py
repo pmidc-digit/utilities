@@ -692,7 +692,7 @@ firenoc_applications_completed_within_sla = {
       "must": [
         {{
           "range": {{
-            "Data.@timestamp": {{
+            "Data.auditDetails.lastModifiedTime": {{
               "gte": {0},
               "lte": {1},
               "format": "epoch_millis"
