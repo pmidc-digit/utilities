@@ -7,6 +7,8 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   groupby_channel = []
   collection = []
   groupby_taxHeads = []
+  groupby_connectionType=[]
+
   if region_bucket.get('byChannel'):
     channel_buckets = region_bucket.get('byChannel').get('buckets')
     for channel_bucket in channel_buckets:
@@ -22,7 +24,19 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
       usage_type = usage_type_bucket.get('key')
       value = usage_type_bucket.get('byUsageType').get('value') if usage_type_bucket.get('byUsageType') else 0
       groupby_usage.append({ 'name' : usage_type, 'value' : value})
-       
+     
+
+  if region_bucket.get('byConnectionType'):
+    connection_types = region_bucket.get('byConnectionType').get('buckets')
+    for connection_type_bucket in connection_types:
+      connection_type = connection_type_bucket.get('key')
+      if connection_type != "Water Charges":
+       value = connection_type_bucket.get('byConnectionType').get('value') if connection_type_bucket.get('byConnectionType') else 0
+       groupby_connectionType.append({ 'name' : "WATER.METERED", 'value' : value})
+      if connection_type != "Sewerage Charges":
+       value = connection_type_bucket.get('byConnectionType').get('value') if connection_type_bucket.get('byConnectionType') else 0
+       groupby_connectionType.append({ 'name' : "SEWERAGE", 'value' : value})
+
 
       
   
@@ -30,12 +44,9 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
   collection.append({ 'groupBy': 'paymentChannelType', 'buckets' : groupby_channel})
   collection.append({ 'groupBy': 'taxHeads', 'buckets' : groupby_taxHeads})
-
-  metrics['todaysCollection'] = collection
- 
-
-  
-  
+  collection.append({'groupBy':'connectionType','buckets' : groupby_connectionType})
+	
+  metrics['todaysCollection'] = collection  
   return metrics
 
 ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
@@ -109,7 +120,18 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
                               }}
                             }}
                           }}
-                         }}
+                         }}, "byConnectionType":{{
+                         "terms": {{
+                          "field": "billingservice.keyword"
+                        }},
+                          "aggs": {{
+                            "byConnectionType": {{
+                              "sum": {{
+                                "field": "totalamount"
+                              }}
+                            }}
+                          }}
+                      }}
                   
                 }}
 }}
@@ -122,8 +144,6 @@ ws_collection_by_payment_channel_type = {'path': 'receipts-consumers/_search',
 
 """
                                  }
-
-
 def extract_ws_collection_by_tax_head_connection_type(metrics, region_bucket):
   groupby_tax_heads = []
   collection = metrics.get('todaysCollection') if metrics.get('todaysCollection') else []
