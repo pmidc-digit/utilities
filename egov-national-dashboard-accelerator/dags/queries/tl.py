@@ -991,6 +991,10 @@ def empty_tl_payload(region, ulb, ward, date):
             "adhocPenalty": 0,
             "adhocRebate": 0,
             "todaysLicenseIssuedWithinSLA": 0,
+            "avgDaysForApplicationApproval":0,
+            "todaysApprovedApplications":0,
+            "todaysApprovedApplicationsWithinSLA":0,
+            "StipulatedDays":0,
             "todaysCollection": [
                   {
                       "groupBy": "tradeType",
