@@ -1031,6 +1031,10 @@ def empty_pt_payload(region, ulb, ward, date):
                 "todaysTotalApplications": 0,
                 "todaysClosedApplications" : 0,
                 "noOfPropertiesPaidToday": 0,
+                "avgDaysForApplicationApproval":0,
+                "todaysApprovedApplications":0,
+                "todaysApprovedApplicationsWithinSLA":0,
+                "StipulatedDays":0,
                 "propertiesRegistered": [
                     {
                         "groupBy": "financialYear",
