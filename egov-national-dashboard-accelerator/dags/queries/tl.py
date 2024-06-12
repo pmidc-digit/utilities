@@ -469,8 +469,6 @@ tl_todays_trade_licenses = {'path': 'tlindex-v1-enriched/_search',
          }}
 
 
-
-
 """
                             }
 
@@ -630,7 +628,10 @@ tl_applications_moved_today = {'path': 'tlindex-v1-enriched/_search',
               "aggs": {{
                 "applicationsMovedToday": {{
                   "value_count": {{
-                    "field": "Data.tradelicense.applicationNumber.keyword"
+                     "script": {{
+                          "lang": "painless",
+                          "source": "params._source.Data.history.sort((o1,o2)->(int)o1.auditDetails.lastModifiedTime-(int)o2.auditDetails.lastModifiedTime); if((params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime']  >= {0})&& (params['_source']['Data']['history'][0]['auditDetails']['lastModifiedTime'] <= {1})){{  return (params['_source']['Data']['tradelicense']['applicationNumber'] ); }}"
+                        }}
                   }}
                 }}
               }}
@@ -973,7 +974,7 @@ tl_todays_collection_by_trade_type = {'path': 'dss-collection_v2/_search',
 
 
 tl_queries = [tl_license_issued_by_boundary, tl_collection_adhoc_penalty,
-              tl_collection_adhoc_rebate, tl_collection_tax, tl_todays_trade_licenses, tl_total_transactions, tl_license_issued_within_sla, tl_todays_collection_by_trade_type]
+              tl_collection_adhoc_rebate, tl_collection_tax, tl_todays_trade_licenses, tl_total_transactions, tl_license_issued_within_sla, tl_todays_collection_by_trade_type,tl_applications_moved_today]
 
 #the default payload for TL
 def empty_tl_payload(region, ulb, ward, date):
