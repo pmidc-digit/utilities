@@ -79,7 +79,8 @@ public class CronService {
 
 	private Email getDataFromDb() {
 		Body body = new Body();
-		List<Map<String, Object>> wsData = externalAPIService.getWSData();
+		//List<Map<String, Object>> wsData = externalAPIService.getWSData();
+		List<Map<String, Object>> wsData = new ArrayList<>();
 		if(CollectionUtils.isEmpty(wsData))
 			throw new CustomException("EMAILER_DATA_RETREIVAL_FAILED", "Failed to retrieve data from WS module");
 		enrichHeadersOfTheTable(body);
