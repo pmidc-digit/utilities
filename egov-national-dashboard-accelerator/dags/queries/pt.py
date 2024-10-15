@@ -325,9 +325,81 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
 
                   "aggs": {{
                     "byUsageType": {{
-                      "terms": {{
-                        "field": "domainObject.usageCategory.keyword"
+                      "filters": {{
+                    "filters": {{
+                      "Residential": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Residential"
+                        }}
                       }},
+                      "Commercial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Commercial"
+                        }}
+                      }},
+                      "Institutional": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Institutional"
+                        }}
+                      }},
+                      "Public and Semi Public": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Public and Semi Public"
+                        }}
+                      }},
+                      "Mixed Use": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Mixed"
+                        }}
+                      }},
+                      "Industrial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Industrial"
+                        }}
+                      }},
+                      "Heritage": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Heritage"
+                        }}
+                      }},
+                      "Religious": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Religious"
+                        }}
+                      }},
+                      "Recreational": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Recreational"
+                        }}
+                      }},
+                      "Vacant land": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Vacant land"
+                        }}
+                      }},
+                      "Others": {{
+                        "bool": {{
+                          "must_not": {{
+                            "terms": {{
+                              "domainObject.usageCategory.keyword": [
+                                "Residential",
+                                "Commercial",
+                                "Institutional",
+                                "Public and Semi Public",
+                                "Mixed",
+                                "Industrial",
+                                "Heritage",
+                                "Religious",
+                                "Recreational",
+                                "Vacant land"
+                              ]
+                            }}
+                          }}
+                        }}
+                      }}
+                      
+                    }}
+                  }},
                       "aggs": {{
                         "todaysCollection": {{
                                 "nested": {{
@@ -464,9 +536,81 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                     }},
                      "aggs": {{
                       "byUsageType":{{
-                        "terms": {{
-                          "field": "domainObject.usageCategory.keyword"
-                        }},
+                        "filters": {{
+                    "filters": {{
+                      "Residential": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Residential"
+                        }}
+                      }},
+                      "Commercial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Commercial"
+                        }}
+                      }},
+                      "Institutional": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Institutional"
+                        }}
+                      }},
+                      "Public and Semi Public": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Public and Semi Public"
+                        }}
+                      }},
+                      "Mixed Use": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Mixed"
+                        }}
+                      }},
+                      "Industrial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Industrial"
+                        }}
+                      }},
+                      "Heritage": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Heritage"
+                        }}
+                      }},
+                      "Religious": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Religious"
+                        }}
+                      }},
+                      "Recreational": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Recreational"
+                        }}
+                      }},
+                      "Vacant land": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Vacant land"
+                        }}
+                      }},
+                      "Others": {{
+                        "bool": {{
+                          "must_not": {{
+                            "terms": {{
+                              "domainObject.usageCategory.keyword": [
+                                "Residential",
+                                "Commercial",
+                                "Institutional",
+                                "Public and Semi Public",
+                                "Mixed",
+                                "Industrial",
+                                "Heritage",
+                                "Religious",
+                                "Recreational",
+                                "Vacant land"
+                              ]
+                            }}
+                          }}
+                        }}
+                      }}
+                      
+                    }}
+                  }},
                     "aggs" : {{
                     "propertyTax": {{
                       "nested": {{
@@ -668,9 +812,81 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
                     }},
                    "aggs": {{
                     "byUsageType": {{
-                      "terms": {{
-                        "field": "domainObject.usageCategory.keyword"
+                      "filters": {{
+                    "filters": {{
+                      "Residential": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Residential"
+                        }}
                       }},
+                      "Commercial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Commercial"
+                        }}
+                      }},
+                      "Institutional": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Institutional"
+                        }}
+                      }},
+                      "Public and Semi Public": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Public and Semi Public"
+                        }}
+                      }},
+                      "Mixed Use": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Mixed"
+                        }}
+                      }},
+                      "Industrial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Industrial"
+                        }}
+                      }},
+                      "Heritage": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Heritage"
+                        }}
+                      }},
+                      "Religious": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Religious"
+                        }}
+                      }},
+                      "Recreational": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Recreational"
+                        }}
+                      }},
+                      "Vacant land": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Vacant land"
+                        }}
+                      }},
+                      "Others": {{
+                        "bool": {{
+                          "must_not": {{
+                            "terms": {{
+                              "domainObject.usageCategory.keyword": [
+                                "Residential",
+                                "Commercial",
+                                "Institutional",
+                                "Public and Semi Public",
+                                "Mixed",
+                                "Industrial",
+                                "Heritage",
+                                "Religious",
+                                "Recreational",
+                                "Vacant land"
+                              ]
+                            }}
+                          }}
+                        }}
+                      }}
+                      
+                    }}
+                  }},
                     "aggs": {{
                       "all_matching_docs": {{
                         "filters": {{
@@ -772,6 +988,7 @@ def extract_pt_assessed_properties(metrics, region_bucket):
 
   return metrics
 
+# neeed to change in below
 pt_assessed_properties = {'path':'property-services/_search',
                                  'name': 'pt_assessed_properties_by_usage',
                                  'lambda': extract_pt_assessed_properties,
@@ -821,9 +1038,81 @@ pt_assessed_properties = {'path':'property-services/_search',
                 }},
                 "aggs": {{
                     "byUsageType": {{
-                      "terms": {{
-                        "field": "Data.usageCategory.keyword"
-                        }},
+                      "filters": {{
+                    "filters": {{
+                      "Residential": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Residential"
+                        }}
+                      }},
+                      "Commercial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Commercial"
+                        }}
+                      }},
+                      "Institutional": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Institutional"
+                        }}
+                      }},
+                      "Public and Semi Public": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Public and Semi Public"
+                        }}
+                      }},
+                      "Mixed Use": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Mixed"
+                        }}
+                      }},
+                      "Industrial": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Industrial"
+                        }}
+                      }},
+                      "Heritage": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Heritage"
+                        }}
+                      }},
+                      "Religious": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Religious"
+                        }}
+                      }},
+                      "Recreational": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Recreational"
+                        }}
+                      }},
+                      "Vacant land": {{
+                        "term": {{
+                          "domainObject.usageCategory.keyword": "Vacant land"
+                        }}
+                      }},
+                      "Others": {{
+                        "bool": {{
+                          "must_not": {{
+                            "terms": {{
+                              "domainObject.usageCategory.keyword": [
+                                "Residential",
+                                "Commercial",
+                                "Institutional",
+                                "Public and Semi Public",
+                                "Mixed",
+                                "Industrial",
+                                "Heritage",
+                                "Religious",
+                                "Recreational",
+                                "Vacant land"
+                              ]
+                            }}
+                          }}
+                        }}
+                      }}
+                      
+                    }}
+                  }},
                 "aggs": {{	
                   "assessedProperties": {{
                     "value_count": {{

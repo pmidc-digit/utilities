@@ -209,9 +209,24 @@ mcollect_todays_collection = {
               }},
               "aggs": {{
                 "bypaymentMode": {{
-                  "terms": {{
-                    "field": "dataObject.paymentMode.keyword"
-                  }},
+                   "filters": {{
+                      "filters": {{
+                        "Non Digital": {{
+                          "term": {{
+                            "dataObject.paymentMode.keyword": "CASH"
+                          }}
+                        }},
+                        "Digital": {{
+                          "bool": {{
+                            "must_not": {{
+                              "term": {{
+                                "dataObject.paymentMode.keyword": "CASH"
+                              }}
+                            }}
+                          }}
+                        }}
+                      }}
+                    }},
                   "aggs": {{
                     "paymentMode": {{
                       "sum": {{
@@ -368,9 +383,24 @@ mcollect_receipts = {
               }},
               "aggs": {{
                 "byPaymentMode": {{
-                  "terms": {{
-                    "field": "dataObject.paymentMode.keyword"
-                  }},
+                  "filters": {{
+                      "filters": {{
+                        "Non Digital": {{
+                          "term": {{
+                            "dataObject.paymentMode.keyword": "CASH"
+                          }}
+                        }},
+                        "Digital": {{
+                          "bool": {{
+                            "must_not": {{
+                              "term": {{
+                                "dataObject.paymentMode.keyword": "CASH"
+                              }}
+                            }}
+                          }}
+                        }}
+                      }}
+                    }},
                   "aggs": {{
                     "paymentMode": {{
                       "value_count": {{
