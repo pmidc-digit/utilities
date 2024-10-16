@@ -114,7 +114,12 @@ def extract_mcollect_todays_collection(metrics, region_bucket):
     paymentMode_buckets = paymentMode_agg.get('buckets')
     grouped_by = []
     for paymentMode_bucket in paymentMode_buckets:
-        grouped_by.append({'name': paymentMode_bucket.get('key'), 'value': paymentMode_bucket.get(
+        payment_mode = paymentMode_bucket.get('key')
+        if payment_mode == 'CASH':
+            payment_mode_display = 'Non Digital'
+        else:
+            payment_mode_display = 'Digital'
+        grouped_by.append({'name': payment_mode_display, 'value': paymentMode_bucket.get(
             'paymentMode').get('value') if paymentMode_bucket.get('paymentMode') else 0})
     all_dims.append(
         {'groupBy': 'paymentMode', 'buckets': grouped_by})
@@ -209,24 +214,9 @@ mcollect_todays_collection = {
               }},
               "aggs": {{
                 "bypaymentMode": {{
-                   "filters": {{
-                      "filters": {{
-                        "Non Digital": {{
-                          "term": {{
-                            "dataObject.paymentMode.keyword": "CASH"
-                          }}
-                        }},
-                        "Digital": {{
-                          "bool": {{
-                            "must_not": {{
-                              "term": {{
-                                "dataObject.paymentMode.keyword": "CASH"
-                              }}
-                            }}
-                          }}
-                        }}
-                      }}
-                    }},
+                  "terms": {{
+                    "field": "dataObject.paymentMode.keyword"
+                  }},
                   "aggs": {{
                     "paymentMode": {{
                       "sum": {{
@@ -288,7 +278,12 @@ def extract_mcollect_receipts(metrics, region_bucket):
     paymentMode_buckets = paymentMode_agg.get('buckets')
     grouped_by = []
     for paymentMode_bucket in paymentMode_buckets:
-        grouped_by.append({'name': paymentMode_bucket.get('key'), 'value': paymentMode_bucket.get(
+        payment_mode = paymentMode_bucket.get('key')
+        if payment_mode == 'CASH':
+            payment_mode_display = 'Non Digital'
+        else:
+            payment_mode_display = 'Digital'
+        grouped_by.append({'name': payment_mode_display, 'value': paymentMode_bucket.get(
             'paymentMode').get('value') if paymentMode_bucket.get('paymentMode') else 0})
     all_dims.append(
         {'groupBy': 'paymentMode', 'buckets': grouped_by})
@@ -383,24 +378,9 @@ mcollect_receipts = {
               }},
               "aggs": {{
                 "byPaymentMode": {{
-                  "filters": {{
-                      "filters": {{
-                        "Non Digital": {{
-                          "term": {{
-                            "dataObject.paymentMode.keyword": "CASH"
-                          }}
-                        }},
-                        "Digital": {{
-                          "bool": {{
-                            "must_not": {{
-                              "term": {{
-                                "dataObject.paymentMode.keyword": "CASH"
-                              }}
-                            }}
-                          }}
-                        }}
-                      }}
-                    }},
+                  "terms": {{
+                    "field": "dataObject.paymentMode.keyword"
+                  }},
                   "aggs": {{
                     "paymentMode": {{
                       "value_count": {{
