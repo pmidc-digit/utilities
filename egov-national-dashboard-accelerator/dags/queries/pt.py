@@ -2,6 +2,13 @@
 import logging
 
 
+usage_categories = [
+    "Residential", "Commercial", "Institutional", 
+    "Public and Semi Public", "Mixed", 
+    "Industrial", "Heritage", "Religious", 
+    "Recreational", "Vacant land"
+]
+
 def extract_pt_closed_applications(metrics, region_bucket):
   metrics['todaysClosedApplications'] = region_bucket.get('todaysClosedApplications').get(
         'value') if region_bucket.get('todaysClosedApplications') else 0
@@ -242,17 +249,27 @@ def extract_pt_collection_transactions_by_usage(metrics, region_bucket):
   collections = []
   transactions = []
 
+  
+
   if region_bucket.get('byUsageType'):
     usage_buckets = region_bucket.get('byUsageType').get('buckets')
     for usage_bucket in usage_buckets:
-      usage = usage_bucket.get('key')
-      transaction_value = usage_bucket.get('transactions').get('value') if usage_bucket.get('transactions') else 0
-      groupby_transactions.append({ 'name' : usage.upper(), 'value' : transaction_value})
-      collection_value = usage_bucket.get('todaysCollection').get("amount").get('value') if usage_bucket.get('todaysCollection').get("amount") else 0
-      groupby_collections.append({ 'name' : usage.upper(), 'value' : collection_value})
-  
- 
+        usage = usage_bucket.get('key')
 
+        # Determine how to display the usage category
+        if usage == 'Mixed':
+            usage_display = 'Mixed Use'
+        elif usage in usage_categories:
+            usage_display = usage
+        else:
+            usage_display = 'Others'
+
+        transaction_value = usage_bucket.get('transactions').get('value') if usage_bucket.get('transactions') else 0
+        groupby_transactions.append({ 'name' : usage_display.upper(), 'value' : transaction_value})
+
+        collection_value = usage_bucket.get('todaysCollection').get("amount").get('value') if usage_bucket.get('todaysCollection').get("amount") else 0
+        groupby_collections.append({ 'name' : usage_display.upper(), 'value' : collection_value})
+  
   collections.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_collections})
   transactions.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_transactions})
   metrics['todaysCollection'] = collections
@@ -260,6 +277,7 @@ def extract_pt_collection_transactions_by_usage(metrics, region_bucket):
   
   
   return metrics
+
 
 pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
                                  'name': 'pt_collection_transactions_by_usage',
@@ -325,81 +343,9 @@ pt_collection_transactions_by_usage = {'path': 'dss-collection_v2/_search',
 
                   "aggs": {{
                     "byUsageType": {{
-                      "filters": {{
-                    "filters": {{
-                      "Residential": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Residential"
-                        }}
+                      "terms": {{
+                        "field": "domainObject.usageCategory.keyword"
                       }},
-                      "Commercial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Commercial"
-                        }}
-                      }},
-                      "Institutional": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Institutional"
-                        }}
-                      }},
-                      "Public and Semi Public": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Public and Semi Public"
-                        }}
-                      }},
-                      "Mixed Use": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Mixed"
-                        }}
-                      }},
-                      "Industrial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Industrial"
-                        }}
-                      }},
-                      "Heritage": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Heritage"
-                        }}
-                      }},
-                      "Religious": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Religious"
-                        }}
-                      }},
-                      "Recreational": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Recreational"
-                        }}
-                      }},
-                      "Vacant land": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Vacant land"
-                        }}
-                      }},
-                      "Others": {{
-                        "bool": {{
-                          "must_not": {{
-                            "terms": {{
-                              "domainObject.usageCategory.keyword": [
-                                "Residential",
-                                "Commercial",
-                                "Institutional",
-                                "Public and Semi Public",
-                                "Mixed",
-                                "Industrial",
-                                "Heritage",
-                                "Religious",
-                                "Recreational",
-                                "Vacant land"
-                              ]
-                            }}
-                          }}
-                        }}
-                      }}
-                      
-                    }}
-                  }},
                       "aggs": {{
                         "todaysCollection": {{
                                 "nested": {{
@@ -444,21 +390,26 @@ def extract_pt_collection_taxes(metrics, region_bucket):
   interest = []
   propertytax = []
 
+  
+
   if region_bucket.get('byUsageType'):
     usage_buckets = region_bucket.get('byUsageType').get('buckets')
     for usage_bucket in usage_buckets:
       usage = usage_bucket.get('key')
+      if usage == 'Mixed':
+            usage_display = 'Mixed Use'
+      elif usage in usage_categories:
+            usage_display = usage
+      else:
+            usage_display = 'Others'
       interest_value = usage_bucket.get('interest').get('aggrFilter').get('amount').get('value') if usage_bucket.get('interest').get('aggrFilter').get('amount') else 0
-      groupby_interest.append({ 'name' : usage.upper(), 'value' : interest_value})
+      groupby_interest.append({ 'name' : usage_display.upper(), 'value' : interest_value})
       penalty_value = usage_bucket.get('penalty').get('aggrFilter').get('amount').get('value') if usage_bucket.get('penalty').get('aggrFilter').get('amount') else 0
-      groupby_penalty.append({ 'name' : usage.upper(), 'value' : penalty_value})
+      groupby_penalty.append({ 'name' : usage_display.upper(), 'value' : penalty_value})
       rebate_value = usage_bucket.get('rebate').get('aggrFilter').get('amount').get('value') if usage_bucket.get('rebate').get('aggrFilter').get('amount') else 0
-      groupby_rebate.append({ 'name' : usage.upper(), 'value' : rebate_value})
+      groupby_rebate.append({ 'name' : usage_display.upper(), 'value' : rebate_value})
       propertytax_value = usage_bucket.get('propertyTax').get('aggrFilter').get('amount').get('value') if usage_bucket.get('propertyTax').get('aggrFilter').get('amount') else 0
-      groupby_propertytax.append({ 'name' : usage.upper(), 'value' : propertytax_value})
-
-  
- 
+      groupby_propertytax.append({ 'name' : usage_display.upper(), 'value' : propertytax_value})
 
   interest.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_interest})
   penalty.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_penalty})
@@ -469,8 +420,6 @@ def extract_pt_collection_taxes(metrics, region_bucket):
   metrics['rebate'] = rebate
   metrics['propertyTax'] = propertytax
 
-  
-  
   return metrics
 
 pt_collection_taxes = {'path': 'dss-collection_v2/_search',
@@ -536,81 +485,9 @@ pt_collection_taxes = {'path': 'dss-collection_v2/_search',
                     }},
                      "aggs": {{
                       "byUsageType":{{
-                        "filters": {{
-                    "filters": {{
-                      "Residential": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Residential"
-                        }}
-                      }},
-                      "Commercial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Commercial"
-                        }}
-                      }},
-                      "Institutional": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Institutional"
-                        }}
-                      }},
-                      "Public and Semi Public": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Public and Semi Public"
-                        }}
-                      }},
-                      "Mixed Use": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Mixed"
-                        }}
-                      }},
-                      "Industrial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Industrial"
-                        }}
-                      }},
-                      "Heritage": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Heritage"
-                        }}
-                      }},
-                      "Religious": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Religious"
-                        }}
-                      }},
-                      "Recreational": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Recreational"
-                        }}
-                      }},
-                      "Vacant land": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Vacant land"
-                        }}
-                      }},
-                      "Others": {{
-                        "bool": {{
-                          "must_not": {{
-                            "terms": {{
-                              "domainObject.usageCategory.keyword": [
-                                "Residential",
-                                "Commercial",
-                                "Institutional",
-                                "Public and Semi Public",
-                                "Mixed",
-                                "Industrial",
-                                "Heritage",
-                                "Religious",
-                                "Recreational",
-                                "Vacant land"
-                              ]
-                            }}
-                          }}
-                        }}
-                      }}
-                      
-                    }}
-                  }},
+                        "terms": {{
+                          "field": "domainObject.usageCategory.keyword"
+                        }},
                     "aggs" : {{
                     "propertyTax": {{
                       "nested": {{
@@ -734,12 +611,22 @@ def extract_pt_collection_cess(metrics, region_bucket):
   groupby_collections = []
   collections =  []
   transactions = []
+
+  
+
   if region_bucket.get('byUsageType'):
     usage_buckets = region_bucket.get('byUsageType').get('buckets')
     for usage_bucket in usage_buckets:
       usage = usage_bucket.get('key')
+      if usage == 'Mixed':
+            usage_display = 'Mixed Use'
+      elif usage in usage_categories:
+            usage_display = usage
+      else:
+            usage_display = 'Others'
+      
       transaction_value = usage_bucket.get('all_matching_docs').get('buckets').get('all').get('cess').get('value') if usage_bucket.get('all_matching_docs').get('buckets').get('all').get('cess').get('value')  else 0
-      groupby_transactions.append({ 'name' : usage.upper(), 'value' : transaction_value})
+      groupby_transactions.append({ 'name' : usage_display.upper(), 'value' : transaction_value})
 
   
 
@@ -812,81 +699,9 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
                     }},
                    "aggs": {{
                     "byUsageType": {{
-                      "filters": {{
-                    "filters": {{
-                      "Residential": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Residential"
-                        }}
+                      "terms": {{
+                        "field": "domainObject.usageCategory.keyword"
                       }},
-                      "Commercial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Commercial"
-                        }}
-                      }},
-                      "Institutional": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Institutional"
-                        }}
-                      }},
-                      "Public and Semi Public": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Public and Semi Public"
-                        }}
-                      }},
-                      "Mixed Use": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Mixed"
-                        }}
-                      }},
-                      "Industrial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Industrial"
-                        }}
-                      }},
-                      "Heritage": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Heritage"
-                        }}
-                      }},
-                      "Religious": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Religious"
-                        }}
-                      }},
-                      "Recreational": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Recreational"
-                        }}
-                      }},
-                      "Vacant land": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Vacant land"
-                        }}
-                      }},
-                      "Others": {{
-                        "bool": {{
-                          "must_not": {{
-                            "terms": {{
-                              "domainObject.usageCategory.keyword": [
-                                "Residential",
-                                "Commercial",
-                                "Institutional",
-                                "Public and Semi Public",
-                                "Mixed",
-                                "Industrial",
-                                "Heritage",
-                                "Religious",
-                                "Recreational",
-                                "Vacant land"
-                              ]
-                            }}
-                          }}
-                        }}
-                      }}
-                      
-                    }}
-                  }},
                     "aggs": {{
                       "all_matching_docs": {{
                         "filters": {{
@@ -974,13 +789,22 @@ pt_collection_cess = {'path': 'dss-collection_v2/_search',
 def extract_pt_assessed_properties(metrics, region_bucket):
   groupby_assessedproperties = []
   assessedproperties = []
+  
 
   if region_bucket.get('byUsageType'):
     usage_buckets = region_bucket.get('byUsageType').get('buckets')
     for usage_bucket in usage_buckets:
       usage = usage_bucket.get('key')
+
+      if usage == 'Mixed':
+          usage_display = 'Mixed Use'
+      elif usage in usage_categories:
+          usage_display = usage
+      else:
+          usage_display = 'Others'
+      
       transaction_value = usage_bucket.get('assessedProperties').get('value') if usage_bucket.get('assessedProperties') else 0
-      groupby_assessedproperties.append({ 'name' : usage.upper(), 'value' : transaction_value})
+      groupby_assessedproperties.append({ 'name' : usage_display.upper(), 'value' : transaction_value})
   
 
   assessedproperties.append({ 'groupBy': 'usageCategory', 'buckets' : groupby_assessedproperties})
@@ -988,7 +812,6 @@ def extract_pt_assessed_properties(metrics, region_bucket):
 
   return metrics
 
-# neeed to change in below
 pt_assessed_properties = {'path':'property-services/_search',
                                  'name': 'pt_assessed_properties_by_usage',
                                  'lambda': extract_pt_assessed_properties,
@@ -1038,81 +861,9 @@ pt_assessed_properties = {'path':'property-services/_search',
                 }},
                 "aggs": {{
                     "byUsageType": {{
-                      "filters": {{
-                    "filters": {{
-                      "Residential": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Residential"
-                        }}
-                      }},
-                      "Commercial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Commercial"
-                        }}
-                      }},
-                      "Institutional": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Institutional"
-                        }}
-                      }},
-                      "Public and Semi Public": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Public and Semi Public"
-                        }}
-                      }},
-                      "Mixed Use": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Mixed"
-                        }}
-                      }},
-                      "Industrial": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Industrial"
-                        }}
-                      }},
-                      "Heritage": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Heritage"
-                        }}
-                      }},
-                      "Religious": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Religious"
-                        }}
-                      }},
-                      "Recreational": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Recreational"
-                        }}
-                      }},
-                      "Vacant land": {{
-                        "term": {{
-                          "domainObject.usageCategory.keyword": "Vacant land"
-                        }}
-                      }},
-                      "Others": {{
-                        "bool": {{
-                          "must_not": {{
-                            "terms": {{
-                              "domainObject.usageCategory.keyword": [
-                                "Residential",
-                                "Commercial",
-                                "Institutional",
-                                "Public and Semi Public",
-                                "Mixed",
-                                "Industrial",
-                                "Heritage",
-                                "Religious",
-                                "Recreational",
-                                "Vacant land"
-                              ]
-                            }}
-                          }}
-                        }}
-                      }}
-                      
-                    }}
-                  }},
+                      "terms": {{
+                        "field": "Data.usageCategory.keyword"
+                        }},
                 "aggs": {{	
                   "assessedProperties": {{
                     "value_count": {{
