@@ -10,6 +10,16 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   groupby_taxHeads = []
   groupby_connectionType=[]
 
+  if region_bucket.get('ulb'):
+    ulb_buckets = region_bucket.get('ulb').get('buckets')
+    for ulb_bucket in ulb_buckets:
+        ulb = ulb_bucket.get('key')
+        # Transform ULB name if it doesn't contain "pb."
+        if not ulb.startswith("pb."):
+            ulb = f"pb.{ulb.lower()}"
+        ulb_bucket['key'] = ulb
+  metrics['ulb'] = ulb
+
   if region_bucket.get('byChannel'):
     channel_buckets = region_bucket.get('byChannel').get('buckets')
     for channel_bucket in channel_buckets:
@@ -41,16 +51,6 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
        groupby_connectionType.append({ 'name' : "SEWERAGE", 'value' : value})
 
 
-      
-  
-
-  collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
-  collection.append({ 'groupBy': 'paymentChannelType', 'buckets' : groupby_channel})
-  collection.append({ 'groupBy': 'taxHeads', 'buckets' : groupby_taxHeads})
-  collection.append({'groupBy':'connectionType','buckets' : groupby_connectionType})
-	
-  metrics['todaysCollection'] = collection  
-  return metrics
       
   
 
@@ -180,11 +180,19 @@ def extract_ws_collection_by_tax_head_connection_type(metrics, region_bucket):
   tax_head = region_bucket.get('LATE.CHARGES')
   value = region_bucket.get('LATE.CHARGES').get('todaysCollection').get('value') if region_bucket.get('LATE.CHARGES').get('todaysCollection') else 0
   groupby_tax_heads.append({ 'name' : tax_head, 'value' : value})
-    
+
+  if region_bucket.get('ulb'):
+    ulb_buckets = region_bucket.get('ulb').get('buckets')
+    for ulb_bucket in ulb_buckets:
+        ulb = ulb_bucket.get('key')
+        # Transform ULB name if it doesn't contain "pb."
+        if not ulb.startswith("pb."):
+            ulb = f"pb.{ulb.lower()}"
+        ulb_bucket['key'] = ulb    
  
   collection.append({ 'groupBy': 'taxHeads', 'buckets' : groupby_tax_heads})
   metrics['todaysCollectionForTaxHeads'] = collection
-  
+  metrics['ulb'] = ulb
   
   return metrics
 
@@ -349,11 +357,21 @@ def extract_ws_pending_connections(metrics, region_bucket):
   
   logging.info("before consolidation -2")
 
+  if region_bucket.get('ulb'):
+    ulb_buckets = region_bucket.get('ulb').get('buckets')
+    for ulb_bucket in ulb_buckets:
+        ulb = ulb_bucket.get('key')
+        # Transform ULB name if it doesn't contain "pb."
+        if not ulb.startswith("pb."):
+            ulb = f"pb.{ulb.lower()}"
+        ulb_bucket['key'] = ulb 
+
   all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_0to3}) 
   all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_3to7})
   all_dims.append({ 'groupBy' : 'duration', 'buckets' : grouped_by_7to15}) 
   all_dims.append({ 'groupBy': 'duration', 'buckets' : grouped_by_MoreThan15})
   metrics['pendingConnections'] = all_dims
+  metrics['ulb'] = ulb
   logging.info("before consolidation -4")
   return metrics
   # for dim in all_dims:
@@ -575,7 +593,15 @@ def extract_ws_sewerage_connections(metrics, region_bucket):
   collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
   collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   metrics['sewerageConnections'] = collection
-  
+  metrics['ulb'] = ulb
+  if region_bucket.get('ulb'):
+    ulb_buckets = region_bucket.get('ulb').get('buckets')
+    for ulb_bucket in ulb_buckets:
+        ulb = ulb_bucket.get('key')
+        # Transform ULB name if it doesn't contain "pb."
+        if not ulb.startswith("pb."):
+            ulb = f"pb.{ulb.lower()}"
+        ulb_bucket['key'] = ulb 
  
   return metrics
 
@@ -708,11 +734,20 @@ def extract_ws_water_connections(metrics, region_bucket):
       value = meter_type_bucket.get('waterConnectionsbyMeterType').get('value') if meter_type_bucket.get('waterConnectionsbyMeterType') else 0
       groupby_meter.append({ 'name' : meter_type, 'value' : value})
   
+  if region_bucket.get('ulb'):
+    ulb_buckets = region_bucket.get('ulb').get('buckets')
+    for ulb_bucket in ulb_buckets:
+        ulb = ulb_bucket.get('key')
+        # Transform ULB name if it doesn't contain "pb."
+        if not ulb.startswith("pb."):
+            ulb = f"pb.{ulb.lower()}"
+        ulb_bucket['key'] = ulb
 
   collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
   collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   collection.append({ 'groupBy': 'meterType', 'buckets' : groupby_meter})
   metrics['waterConnections'] = collection
+  metrics['ulb'] = ulb
   
   
   return metrics
@@ -832,8 +867,20 @@ ws_water_connections = {'path': 'wsapplications/_search',
 
 
 def extract_ws_todays_applications(metrics, region_bucket):
+    if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
+
     metrics['todaysTotalApplications'] = region_bucket.get('todaysTotalApplications').get(
         'value') if region_bucket.get('todaysTotalApplications') else 0
+    metrics['ulb'] = ulb
+    
+
     return metrics
 
 ws_todays_applications = {'path': 'wsapplications/_search',
@@ -897,8 +944,20 @@ ws_todays_applications = {'path': 'wsapplications/_search',
 
 
 def extract_ws_closed_applications(metrics, region_bucket):
+    
+    if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
     metrics['todaysClosedApplications'] = region_bucket.get('todaysClosedApplications').get(
         'value') if region_bucket.get('todaysClosedApplications') else 0
+    metrics['ulb'] = ulb
+    
+
     return metrics
 
 ws_closed_applications = {'path': 'wsapplications/_search',
@@ -987,8 +1046,18 @@ def extract_ws_connections_created_by_connection_type(metrics, region_bucket):
     if created_buckets:
       groupby_connection_type.append({'name' : 'WATER.NONMETERED', 'value' : created_buckets.get('value') if created_buckets else 0})
   
+  if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
+  
   collection.append({ 'groupBy': 'connectionType', 'buckets' : groupby_connection_type})
   metrics['connectionsCreated'] = collection
+  metrics['ulb'] = ulb
 
   return metrics
 
@@ -1112,10 +1181,19 @@ def extract_ws_connections_created_by_channel_type(metrics, region_bucket):
       channel = channel_bucket.get('key')
       value = channel_bucket.get('count').get('value') if channel_bucket.get('count') else 0
       groupby_channel.append({ 'name' : channel, 'value' : value})
-
+  
+  if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
   
   collection.append({ 'groupBy': 'channelType', 'buckets' : groupby_channel})
   metrics['connectionsCreated'] = collection
+  metrics['ulb'] = ulb
 
   return metrics
 
@@ -1209,8 +1287,22 @@ ws_connections_created_by_channel_type = {'path': 'wsapplications/_search',
 
 
 def extract_ws_total_transactions(metrics, region_bucket):
+     
+     if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
+    
      metrics['transactions'] = region_bucket.get('transactions').get(
         'value') if region_bucket.get('transactions') else 0
+     metrics['ulb'] = ulb
+     
+     
+
      return metrics
 
 
@@ -1303,8 +1395,19 @@ ws_total_transactions = {'path': 'dss-collection_v2/_search',
 
 def extract_ws_todays_completed_applications_withinSLA(metrics, region_bucket):
     val = 0 if region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value') == None else region_bucket.get('todaysCompletedApplicationsWithinSLA').get('value')
+    
+    if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
+
     metrics['todaysCompletedApplicationsWithinSLA'] = val
     metrics['todaysCompletedApplicationsWithinSLA'] = val
+    metrics['ulb'] = ulb
     return metrics
 
 ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
@@ -1383,8 +1486,20 @@ ws_todays_completed_application_withinSLA = {'path': 'wsapplications/_search',
 }
 
 def extract_ws_todays_sla_compliance(metrics, region_bucket):
+    
+    if region_bucket.get('ulb'):
+      ulb_buckets = region_bucket.get('ulb').get('buckets')
+      for ulb_bucket in ulb_buckets:
+          ulb = ulb_bucket.get('key')
+          # Transform ULB name if it doesn't contain "pb."
+          if not ulb.startswith("pb."):
+              ulb = f"pb.{ulb.lower()}"
+          ulb_bucket['key'] = ulb
     metrics['todaysCompletedApplicationsWithinSLA'] = region_bucket.get('slaCompliance').get(
         'value') if region_bucket.get('slaCompliance') else 0
+    metrics['ulb'] = ulb
+    
+
     return metrics
 
 ws_todays_sla_compliance = {'path': 'wsapplications/_search',

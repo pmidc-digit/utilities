@@ -316,8 +316,6 @@ def call_ingest_api(connection, access_token, user_info, payload, module,startda
     helpers.bulk(es, actions)
     return response
 
-
-
 def load(**kwargs):
     connection = BaseHook.get_connection('digit-auth')
     (access_token, refresh_token, user_info) = get_auth_token(connection)
@@ -326,16 +324,67 @@ def load(**kwargs):
     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
     logging.info(payload)
     payload_obj = json.loads(payload)
-    logging.info("payload length {0} {1}".format(len(payload_obj),module))
+    logging.info("payload length {0} {1}".format(len(payload_obj), module))
+
     localtz = timezone('Asia/Kolkata')
     dt_aware = localtz.localize(datetime.strptime(kwargs['dag_run'].conf.get('date'), "%d-%m-%Y"))
     startdate = int(dt_aware.timestamp() * 1000)
     logging.info(startdate)
+
+    # Retrieve processed batches from XCom (or initialize if not present)
+    processed_batches = kwargs['ti'].xcom_pull(key='processed_batches_{0}'.format(module))
+    if not processed_batches:
+        processed_batches = []
+
+    def process_batch(batch_index, batch_data):
+        try:
+            logging.info('calling ingest api for batch starting at index {0}'.format(batch_index))
+            call_ingest_api(connection, access_token, user_info, batch_data, module, startdate)
+            return True
+        except Exception as e:
+            logging.error(f"Error processing batch at index {batch_index}: {str(e)}")
+            return False
+
     if access_token and refresh_token:
         for i in range(0, len(payload_obj), batch_size):
-            logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
-            call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module,startdate)
+            batch_data = payload_obj[i:i + batch_size]
+            
+            # Check if the batch is already processed
+            if i not in processed_batches:
+                success = process_batch(i, batch_data)
+                
+                if success:
+                    processed_batches.append(i)  # Mark the batch as processed globally
+
+    kwargs['ti'].xcom_push(key='processed_batches_{0}'.format(module), value=processed_batches)
+
+    logging.info("Batch processing complete")
     return None
+
+
+
+
+# def load(**kwargs):
+#     connection = BaseHook.get_connection('digit-auth')
+#     (access_token, refresh_token, user_info) = get_auth_token(connection)
+#     module = kwargs['module']
+
+#     payload = kwargs['ti'].xcom_pull(key='payload_{0}'.format(module))
+#     logging.info(payload)
+#     payload_obj = json.loads(payload)
+#     logging.info("payload length {0} {1}".format(len(payload_obj),module))
+#     localtz = timezone('Asia/Kolkata')
+#     dt_aware = localtz.localize(datetime.strptime(kwargs['dag_run'].conf.get('date'), "%d-%m-%Y"))
+#     startdate = int(dt_aware.timestamp() * 1000)
+#     logging.info(startdate)
+#     if access_token and refresh_token:
+#         for i in range(0, len(payload_obj), batch_size):
+#             logging.info('calling ingest api for batch starting at {0} with batch size {1}'.format(i, batch_size))
+#             call_ingest_api(connection, access_token, user_info, payload_obj[i:i+batch_size], module,startdate)
+#     return None
+
+
+
 
 def transform(**kwargs):
     logging.info('Your transformations go here')
