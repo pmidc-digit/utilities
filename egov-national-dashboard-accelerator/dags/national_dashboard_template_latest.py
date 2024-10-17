@@ -226,7 +226,8 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
             ulb = ulb_bucket.get('key')
             # Transform the ULB to ensure it starts with "pb."
             if not ulb.startswith("pb."):
-                ulb = f"pb.{ulb.lower()}"
+                ulb = f"pb.{ulb.lower().replace(' ', '')}"
+
             
             if ulb == "pb.testing":
                 logging.info(f"Skipping ULB: {ulb}")
