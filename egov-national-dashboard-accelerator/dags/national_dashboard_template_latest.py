@@ -224,6 +224,13 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
         ulb_buckets = ulb_agg.get('buckets')
         for ulb_bucket in ulb_buckets:
             ulb = ulb_bucket.get('key')
+            # Transform the ULB to ensure it starts with "pb."
+            if not ulb.startswith("pb."):
+                ulb = f"pb.{ulb.lower()}"
+            
+            if ulb == "pb.testing":
+                logging.info(f"Skipping ULB: {ulb}")
+                continue  # Skip further processing for pb.testing
             region_agg = ulb_bucket.get('region')
             region_buckets = region_agg.get('buckets')
             for region_bucket in region_buckets:
