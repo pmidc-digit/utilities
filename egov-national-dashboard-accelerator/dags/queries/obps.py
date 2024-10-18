@@ -1526,7 +1526,12 @@ def extract_obps_todaysCollection_by_paymentMode(metrics, region_bucket):
    
 
   for paymentMode_bucket in paymentMode_buckets:
-    paymentMode_name = paymentMode_bucket.get('key')
+    payment_mode = paymentMode_bucket.get('key')
+    if payment_mode == 'CASH':
+        payment_mode_display = 'Non Digital'
+    else:
+        payment_mode_display = 'Digital'
+    paymentMode_name = payment_mode_display
     todaysCollection['buckets'].append( { 'name' : paymentMode_name, 'value' : paymentMode_bucket.get('todaysCollection').get('value') if paymentMode_bucket.get('todaysCollection') else 0})
    
   metrics['todaysCollection'] = [todaysCollection]

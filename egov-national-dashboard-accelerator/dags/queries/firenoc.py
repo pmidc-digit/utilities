@@ -787,7 +787,12 @@ def extract_firenoc_collections_by_department(metrics, region_bucket):
     paymentmode_buckets = paymentmode_agg.get('buckets')
     grouped_by = []
     for paymentmode_bucket in paymentmode_buckets:
-        grouped_by.append({'name': paymentmode_bucket.get('key'), 'value': paymentmode_bucket.get(
+        payment_mode = paymentmode_bucket.get('key')
+        if payment_mode == 'CASH':
+            payment_mode_display = 'Non Digital'
+        else:
+            payment_mode_display = 'Digital'
+        grouped_by.append({'name': payment_mode_display, 'value': paymentmode_bucket.get(
             'todaysCollection').get('value') if paymentmode_bucket.get('todaysCollection') else 0})
     all_dims.append(
         {'groupBy': 'paymentMode', 'buckets': grouped_by})
