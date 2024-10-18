@@ -1,7 +1,17 @@
 
 import logging
 
+usage_categories = [
+    "Residential", "Commercial", "Institutional", 
+    "Public and Semi Public", "Mixed", 
+    "Industrial", "Heritage", "Religious", 
+    "Recreational", "Vacant land"
+]
 
+domestic_categories = [
+   "DOMESTIC", "Domestic", "DOMESTIC_FIXED", "DOMESTIC_SLC",
+   "DOMESTIC_EXEMPTED", "DOMESTIC_above251"
+]
 
 def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   groupby_usage = []
@@ -9,18 +19,24 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
   collection = []
   groupby_taxHeads = []
   groupby_connectionType=[]
+  digital_total = 0
+  non_digital_total = 0
 
   if region_bucket.get('byChannel'):
     channel_buckets = region_bucket.get('byChannel').get('buckets')
     for channel_bucket in channel_buckets:
       channel = channel_bucket.get('key')
       if channel == 'CASH':
-          channel_display = 'Non Digital'
+          value = channel_bucket.get('byChannel').get('value') if channel_bucket.get('byChannel') else 0
+          non_digital_total+=value
       else:
-          channel_display = 'Digital'
-      value = channel_bucket.get('byChannel').get('value') if channel_bucket.get('byChannel') else 0
-      groupby_channel.append({ 'name' : channel_display, 'value' : value})
-    
+          value = channel_bucket.get('byChannel').get('value') if channel_bucket.get('byChannel') else 0
+          digital_total+=value
+  
+  if non_digital_total > 0:
+        groupby_channel.append({ 'name': 'Non Digital', 'value': non_digital_total })
+  if digital_total > 0:
+        groupby_channel.append({ 'name': 'Digital', 'value': digital_total })
       
   
   if region_bucket.get('byUsageType'):
@@ -28,8 +44,14 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
     tax=0
     for usage_type_bucket in usage_type_buckets:
       usage_type = usage_type_bucket.get('key')
+      if usage_type in domestic_categories:
+            usage_display = 'Residential'
+      elif usage_type.lower() in usage_categories:
+            usage_display = usage_type
+      else:
+            usage_display = 'Others'
       value = usage_type_bucket.get('byUsageType').get('value') if usage_type_bucket.get('byUsageType') else 0
-      groupby_usage.append({ 'name' : usage_type, 'value' : value})
+      groupby_usage.append({ 'name' : usage_display.upper(), 'value' : value})
       tax+=value
   groupby_taxHeads.append({'name':'CURRENT.CHARGES','value':tax})  
 
@@ -572,8 +594,14 @@ def extract_ws_sewerage_connections(metrics, region_bucket):
     usage_type_buckets = region_bucket.get('sewerageConnectionsbyUsageType').get('buckets')
     for usage_type_bucket in usage_type_buckets:
       usage_type = usage_type_bucket.get('key')
+      if usage_type in domestic_categories:
+            usage_display = 'Residential'
+      elif usage_type.lower() in usage_categories:
+            usage_display = usage_type
+      else:
+            usage_display = 'Others'
       value = usage_type_bucket.get('sewerageConnectionsbyUsageType').get('value') if usage_type_bucket.get('sewerageConnectionsbyUsageType') else 0
-      groupby_usage.append({ 'name' : usage_type, 'value' : value})
+      groupby_usage.append({ 'name' : usage_display, 'value' : value})
   
 
   collection.append({ 'groupBy': 'usageType', 'buckets' : groupby_usage})
@@ -702,8 +730,14 @@ def extract_ws_water_connections(metrics, region_bucket):
     usage_type_buckets = region_bucket.get('waterConnectionsbyUsageType').get('buckets')
     for usage_type_bucket in usage_type_buckets:
       usage_type = usage_type_bucket.get('key')
+      if usage_type in domestic_categories:
+            usage_display = 'Residential'
+      elif usage_type.lower() in usage_categories:
+            usage_display = usage_type
+      else:
+            usage_display = 'Others'
       value = usage_type_bucket.get('waterConnectionsbyUsageType').get('value') if usage_type_bucket.get('waterConnectionsbyUsageType') else 0
-      groupby_usage.append({ 'name' : usage_type, 'value' : value})
+      groupby_usage.append({ 'name' : usage_display, 'value' : value})
   
   if region_bucket.get('waterConnectionsbyMeterType'):
     meter_type_buckets = region_bucket.get('waterConnectionsbyMeterType').get('buckets')

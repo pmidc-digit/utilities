@@ -1521,19 +1521,29 @@ obps_todaysCompletedApplicationsWithinSLAOC= {
 
 def extract_obps_todaysCollection_by_paymentMode(metrics, region_bucket):
   paymentMode_agg = region_bucket.get('paymentMode')
+  if not paymentMode_agg:
+      return metrics
   paymentMode_buckets = paymentMode_agg.get('buckets')
   todaysCollection = { 'groupBy' : 'applicationType', 'buckets' : []}
+  digital_total = 0
+  non_digital_total = 0
    
 
   for paymentMode_bucket in paymentMode_buckets:
     payment_mode = paymentMode_bucket.get('key')
     if payment_mode == 'CASH':
-        payment_mode_display = 'Non Digital'
+        value = paymentMode_bucket.get('todaysCollection').get('value') if paymentMode_bucket.get('todaysCollection') else 0
+        non_digital_total += value
     else:
-        payment_mode_display = 'Digital'
-    paymentMode_name = payment_mode_display
-    todaysCollection['buckets'].append( { 'name' : paymentMode_name, 'value' : paymentMode_bucket.get('todaysCollection').get('value') if paymentMode_bucket.get('todaysCollection') else 0})
-   
+        value = paymentMode_bucket.get('todaysCollection').get('value') if paymentMode_bucket.get('todaysCollection') else 0
+        digital_total += value
+
+  if non_digital_total > 0:
+      todaysCollection['buckets'].append( { 'name' : 'Non Digital', 'value' : non_digital_total })
+
+  if digital_total > 0:
+      todaysCollection['buckets'].append( { 'name' : 'Digital', 'value' : digital_total })
+
   metrics['todaysCollection'] = [todaysCollection]
     
 

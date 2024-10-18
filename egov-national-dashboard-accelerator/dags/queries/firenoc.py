@@ -1,5 +1,13 @@
 
 import logging
+
+usage_categories = [
+    "residential", "commercial", "institutional", 
+    "public and semi public", "mixed use", 
+    "industrial", "heritage", "religious", 
+    "recreational", "vacant land"
+]
+
 def extract_firenoc_bundle_metrics(metrics, region_bucket):
   department_agg = region_bucket.get('department')
   department_buckets = department_agg.get('buckets')
@@ -317,7 +325,11 @@ def extract_firenoc_issued_by_usage_type(metrics, region_bucket):
 
   for usagetype_bucket in usagetype_buckets:
     usagetype_name = usagetype_bucket.get('key')
-    actualNOCIssued['buckets'].append( { 'name' : usagetype_name, 'value' : usagetype_bucket.get('actualNOCIssued').get('value') if usagetype_bucket.get('actualNOCIssued') else 0})
+    if usagetype_name.lower() in usage_categories:
+          usage_display = usagetype_name
+    else:
+          usage_display = 'Others'
+    actualNOCIssued['buckets'].append( { 'name' : usage_display, 'value' : usagetype_bucket.get('actualNOCIssued').get('value') if usagetype_bucket.get('actualNOCIssued') else 0})
    
   if metrics['actualNOCIssued'] and len(metrics['actualNOCIssued']) > 0:
     metrics['actualNOCIssued'].append(actualNOCIssued)
@@ -777,6 +789,8 @@ def extract_firenoc_collections_by_department(metrics, region_bucket):
     department_buckets = department_agg.get('buckets')
     all_dims = []
     grouped_by = []
+    digital_total = 0
+    non_digital_total = 0
     for department_bucket in department_buckets:
         grouped_by.append({'name': department_bucket.get('key'), 'value': department_bucket.get(
             'todaysCollection').get('value') if department_bucket.get('todaysCollection') else 0})
@@ -789,11 +803,18 @@ def extract_firenoc_collections_by_department(metrics, region_bucket):
     for paymentmode_bucket in paymentmode_buckets:
         payment_mode = paymentmode_bucket.get('key')
         if payment_mode == 'CASH':
-            payment_mode_display = 'Non Digital'
+            value = paymentmode_bucket.get('todaysCollection').get('value') if paymentmode_bucket.get('todaysCollection') else 0
+            non_digital_total += value
         else:
-            payment_mode_display = 'Digital'
-        grouped_by.append({'name': payment_mode_display, 'value': paymentmode_bucket.get(
-            'todaysCollection').get('value') if paymentmode_bucket.get('todaysCollection') else 0})
+            value = paymentmode_bucket.get('todaysCollection').get('value') if paymentmode_bucket.get('todaysCollection') else 0
+            digital_total += value
+
+    if non_digital_total > 0:
+        grouped_by.append({'name': 'Non Digital', 'value': non_digital_total})
+
+    if digital_total > 0:
+        grouped_by.append({'name': 'Digital', 'value': digital_total})
+    
     all_dims.append(
         {'groupBy': 'paymentMode', 'buckets': grouped_by})
 

@@ -3,10 +3,10 @@ import logging
 
 
 usage_categories = [
-    "Residential", "Commercial", "Institutional", 
-    "Public and Semi Public", "Mixed", 
-    "Industrial", "Heritage", "Religious", 
-    "Recreational", "Vacant land"
+    "residential", "commercial", "institutional", 
+    "public and semi public", 
+    "industrial", "heritage", "religious", 
+    "recreational", "vacant land"
 ]
 
 def extract_pt_closed_applications(metrics, region_bucket):
@@ -259,7 +259,7 @@ def extract_pt_collection_transactions_by_usage(metrics, region_bucket):
         # Determine how to display the usage category
         if usage == 'Mixed':
             usage_display = 'Mixed Use'
-        elif usage in usage_categories:
+        elif usage.lower() in usage_categories:
             usage_display = usage
         else:
             usage_display = 'Others'
@@ -398,7 +398,7 @@ def extract_pt_collection_taxes(metrics, region_bucket):
       usage = usage_bucket.get('key')
       if usage == 'Mixed':
             usage_display = 'Mixed Use'
-      elif usage in usage_categories:
+      elif usage.lower() in usage_categories:
             usage_display = usage
       else:
             usage_display = 'Others'
@@ -620,7 +620,7 @@ def extract_pt_collection_cess(metrics, region_bucket):
       usage = usage_bucket.get('key')
       if usage == 'Mixed':
             usage_display = 'Mixed Use'
-      elif usage in usage_categories:
+      elif usage.lower() in usage_categories:
             usage_display = usage
       else:
             usage_display = 'Others'
@@ -798,7 +798,7 @@ def extract_pt_assessed_properties(metrics, region_bucket):
 
       if usage == 'Mixed':
           usage_display = 'Mixed Use'
-      elif usage in usage_categories:
+      elif usage.lower() in usage_categories:
           usage_display = usage
       else:
           usage_display = 'Others'
