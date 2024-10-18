@@ -14,8 +14,12 @@ def extract_ws_collection_by_payment_channel_type(metrics, region_bucket):
     channel_buckets = region_bucket.get('byChannel').get('buckets')
     for channel_bucket in channel_buckets:
       channel = channel_bucket.get('key')
+      if channel == 'CASH':
+          channel_display = 'Non Digital'
+      else:
+          channel_display = 'Digital'
       value = channel_bucket.get('byChannel').get('value') if channel_bucket.get('byChannel') else 0
-      groupby_channel.append({ 'name' : channel, 'value' : value})
+      groupby_channel.append({ 'name' : channel_display, 'value' : value})
     
       
   

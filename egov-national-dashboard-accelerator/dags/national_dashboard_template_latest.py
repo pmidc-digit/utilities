@@ -226,9 +226,9 @@ def transform_single(single_document, ward_map, date, lambda_function, module):
             ulb = ulb_bucket.get('key')
             # Transform the ULB to ensure it starts with "pb."
             if not ulb.startswith("pb."):
-                ulb = f"pb.{ulb.lower()}"
-            
-            if ulb == "pb.testing":
+                ulb = f"pb.{ulb.lower().replace(' ', '')}"
+
+            if ulb == "pb.testing" or ulb == "pb.punjab":
                 logging.info(f"Skipping ULB: {ulb}")
                 continue  # Skip further processing for pb.testing
             region_agg = ulb_bucket.get('region')
