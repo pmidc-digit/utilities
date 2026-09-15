@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from airflow import DAG
-from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 
 with DAG(
@@ -12,11 +12,12 @@ with DAG(
     tags=["testing", "postgres"],
 ) as dag:
 
-    test_query = PostgresOperator(
+    test_query = SQLExecuteQueryOperator(
         task_id="select_bills_summary",
-        postgres_conn_id="postgres_default",
+        conn_id="postgres_default",
         sql="""
             SELECT *
-            FROM public.mv_sw_amritsar_bills_summary;
+            FROM public.mv_sw_amritsar_bills_summary
+            LIMIT 10;
         """,
     )
