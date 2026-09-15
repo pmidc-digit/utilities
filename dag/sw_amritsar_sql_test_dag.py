@@ -14,7 +14,7 @@ with DAG(
 
     test_query = SQLExecuteQueryOperator(
         task_id="select_bills_summary",
-        conn_id="source_postgre",
+        conn_id="source_postgres",
         sql="""
             SELECT *
             FROM public.mv_sw_amritsar_bills_summary
