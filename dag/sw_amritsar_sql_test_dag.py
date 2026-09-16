@@ -17,7 +17,6 @@ with DAG(
         conn_id="source_postgres",
         sql="""
             SELECT *
-            FROM public.mv_sw_amritsar_bills_summary
-            LIMIT 10;
+            FROM public.mv_sw_amritsar_bills_summary;
         """,
     )
