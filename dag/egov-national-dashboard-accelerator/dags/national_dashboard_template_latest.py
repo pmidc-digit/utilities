@@ -57,12 +57,12 @@ default_args = {
 # Maps each service module to its ES query list and empty payload template function.
 # Only PT is active here; uncomment others to enable additional modules.
 module_map = {
-    # 'TL' : (tl_queries, empty_tl_payload),
-    # 'PGR' : (pgr_queries, empty_pgr_payload),
-    # 'WS' : (ws_queries, empty_ws_payload),
-    'PT' : (pt_queries, empty_pt_payload)
-    # 'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
-    # 'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
+     'TL' : (tl_queries, empty_tl_payload),
+     'PGR' : (pgr_queries, empty_pgr_payload),
+     'WS' : (ws_queries, empty_ws_payload),
+     'PT' : (pt_queries, empty_pt_payload)
+     'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
+     'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
     # 'OBPS' : (obps_queries, empty_obps_payload),
     # 'COMMON' : (common_queries,empty_common_payload)
 }
@@ -467,62 +467,62 @@ def transform(**kwargs):
 # Only PT is enabled; other modules are commented out below.
 
 # Disabled TL tasks (kept for reference)
-# extract_tl = PythonOperator(
-#     task_id='elastic_search_extract_tl',
-#     python_callable=dump_kibana,
-#     op_kwargs={ 'module' : 'TL'},
-#     dag=dag)
-#
-# transform_tl = PythonOperator(
-#     task_id='nudb_transform_tl',
-#     python_callable=transform,
-#     dag=dag)
-#
-# load_tl = PythonOperator(
-#     task_id='nudb_ingest_load_tl',
-#     python_callable=load,
-#     op_kwargs={ 'module' : 'TL'},
-#     dag=dag)
+ extract_tl = PythonOperator(
+     task_id='elastic_search_extract_tl',
+     python_callable=dump_kibana,
+     op_kwargs={ 'module' : 'TL'},
+     dag=dag)
+
+ transform_tl = PythonOperator(
+     task_id='nudb_transform_tl',
+     python_callable=transform,
+     dag=dag)
+
+ load_tl = PythonOperator(
+     task_id='nudb_ingest_load_tl',
+     python_callable=load,
+     op_kwargs={ 'module' : 'TL'},
+     dag=dag)
 
 
 # Disabled PGR tasks (kept for reference)
-# extract_pgr = PythonOperator(
-#     task_id='elastic_search_extract_pgr',
-#     python_callable=dump_kibana,
-#     op_kwargs={ 'module' : 'PGR'},
-#     dag=dag)
-#
-# transform_pgr = PythonOperator(
-#     task_id='nudb_transform_pgr',
-#     python_callable=transform,
-#     dag=dag)
-#
-# load_pgr = PythonOperator(
-#     task_id='nudb_ingest_load_pgr',
-#     python_callable=load,
-#     op_kwargs={ 'module' : 'PGR'},
-#     dag=dag)
-#
-# Disabled WS tasks (kept for reference)
-# extract_ws = PythonOperator(
-#     task_id='elastic_search_extract_ws',
-#     python_callable=dump_kibana,
-#     op_kwargs={ 'module' : 'WS'},
-#     dag=dag)
-#
-# transform_ws = PythonOperator(
-#     task_id='nudb_transform_ws',
-#     python_callable=transform,
-#     dag=dag)
-#
-# load_ws = PythonOperator(
-#     task_id='nudb_ingest_load_ws',
-#     python_callable=load,
-#     op_kwargs={ 'module' : 'WS'},
-#     dag=dag)
+ extract_pgr = PythonOperator(
+     task_id='elastic_search_extract_pgr',
+     python_callable=dump_kibana,
+     op_kwargs={ 'module' : 'PGR'},
+     dag=dag)
+
+ transform_pgr = PythonOperator(
+     task_id='nudb_transform_pgr',
+     python_callable=transform,
+     dag=dag)
+
+ load_pgr = PythonOperator(
+     task_id='nudb_ingest_load_pgr',
+     python_callable=load,
+     op_kwargs={ 'module' : 'PGR'},
+     dag=dag)
 
 
-# Active PT pipeline: extract ES data -> transform (no-op) -> ingest to National Dashboard
+ extract_ws = PythonOperator(
+     task_id='elastic_search_extract_ws',
+     python_callable=dump_kibana,
+     op_kwargs={ 'module' : 'WS'},
+     dag=dag)
+
+ transform_ws = PythonOperator(
+     task_id='nudb_transform_ws',
+     python_callable=transform,
+     dag=dag)
+
+ load_ws = PythonOperator(
+     task_id='nudb_ingest_load_ws',
+     python_callable=load,
+     op_kwargs={ 'module' : 'WS'},
+     dag=dag)
+
+
+
 extract_pt = PythonOperator(
     task_id='elastic_search_extract_pt',
     python_callable=dump_kibana,
@@ -541,40 +541,40 @@ load_pt = PythonOperator(
     dag=dag)
 
 # Disabled FIRENOC tasks (kept for reference)
-# extract_firenoc = PythonOperator(
-#     task_id='elastic_search_extract_firenoc',
-#     python_callable=dump_kibana,
-#     op_kwargs={ 'module' : 'FIRENOC'},
-#     dag=dag)
+extract_firenoc = PythonOperator(
+     task_id='elastic_search_extract_firenoc',
+     python_callable=dump_kibana,
+     op_kwargs={ 'module' : 'FIRENOC'},
+     dag=dag)
 #
-# transform_firenoc = PythonOperator(
-#     task_id='nudb_transform_firenoc',
-#     python_callable=transform,
-#     dag=dag)
+ transform_firenoc = PythonOperator(
+     task_id='nudb_transform_firenoc',
+     python_callable=transform,
+     dag=dag)
 #
-# load_firenoc = PythonOperator(
-#     task_id='nudb_ingest_load_firenoc',
-#     python_callable=load,
-#     op_kwargs={ 'module' : 'FIRENOC'},
-#     dag=dag)
+ load_firenoc = PythonOperator(
+     task_id='nudb_ingest_load_firenoc',
+     python_callable=load,
+     op_kwargs={ 'module' : 'FIRENOC'},
+     dag=dag)
 #
 # Disabled MCOLLECT tasks (kept for reference)
-# extract_mcollect = PythonOperator(
-#     task_id='elastic_search_extract_mcollect',
-#     python_callable=dump_kibana,
-#     op_kwargs={ 'module' : 'MCOLLECT'},
-#     dag=dag)
+ extract_mcollect = PythonOperator(
+     task_id='elastic_search_extract_mcollect',
+     python_callable=dump_kibana,
+     op_kwargs={ 'module' : 'MCOLLECT'},
+     dag=dag)
 #
-# transform_mcollect = PythonOperator(
-#     task_id='nudb_transform_mcollect',
-#     python_callable=transform,
-#     dag=dag)
+ transform_mcollect = PythonOperator(
+     task_id='nudb_transform_mcollect',
+     python_callable=transform,
+     dag=dag)
 #
-# load_mcollect = PythonOperator(
-#     task_id='nudb_ingest_load_mcollect',
-#     python_callable=load,
-#     op_kwargs={ 'module' : 'MCOLLECT'},
-#     dag=dag)
+ load_mcollect = PythonOperator(
+     task_id='nudb_ingest_load_mcollect',
+     python_callable=load,
+     op_kwargs={ 'module' : 'MCOLLECT'},
+     dag=dag)
 #
 # Disabled COMMON tasks (kept for reference)
 # extract_common = PythonOperator(
@@ -629,15 +629,15 @@ load_pt = PythonOperator(
 
 
 
-# extract_tl >> transform_tl >> load_tl
-# extract_pgr >> transform_pgr >> load_pgr
-# extract_ws >> transform_ws >> load_ws
+extract_tl >> transform_tl >> load_tl
+extract_pgr >> transform_pgr >> load_pgr
+extract_ws >> transform_ws >> load_ws
 #     python_callable=load,
 # #     op_kwargs={ 'module' : 'OBPS'},
 #     dag=dag)
 extract_pt >> transform_pt >> load_pt
-# extract_firenoc >> transform_firenoc >> load_firenoc
-# extract_mcollect >> transform_mcollect >> load_mcollect
+extract_firenoc >> transform_firenoc >> load_firenoc
+extract_mcollect >> transform_mcollect >> load_mcollect
 # extract_common >> transform_common >> load_common
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
 #extract_obps >> transform_obps >> load_obps
