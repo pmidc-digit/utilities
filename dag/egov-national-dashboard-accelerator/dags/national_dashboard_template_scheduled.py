@@ -449,23 +449,23 @@ load_mcollect = PythonOperator(
     dag=dag)
 
 
-# extract_obps = PythonOperator(
-#     task_id='elastic_search_extract_obps',
-#     python_callable=dump_kibana,
-# #     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'OBPS'},
-#     dag=dag)
+ extract_obps = PythonOperator(
+     task_id='elastic_search_extract_obps',
+     python_callable=dump_kibana,
+     do_xcom_push=True,
+     op_kwargs={ 'module' : 'OBPS'},
+     dag=dag)
 
-# transform_obps = PythonOperator(
-#     task_id='nudb_transform_obps',
-#     python_callable=transform,
-# #     dag=dag)
+ transform_obps = PythonOperator(
+     task_id='nudb_transform_obps',
+     python_callable=transform,
+     dag=dag)
 
-# load_obps = PythonOperator(
-#     task_id='nudb_ingest_load_obps',
-#     python_callable=load,
-# #     op_kwargs={ 'module' : 'OBPS'},
-#     dag=dag)
+ load_obps = PythonOperator(
+     task_id='nudb_ingest_load_obps',
+     python_callable=load,
+     op_kwargs={ 'module' : 'OBPS'},
+     dag=dag)
 
 # extract_common = PythonOperator(
 #     task_id='elastic_search_extract_common',
@@ -493,5 +493,5 @@ extract_ws >> transform_ws >> load_ws
 extract_pt >> transform_pt >> load_pt
 extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
-#extract_obps >> transform_obps >> load_obps
+extract_obps >> transform_obps >> load_obps
 #extract_common >> transform_common >> load_common
