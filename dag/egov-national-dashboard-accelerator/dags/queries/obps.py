@@ -1638,38 +1638,34 @@ def empty_obps_payload(region, ulb, ward, date):
         "region": region,
         "state": "Punjab",
         "metrics": {
-            "ocPlansScrutinized": 120,
-            "plansScrutinized": 540,
-            "ocSubmitted": 50,
-            "applicationsSubmitted": 50,
-            "ocIssued": 19,
-            "landAreaAppliedInSystemForBPA": 25000,
-            "averageDaysToIssuePermit": 10,
-            "averageDaysToIssueOC": 8,
-            "todaysClosedApplicationsOC":10 ,
-            "todaysCompletedApplicationsWithinSLAOC":5 ,
-            "todaysClosedApplicationsPermit": 20,
-            "todaysCompletedApplicationsWithinSLAPermit":10,
-            "slaComplianceOC": 20,
-            "slaCompliancePermit": 40,
-            "applicationsWithDeviation": 20,
-            "averageDeviation": 10,
-            "ocWithDeviation": 30,
+            "ocPlansScrutinized": 0,
+            "plansScrutinized": 0,
+            "ocSubmitted": 0,
+            "applicationsSubmitted": 0,
+            "ocIssued": 0,
+            "landAreaAppliedInSystemForBPA": 0,
+            "averageDaysToIssuePermit": 0,
+            "averageDaysToIssueOC": 0,
+            "todaysClosedApplicationsOC":0,
+            "todaysCompletedApplicationsWithinSLAOC": 0,
+            "todaysClosedApplicationsPermit": 0,
+            "todaysCompletedApplicationsWithinSLAPermit": 0,
+            "slaComplianceOC": 0,
+            "slaCompliancePermit": 0,
+            "applicationsWithDeviation": 0,
+            "averageDeviation": 0,
+            "ocWithDeviation": 0,
             "todaysCollection": [
                 {
                     "groupBy": "paymentMode",
                     "buckets": [
                         {
-                            "name": "UPI",
-                            "value": 10000
+                            "name": "Digital",
+                            "value": 0
                         },
                         {
-                            "name": "DEBIT.CARD",
-                            "value": 15000
-                        },
-                        {
-                            "name": "CREDIT.CARD",
-                            "value": 8500
+                            "name": "Non Digital",
+                            "value": 0
                         }
                     ]
                 }
@@ -1680,15 +1676,15 @@ def empty_obps_payload(region, ulb, ward, date):
                     "buckets": [
                         {
                             "name": "LOW",
-                            "value": 150
+                            "value": 0
                         },
                         {
                             "name": "MEDIUM",
-                            "value": 300
+                            "value": 0
                         },
                         {
                             "name": "HIGH",
-                            "value": 600
+                            "value": 0
                         }
                     ]
                 } ,
@@ -1697,11 +1693,11 @@ def empty_obps_payload(region, ulb, ward, date):
                     "buckets": [
                         {
                             "name": "RESIDENTIAL",
-                            "value": 150
+                            "value": 0
                         },
                         {
                             "name": "INSTITUTIONAL",
-                            "value": 180
+                            "value": 0
                         }
                     ]
                 },
@@ -1710,15 +1706,15 @@ def empty_obps_payload(region, ulb, ward, date):
                     "buckets": [
                         {
                             "name": "RESIDENTIAL.INDIVIDUAL",
-                            "value": 50
+                            "value": 0
                         },
                         {
                             "name": "RESIDENTIAL.SHARED",
-                            "value": 20
+                            "value": 0
                         },
                         {
                             "name": "INSITUTIONAL.SHARED",
-                            "value": 120
+                            "value": 0
                         }
                     ]
                 }
