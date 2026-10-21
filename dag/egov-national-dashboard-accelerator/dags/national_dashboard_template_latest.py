@@ -63,7 +63,7 @@ module_map = {
     'PT' : (pt_queries, empty_pt_payload),
     'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
     'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
-  #  'OBPS' : (obps_queries, empty_obps_payload),
+    'OBPS' : (obps_queries, empty_obps_payload),
   #  'COMMON' : (common_queries,empty_common_payload)
 }
 
@@ -603,20 +603,20 @@ load_mcollect = PythonOperator(
 # #     op_kwargs={ 'module' : 'WS_DIGIT'},
 #     dag=dag)
 
-# extract_obps = PythonOperator(
-#     task_id='elastic_search_extract_obps',
-#     python_callable=dump_kibana,
-# #     do_xcom_push=True,
-#     op_kwargs={ 'module' : 'OBPS'},
-#     dag=dag)
+ extract_obps = PythonOperator(
+     task_id='elastic_search_extract_obps',
+     python_callable=dump_kibana,
+     do_xcom_push=True,
+     op_kwargs={ 'module' : 'OBPS'},
+     dag=dag)
 
-# transform_obps = PythonOperator(
-#     task_id='nudb_transform_obps',
-#     python_callable=transform,
-# #     dag=dag)
+ transform_obps = PythonOperator(
+     task_id='nudb_transform_obps',
+     python_callable=transform,
+     dag=dag)
 
-# load_obps = PythonOperator(
-#     task_id='nudb_ingest_load_obps',
+ load_obps = PythonOperator(
+     task_id='nudb_ingest_load_obps',
 
 
 
@@ -631,4 +631,4 @@ extract_firenoc >> transform_firenoc >> load_firenoc
 extract_mcollect >> transform_mcollect >> load_mcollect
 # extract_common >> transform_common >> load_common
 #extract_ws_digit >> transform_ws_digit >> load_ws_digit
-#extract_obps >> transform_obps >> load_obps
+extract_obps >> transform_obps >> load_obps
