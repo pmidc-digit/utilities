@@ -1,1037 +1,452 @@
-def extract_obps_ocIssued(metrics, region_bucket):
-    metrics['ocIssued'] = region_bucket.get('ocIssued').get(
-        'value') if region_bucket.get('ocIssued') else 0
+"""OBPS National Dashboard extraction queries.
+
+Building plans: bpa-buildingplan-index (mapping supplied).
+Collections: dss-collection_v2 (requested name; supplied mapping is for
+             egov-dss-ingest-enriched, so verify _mapping before deployment).
+
+IMPORTANT: Empty/zero metrics can be unmeasured rather than actual zero.
+Review the accompanying report for unsupported metrics and business assumptions.
+"""
+import copy
+
+BUILDING_INDEX = 'bpa-buildingplan-index'
+PAYMENT_INDEX = 'dss-collection_v2'
+
+
+def _value(bucket, name, subfield='count'):
+    return ((bucket.get(name) or {}).get(subfield) or {}).get('value') or 0
+
+
+def extract_obps_building(metrics, bucket):
+    for key in ('ocIssued','ocSubmitted','applicationsSubmitted',
+                'todaysClosedApplicationsOC','todaysClosedApplicationsPermit',
+                'todaysApprovedApplications'):
+        metrics[key] = int(_value(bucket,key))
+    for key in ('averageDaysToIssuePermit','averageDaysToIssueOC'):
+        metrics[key] = _value(bucket,key,'days')
+    issued = bucket.get('permitsIssued') or {}
+    metrics['permitsIssued'] = [
+        {'groupBy':group,'buckets':[
+            {'name':entry['key'],'value':entry['doc_count']}
+            for entry in (issued.get(aggregation) or {}).get('buckets',[])
+        ]}
+        for group,aggregation in [('riskType','byRiskType'),
+                                  ('occupancyType','byOccupancyType'),
+                                  ('subOccupancyType','bySubOccupancyType')]
+    ]
+    # Suboccupancy is not calculated: no confirmed source field/derivation.
     return metrics
 
-obps_ocIssued = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_ocIssued',
-    'lambda': extract_obps_ocIssued,
-    'query': """
-{{
-  "size": 0,
-    "query": {{
-        "bool": {{
-          "must_not": [
-            {{
-              "term": {{
-                "Data.tenantId.keyword": "pb.testing"
-              }}
-            }}
-          ],
-          "must": [
-            {{
-              "term": {{
-                "Data.status.keyword": "APPROVED"
-              }}
-            }},
-            {{
-              "terms": {{
-                "Data.businessService.keyword": [
-                  "BPA_OC"
-                ]
-              }}
-            }},
-          {{
-            "range": {{
-              "Data.@timestamp": {{
-                "gte": {0},
-                "lte": {1},
-                "format": "epoch_millis"
-              }}
-            }}
-          }}
-          ]
-        }}
-      }},
-        "aggs": {{
-            "ward": {{
-            "terms": {{
-                "field": "Data.ward.name.keyword",
-                "size":10000
-            }},
-            "aggs": {{
-                "ulb": {{
-                "terms": {{
-                    "field": "Data.tenantId.keyword",
-                    "size":10000
-                }},
-                "aggs": {{
-                    "region": {{
-                    "terms": {{
-                        "field": "Data.landInfo.address.locality.name.keyword",
-                        "size":10000
-                    }},
-                    "aggs": {{
-                        "ocIssued": {{
-                        "value_count": {{
-                            "field": "Data.applicationNo.keyword"
-                        }}
-                        }}
-                    }}
-                 }}
-            }}
-        }}
-    }}
-}}
-}}
-}}
 
-    """
-}
-
-
-def extract_obps_permitsIssued_by_riskType_occupancyType_subOccupancyType(metrics, region_bucket):
-    allDims = []
-    grouped_by = []
-
-    riskType_agg = region_bucket.get('byRiskType')
-    riskType_buckets = riskType_agg.get('buckets')
-    grouped_by = []
-    for riskType_bucket in riskType_buckets:
-        grouped_by.append({'name': riskType_bucket.get('key'), 'value': riskType_bucket.get(
-            'permitsIssued').get('value') if riskType_bucket.get('permitsIssued') else 0})
-    allDims.append(
-        {'groupBy': 'riskType', 'buckets': grouped_by})
-
-
-    occupancyType_agg = region_bucket.get('byoccupancyType')
-    occupancyType_buckets = occupancyType_agg.get('buckets')
-    grouped_by = []
-    for occupancyType_bucket in occupancyType_buckets:
-        grouped_by.append({'name': occupancyType_bucket.get('key'), 'value': occupancyType_bucket.get(
-            'permitsIssued').get('value') if occupancyType_bucket.get('permitsIssued') else 0})
-    allDims.append(
-        {'groupBy': 'occupancyType', 'buckets': grouped_by})
-
-
-    subOccupancyType_agg = region_bucket.get('bysubOccupancyType')
-    subOccupancyType_buckets = subOccupancyType_agg.get('buckets')
-    grouped_by = []
-    for subOccupancyType_bucket in subOccupancyType_buckets:
-        grouped_by.append({'name': subOccupancyType_bucket .get('key'), 'value': subOccupancyType_bucket .get(
-            'permitsIssued').get('value') if subOccupancyType_bucket.get('permitsIssued') else 0})
-    allDims.append(
-        {'groupBy': 'subOccupancyType', 'buckets': grouped_by})
-
-    metrics['permitsIssued'] = allDims
-
-
+def extract_obps_payment(metrics, bucket):
+    values={'Digital':0.0,'Non Digital':0.0}
+    for item in (bucket.get('paymentMode') or {}).get('buckets',[]):
+        mode=str(item.get('key','')).strip().lower()
+        amount=float((item.get('amount') or {}).get('value') or 0)
+        if mode in ('online','digital','netbanking','net banking','upi','card',
+                    'credit card','debit card','internet banking'):
+            values['Digital']+=amount
+        else:
+            # Verify paymentMode vocabulary to classify any other mode.
+            values['Non Digital']+=amount
+    metrics['todaysCollection']=[{'groupBy':'paymentMode','buckets':[
+        {'name':key,'value':value} for key,value in values.items()]}]
     return metrics
 
-obps_permitsIssued_by_riskType_occupancyType_subOccupancyType = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_permitsIssued_by_riskType_occupancyType_subOccupancyType',
-    'lambda': extract_obps_permitsIssued_by_riskType_occupancyType_subOccupancyType,
-    'query': """
-{{
+obps_building = {
+    'path': BUILDING_INDEX + '/_search',
+    'name': 'obps_building',
+    'lambda': extract_obps_building,
+    'query': '''{{
   "size": 0,
   "query": {{
     "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
+      "filter": [
         {{
           "terms": {{
             "Data.businessService.keyword": [
               "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "byRiskType": {{
-                  "terms": {{
-                    "field": "Data.riskType.keyword"
-                  }},
-                  "aggs": {{
-                    "permitsIssued": {{
-                      "value_count": {{
-                        "field": "Data.riskType.keyword"
-                      }}
-                    }}
-                  }}
-                }},
-                "byOccupancyType": {{
-                  "terms": {{
-                    "field": "Data.landInfo.unit.occupancyType.keyword"
-                  }},
-                  "aggs": {{
-                    "permitsIssued": {{
-                      "value_count": {{
-                        "field": "Data.landInfo.unit.occupancyType.keyword"
-                      }}
-                    }}
-                  }}
-                }},
-                "bysubOccupancyType": {{
-                  "terms": {{
-                    "field": "Data.landInfo.ownershipCategory.keyword"
-                  }},
-                  "aggs": {{
-                    "permitsIssued": {{
-                      "value_count": {{
-                        "field": "Data.landInfo.ownershipCategory.keyword"
-                      }}
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-
-    """
-}
-
-
-def extract_obps_averageDaysToIssuePermit(metrics, region_bucket):
-    metrics['averageDaysToIssuePermit'] = region_bucket.get('averageDaysToIssuePermit').get(
-        'value') if region_bucket.get('averageDaysToIssuePermit') else 0
-    return metrics
-
-obps_averageDaysToIssuePermit = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_averageDaysToIssuePermit',
-    'lambda': extract_obps_averageDaysToIssuePermit,
-    'query': """
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": 1646677800000,
-              "lte": 1646764199000,
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "averageDaysToIssuePermit": {{
-                  "avg": {{
-                    "script": {{
-                      "source": "(doc['Data.auditDetails.lastModifiedTime'].value-doc['Data.auditDetails.createdTime'].value)/(86400*1000)"
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-
-    """
-}
-
-
-def extract_obps_averageDaysToIssueOC(metrics, region_bucket):
-    metrics['averageDaysToIssueOC'] = region_bucket.get('averageDaysToIssueOC').get(
-        'value') if region_bucket.get('averageDaysToIssueOC') else 0
-    return metrics
-
-obps_averageDaysToIssueOC = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_averageDaysToIssueOC',
-    'lambda': extract_obps_averageDaysToIssueOC,
-    'query': """
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {
-          "terms": {{
-            "Data.businessService.keyword": [
+              "BPA_LOW",
               "BPA_OC"
             ]
           }}
         }},
         {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": 1646677800000,
-              "lte": 1646764199000,
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
+          "bool": {{
+            "should": [
+              {{
+                "range": {{
+                  "Data.applicationDate": {{
+                    "gte": {0},
+                    "lte": {1}
+                  }}
+                }}
               }},
-              "aggs": {{
-                "averageDaysToIssueOC": {{
-                  "avg": {{
-                    "script": {{
-                      "source": "(doc['Data.auditDetails.lastModifiedTime'].value-doc['Data.auditDetails.createdTime'].value)/(86400*1000)"
-                    }}
+              {{
+                "range": {{
+                  "Data.approvalDate": {{
+                    "gte": {0},
+                    "lte": {1}
                   }}
                 }}
               }}
-            }}
+            ],
+            "minimum_should_match": 1
           }}
         }}
-      }}
-    }}
-  }}
-}}
-
-
-    """
-}
-
-
-def extract_obps_slaCompliancePermit(metrics, region_bucket):
-    metrics['slaCompliancePermit'] = region_bucket.get('slaCompliancePermit').get(
-        'doc_count') if region_bucket.get('slaCompliancePermit') else 0
-    return metrics
-
-obps_slaCompliancePermit = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_slaCompliancePermit',
-    'lambda': extract_obps_slaCompliancePermit,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
+      ],
       "must_not": [
         {{
           "term": {{
             "Data.tenantId.keyword": "pb.testing"
           }}
         }}
-      ],
-      "must": [
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
       ]
     }}
   }},
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
+        "field": "Data.additionalDetails.wardnumber.keyword",
+        "size": 10000,
+        "missing": "UNKNOWN"
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
             "field": "Data.tenantId.keyword",
-            "size":10000
-          },
+            "size": 10000,
+            "missing": "UNKNOWN"
+          }},
           "aggs": {{
             "region": {{
               "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              },
+                "field": "Data.additionalDetails.landInfo.address.locality.name.keyword",
+                "size": 10000,
+                "missing": "UNKNOWN"
+              }},
               "aggs": {{
-                "slaCompliancePermit": {{
+                "ocIssued": {{
                   "filter": {{
                     "bool": {{
-                      "must": [
+                      "filter": [
                         {{
-                          "script": {{
-                            "script": {{
-                              "source": "doc['Data.auditDetails.lastModifiedTime'].value-doc['Data.auditDetails.createdTime'].value<params.threshold",
-                              "lang": "painless",
-                              "params": {{
-                                "threshold": 172800000
-                              }}
-                            }}
-                          }}
-                        }}
-                      ]
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-
-
-    """
-}
-
-
-def extract_obps_slaComplianceOC(metrics, region_bucket):
-    metrics['slaComplianceOC'] = region_bucket.get('slaComplianceOC').get(
-        'doc_count') if region_bucket.get('slaComplianceOC') else 0
-    return metrics
-
-obps_slaComplianceOC = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_slaComplianceOC',
-    'lambda': extract_obps_slaComplianceOC,
-    'query': """
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-               "BPA_OC"
-            ]
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": 1646677800000,
-              "lte": 1646764199000,
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          },
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              },
-              "aggs": {{
-                "slaCompliancePermit": {{
-                  "filter": {{
-                    "bool": {{
-                      "must": [
-                        {{
-                          "script": {{
-                            "script": {{
-                              "source": "doc['Data.auditDetails.lastModifiedTime'].value-doc['Data.auditDetails.createdTime'].value<params.threshold",
-                              "lang": "painless",
-                              "params": {{
-                                "threshold": 172800000
-                              }}
-                            }}
-                          }}
-                        }}
-                      ]
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-
-
-    """
-}
-
-
-def extract_obps_ocSubmitted(metrics, region_bucket):
-    metrics['ocSubmitted'] = region_bucket.get('ocSubmitted').get(
-        'value') if region_bucket.get('ocSubmitted') else 0
-    return metrics
-
-obps_ocSubmitted = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_ocSubmitted',
-    'lambda': extract_obps_ocSubmitted,
-    'query': """
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA_OC"
-            ]
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "ocSubmitted": {{
-                  "value_count": {{
-                    "field": "Data.applicationNo.keyword"
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-    """
-}
-
-
-def extract_obps_applicationsSubmitted(metrics, region_bucket):
-    metrics['applicationSubmitted'] = region_bucket.get('applicationSubmitted').get(
-        'value') if region_bucket.get('applicationSubmitted') else 0
-    return metrics
-
-obps_applicationsSubmitted = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_applicationsSubmitted',
-    'lambda': extract_obps_applicationsSubmitted,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "applicationSubmitted": {{
-                  "value_count": {{
-                    "field": "Data.applicationNo.keyword"
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-    """
-}
-
-
-def extract_obps_landAreaAppliedInSystemForBPA(metrics, region_bucket):
-    metrics['landAreaAppliedInSystemForBPA'] = region_bucket.get('landAreaAppliedInSystemForBPA').get(
-        'value') if region_bucket.get('landAreaAppliedInSystemForBPA') else 0
-    return metrics
-
-obps_landAreaAppliedInSystemForBPA = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_landAreaAppliedInSystemForBPA',
-    'lambda': extract_obps_landAreaAppliedInSystemForBPA,
-    'query': """
-
-{{
-  "size": 0,
-    "query": {{
-      "bool": {{
-        "must_not": [
-          {{
-            "term": {{
-              "Data.tenantId.keyword": "pb.testing"
-            }}
-          }}
-        ],
-        "must": [
-          {{
-            "terms": {{
-              "Data.businessService.keyword": [
-                "BPA_OC",
-                "BPA",
-                "BPA_LOW"
-              ]
-            }}
-          }},
-          {{
-            "term": {{
-              "Data.status.keyword": "APPROVED"
-            }}
-          }},
-          {{
-            "exists": {{
-              "field": "Data.plotAreaApproved"
-            }}
-          }},
-          {{
-            "range": {{
-              "Data.@timestamp": {{
-                "gte": {0},
-                "lte": {1},
-                "format": "epoch_millis"
-              }}
-            }}
-          }}
-        ]
-      }}
-    }},
-    "aggs": {{
-      "ward": {{
-        "terms": {{
-          "field": "Data.ward.name.keyword",
-          "size":10000
-        }},
-        "aggs": {{
-          "ulb":  {{
-            "terms": {{
-              "field": "Data.tenantId.keyword",
-              "size":10000
-            }},
-            "aggs": {{
-              "region": {{
-                "terms": {{
-                  "field": "Data.landInfo.address.locality.name.keyword",
-                  "size":10000
-                }},
-                "aggs": {{
-                  "landAreaAppliedInSystemForBPA": {{
-                    "sum": {{
-                      "field": "Data.plotArea"
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-
-    """
-}
-
-
-def extract_obps_applicationsWithDeviation(metrics, region_bucket):
-    metrics['applicationsWithDeviation'] = region_bucket.get('applicationsWithDeviation').get(
-        'value') if region_bucket.get('applicationsWithDeviation') else 0
-    return metrics
-
-obps_applicationsWithDeviation = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_applicationsWithDeviation',
-    'lambda': extract_obps_applicationsWithDeviation,
-    'query': """
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {{
-          "exists": {{
-            "field": "Data.plotAreaApproved"
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "applicationsWithDeviation": {{
-                  "avg": {{
-                    "script": {{
-                      "source": "Math.round(((doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)*100)/(doc['Data.plotArea'].value))"
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-
-    """
-}
-
-
-def extract_obps_ocWithDeviation(metrics, region_bucket):
-    metrics['ocWithDeviation'] = region_bucket.get('ocWithDeviation').get(
-        'value') if region_bucket.get('ocWithDeviation') else 0
-    return metrics
-
-obps_ocWithDeviation = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_ocWithDeviation',
-    'lambda': extract_obps_ocWithDeviation,
-    'query': """
-
- {{
-  "size": 0,
-  "query":  {{
-    "bool":  {{
-      "must_not": [
-         {{
-          "term":  {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-         {{
-          "range":  {{
-            "Data.@timestamp":  {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward":  {{
-      "terms":  {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs":  {{
-        "ulb":  {{
-          "terms":  {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs":  {{
-            "region":  {{
-              "terms":  {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "applicationsWithDeviation":  {{
-                  "filter":  {{
-                    "bool":  {{
-                      "must": [
-                         {{
-                          "terms":  {{
+                          "terms": {{
                             "Data.businessService.keyword": [
                               "BPA_OC"
                             ]
                           }}
                         }},
-                         {{
-                          "term":  {{
+                        {{
+                          "term": {{
                             "Data.status.keyword": "APPROVED"
                           }}
                         }},
-                         {{
-                          "exists":  {{
-                            "field": "Data.plotAreaApproved"
-                          }}
-                        }},
                         {{
-                          "script":  {{
-                            "script":  {{
-                              "source": "(doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)>params.threshold",
-                              "lang": "painless",
-                              "params":  {{
-                                "threshold": 0
-                              }}
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
                             }}
                           }}
                         }}
                       ]
                     }}
+                  }},
+                  "aggs": {{
+                    "count": {{
+                      "value_count": {{
+                        "field": "Data.applicationNo.keyword"
+                      }}
+                    }}
+                  }}
+                }},
+                "ocSubmitted": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA_OC"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.applicationDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "count": {{
+                      "value_count": {{
+                        "field": "Data.applicationNo.keyword"
+                      }}
+                    }}
+                  }}
+                }},
+                "applicationsSubmitted": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA",
+                              "BPA_LOW"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.applicationDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "count": {{
+                      "value_count": {{
+                        "field": "Data.applicationNo.keyword"
+                      }}
+                    }}
+                  }}
+                }},
+                "todaysClosedApplicationsOC": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA_OC"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "term": {{
+                            "Data.status.keyword": "APPROVED"
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "count": {{
+                      "value_count": {{
+                        "field": "Data.applicationNo.keyword"
+                      }}
+                    }}
+                  }}
+                }},
+                "todaysClosedApplicationsPermit": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA",
+                              "BPA_LOW"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "term": {{
+                            "Data.status.keyword": "APPROVED"
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "count": {{
+                      "value_count": {{
+                        "field": "Data.applicationNo.keyword"
+                      }}
+                    }}
+                  }}
+                }},
+                "averageDaysToIssuePermit": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA",
+                              "BPA_LOW"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "term": {{
+                            "Data.status.keyword": "APPROVED"
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "days": {{
+                      "avg": {{
+                        "script": {{
+                          "lang": "painless",
+                          "source": "if (doc['Data.approvalDate'].size()==0 || doc['Data.applicationDate'].size()==0) return null; long delta=doc['Data.approvalDate'].value-doc['Data.applicationDate'].value; return delta>=0 ? delta/86400000.0 : null;"
+                        }}
+                      }}
+                    }}
+                  }}
+                }},
+                "averageDaysToIssueOC": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA_OC"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "term": {{
+                            "Data.status.keyword": "APPROVED"
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "days": {{
+                      "avg": {{
+                        "script": {{
+                          "lang": "painless",
+                          "source": "if (doc['Data.approvalDate'].size()==0 || doc['Data.applicationDate'].size()==0) return null; long delta=doc['Data.approvalDate'].value-doc['Data.applicationDate'].value; return delta>=0 ? delta/86400000.0 : null;"
+                        }}
+                      }}
+                    }}
+                  }}
+                }},
+                "permitsIssued": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA",
+                              "BPA_LOW"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "term": {{
+                            "Data.status.keyword": "APPROVED"
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "byRiskType": {{
+                      "terms": {{
+                        "field": "Data.additionalDetails.riskType.keyword",
+                        "size": 100
+                      }}
+                    }},
+                    "byOccupancyType": {{
+                      "terms": {{
+                        "field": "Data.additionalDetails.landInfo.unit.occupancyType.keyword",
+                        "size": 100
+                      }}
+                    }}
+                  }}
+                }},
+                "todaysApprovedApplications": {{
+                  "filter": {{
+                    "bool": {{
+                      "filter": [
+                        {{
+                          "terms": {{
+                            "Data.businessService.keyword": [
+                              "BPA",
+                              "BPA_LOW"
+                            ]
+                          }}
+                        }},
+                        {{
+                          "term": {{
+                            "Data.status.keyword": "APPROVED"
+                          }}
+                        }},
+                        {{
+                          "range": {{
+                            "Data.approvalDate": {{
+                              "gte": {0},
+                              "lte": {1}
+                            }}
+                          }}
+                        }}
+                      ]
+                    }}
+                  }},
+                  "aggs": {{
+                    "count": {{
+                      "value_count": {{
+                        "field": "Data.applicationNo.keyword"
+                      }}
+                    }}
                   }}
                 }}
               }}
@@ -1041,510 +456,18 @@ obps_ocWithDeviation = {
       }}
     }}
   }}
-}}
-
-
-
-    """
+}}'''
 }
 
-
-def extract_obps_averageDeviation(metrics, region_bucket):
-    metrics['averageDeviation'] = region_bucket.get('extract_obps_averageDeviation').get(
-        'value') if region_bucket.get('averageDeviation') else 0
-    return metrics
-
-obps_averageDeviation = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_averageDeviation',
-    'lambda': extract_obps_averageDeviation,
-    'query': """
-
-{{
+obps_collection = {
+    'path': PAYMENT_INDEX + '/_search',
+    'name': 'obps_collection',
+    'lambda': extract_obps_payment,
+    'query': '''{{
   "size": 0,
   "query": {{
     "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA_OC",
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "term": {{
-            "Data.status.keyword": "APPROVED"
-          }}
-        }},
-        {{
-          "exists": {{
-            "field": "Data.plotAreaApproved"
-          }}
-        }},
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "deviation": {{
-                  "avg": {{
-                    "script": {{
-                      "source": "Math.round(((doc['Data.plotAreaApproved'].value-doc['Data.plotArea'].value)*100)/(doc['Data.plotArea'].value))"
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-  }}
-}}
-
-
-    """
-}
-
-
-def extract_obps_todaysClosedApplicationsPermit(metrics, region_bucket):
-    metrics['todaysClosedApplicationsPermit'] = region_bucket.get('extract_obps_todaysClosedApplicationsPermit').get(
-        'value') if region_bucket.get('todaysClosedApplicationsPermit') else 0
-    return metrics
-
-obps_todaysClosedApplicationsPermit = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_todaysClosedApplicationsPermit',
-    'lambda': extract_obps_todaysClosedApplicationsPermit,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.status.keyword": [
-              "APPROVED",
-              "CANCELED",
-              "REJECTED"
-            ]
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "todaysClosedApplicationsPermit": {{
-                      "value_count": {{
-                        "field": "Data.applicationNo.keyword"
-                      }}
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-
-    """
-}
-
-
-def extract_obps_todaysClosedApplicationsOC(metrics, region_bucket):
-    metrics['todaysClosedApplicationsOC '] = region_bucket.get('extract_obps_todaysClosedApplicationsOC ').get(
-        'value') if region_bucket.get('todaysClosedApplicationsOC ') else 0
-    return metrics
-
-obps_todaysClosedApplicationsOC = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_todaysClosedApplicationsOC',
-    'lambda': extract_obps_todaysClosedApplicationsOC,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.status.keyword": [
-              "APPROVED",
-              "CANCELED",
-              "REJECTED"
-            ]
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA_OC"
-            ]
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "todaysClosedApplicationsPermit": {{
-                      "value_count": {{
-                        "field": "Data.applicationNo.keyword"
-                      }}
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-
-
-    """
-}
-
-
-def extract_obps_todaysCompletedApplicationsWithinSLAPermit(metrics, region_bucket):
-    metrics['todaysCompletedApplicationsWithinSLAPermit'] = region_bucket.get('extract_obps_todaysCompletedApplicationsWithinSLAPermit').get(
-        'value') if region_bucket.get('todaysCompletedApplicationsWithinSLAPermit') else 0
-    return metrics
-
-obps_todaysCompletedApplicationsWithinSLAPermit = {
-    'path': 'bpa-index/_search',
-    'name': 'obps_todaysCompletedApplicationsWithinSLAPermit',
-    'lambda': extract_obps_todaysCompletedApplicationsWithinSLAPermit,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.status.keyword": [
-              "APPROVED"
-            ]
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA",
-              "BPA_LOW"
-            ]
-          }}
-        }},
-        {{
-          "script": {{
-            "script": {{
-              "source": "doc['Data.auditDetails.lastModifiedTime'].value-doc['Data.auditDetails.createdTime'].value<params.threshold",
-              "lang": "painless",
-              "params": {{
-                "threshold": 172800000
-              }}
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "todaysCompletedApplicationsWithinSLAOC": {{
-                      "value_count": {{
-                        "field": "Data.applicationNo.keyword"
-                      }}
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-
-
-    """
-}
-
-
-
-def extract_obps_todaysCompletedApplicationsWithinSLAOC(metrics, region_bucket):
-    metrics['todaysCompletedApplicationsWithinSLAOC'] = region_bucket.get('extract_obps_todaysCompletedApplicationsWithinSLAOC').get(
-        'value') if region_bucket.get('todaysCompletedApplicationsWithinSLAOC') else 0
-    return metrics
-
-obps_todaysCompletedApplicationsWithinSLAOC= {
-    'path': 'bpa-index/_search',
-    'name': 'obps_todaysCompletedApplicationsWithinSLAOC',
-    'lambda': extract_obps_todaysCompletedApplicationsWithinSLAOC,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must_not": [
-        {{
-          "term": {{
-            "Data.tenantId.keyword": "pb.testing"
-          }}
-        }}
-      ],
-      "must": [
-        {{
-          "range": {{
-            "Data.@timestamp": {{
-              "gte": {0},
-              "lte": {1},
-              "format": "epoch_millis"
-            }}
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.status.keyword": [
-              "APPROVED"
-            ]
-          }}
-        }},
-        {{
-          "terms": {{
-            "Data.businessService.keyword": [
-              "BPA_OC"
-            ]
-          }}
-        }},
-        {{
-          "script": {{
-            "script": {{
-              "source": "doc['Data.auditDetails.lastModifiedTime'].value-doc['Data.auditDetails.createdTime'].value<params.threshold",
-              "lang": "painless",
-              "params": {{
-                "threshold": 172800000
-              }}
-            }}
-          }}
-        }}
-      ]
-    }}
-  }},
-  "aggs": {{
-    "ward": {{
-      "terms": {{
-        "field": "Data.ward.name.keyword",
-        "size":10000
-      }},
-      "aggs": {{
-        "ulb": {{
-          "terms": {{
-            "field": "Data.tenantId.keyword",
-            "size":10000
-          }},
-          "aggs": {{
-            "region": {{
-              "terms": {{
-                "field": "Data.landInfo.address.locality.name.keyword",
-                "size":10000
-              }},
-              "aggs": {{
-                "todaysCompletedApplicationsWithinSLAOC": {{
-                      "value_count": {{
-                        "field": "Data.applicationNo.keyword"
-                      }}
-                    }}
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }}
-      }}
-    }}
-
-
-    """
-}
-
-
-def extract_obps_todaysCollection_by_paymentMode(metrics, region_bucket):
-    paymentMode_agg = region_bucket.get('paymentMode')
-    paymentMode_buckets = paymentMode_agg.get('buckets')
-    todaysCollection = { 'groupBy' : 'applicationType', 'buckets' : []}
-
-
-    for paymentMode_bucket in paymentMode_buckets:
-        paymentMode_name = paymentMode_bucket.get('key')
-        todaysCollection['buckets'].append( { 'name' : paymentMode_name, 'value' : paymentMode_bucket.get('todaysCollection').get('value') if paymentMode_bucket.get('todaysCollection') else 0})
-
-    metrics['todaysCollection'] = [todaysCollection]
-
-
-    return metrics
-
-obps_todaysCollection_by_paymentMode = {
-    'path': 'dss-collection_v2/_search',
-    'name': 'obps_todaysCollection_by_paymentMode',
-    'lambda': extract_obps_todaysCollection_by_paymentMode,
-    'query': """
-
-{{
-  "size": 0,
-  "query": {{
-    "bool": {{
-      "must": [
+      "filter": [
         {{
           "terms": {{
             "dataObject.paymentDetails.businessService.keyword": [
@@ -1558,9 +481,8 @@ obps_todaysCollection_by_paymentMode = {
         {{
           "range": {{
             "dataObject.paymentDetails.receiptDate": {{
-              "gte": 1646677800000,
-              "lte": 1646764199000,
-              "format": "epoch_millis"
+              "gte": {0},
+              "lte": {1}
             }}
           }}
         }}
@@ -1582,28 +504,32 @@ obps_todaysCollection_by_paymentMode = {
   "aggs": {{
     "ward": {{
       "terms": {{
-        "field": "domainObject.ward.name.keyword",
-        "size":10000
+        "field": "dataObject.ward.name.keyword",
+        "size": 10000,
+        "missing": "UNKNOWN"
       }},
       "aggs": {{
         "ulb": {{
           "terms": {{
-            "field": "domainObject.tenantId.keyword",
-            "size":10000
+            "field": "dataObject.tenantId.keyword",
+            "size": 10000,
+            "missing": "UNKNOWN"
           }},
           "aggs": {{
             "region": {{
               "terms": {{
                 "field": "dataObject.tenantData.city.districtName.keyword",
-                "size":10000
+                "size": 10000,
+                "missing": "UNKNOWN"
               }},
               "aggs": {{
-                "paymentmode": {{
+                "paymentMode": {{
                   "terms": {{
-                    "field": "dataObject.paymentMode.keyword"
+                    "field": "dataObject.paymentMode.keyword",
+                    "size": 100
                   }},
                   "aggs": {{
-                    "todaysCollection": {{
+                    "amount": {{
                       "sum": {{
                         "field": "dataObject.paymentDetails.totalAmountPaid"
                       }}
@@ -1617,107 +543,16 @@ obps_todaysCollection_by_paymentMode = {
       }}
     }}
   }}
-}}
-
-
-    """
+}}'''
 }
 
+_DEFAULT_METRICS = {'ocPlansScrutinized': 0, 'plansScrutinized': 0, 'ocSubmitted': 0, 'applicationsSubmitted': 0, 'ocIssued': 0, 'landAreaAppliedInSystemForBPA': 0, 'averageDaysToIssuePermit': 0, 'averageDaysToIssueOC': 0, 'todaysClosedApplicationsOC': 0, 'todaysCompletedApplicationsWithinSLAOC': 0, 'todaysClosedApplicationsPermit': 0, 'todaysCompletedApplicationsWithinSLAPermit': 0, 'slaComplianceOC': 0, 'slaCompliancePermit': 0, 'applicationsWithDeviation': 0, 'averageDeviation': 0, 'ocWithDeviation': 0, 'todaysCollection': [{'groupBy': 'paymentMode', 'buckets': [{'name': 'Digital', 'value': 0}, {'name': 'Non Digital', 'value': 0}]}], 'permitsIssued': [{'groupBy': 'riskType', 'buckets': []}, {'groupBy': 'occupancyType', 'buckets': []}, {'groupBy': 'subOccupancyType', 'buckets': []}], 'pendingApplicationsBeyondTimeline': 0, 'todaysApprovedApplications': 0, 'todaysApprovedApplicationsWithinSLA': 0, 'avgDaysForApplicationApproval': 0, 'StipulatedDays': 0}
 
-obps_queries = [obps_ocIssued, obps_permitsIssued_by_riskType_occupancyType_subOccupancyType, obps_averageDaysToIssuePermit, obps_averageDaysToIssueOC,
-                obps_slaCompliancePermit,obps_slaComplianceOC,obps_ocSubmitted,obps_applicationsSubmitted,obps_landAreaAppliedInSystemForBPA,obps_applicationsWithDeviation,
-                obps_ocWithDeviation, obps_averageDeviation,obps_todaysClosedApplicationsOC,obps_todaysClosedApplicationsPermit, obps_todaysCollection_by_paymentMode]
+obps_queries = [obps_building, obps_collection]
 
-
+# Unmapped: ocPlansScrutinized, plansScrutinized, landAreaAppliedInSystemForBPA,
+# SLA metrics, deviations, pending timelines, subOccupancyType and StipulatedDays.
+# Their default values remain zero as placeholders; do NOT interpret as measured.
 def empty_obps_payload(region, ulb, ward, date):
-    return {
-        "date": date,
-        "module": "OBPS",
-        "ward": ward,
-        "ulb": ulb,
-        "region": region,
-        "state": "Punjab",
-        "metrics": {
-            "ocPlansScrutinized": 0,
-            "plansScrutinized": 0,
-            "ocSubmitted": 0,
-            "applicationsSubmitted": 0,
-            "ocIssued": 0,
-            "landAreaAppliedInSystemForBPA": 0,
-            "averageDaysToIssuePermit": 0,
-            "averageDaysToIssueOC": 0,
-            "todaysClosedApplicationsOC":0,
-            "todaysCompletedApplicationsWithinSLAOC": 0,
-            "todaysClosedApplicationsPermit": 0,
-            "todaysCompletedApplicationsWithinSLAPermit": 0,
-            "slaComplianceOC": 0,
-            "slaCompliancePermit": 0,
-            "applicationsWithDeviation": 0,
-            "averageDeviation": 0,
-            "ocWithDeviation": 0,
-            "todaysCollection": [
-                {
-                    "groupBy": "paymentMode",
-                    "buckets": [
-                        {
-                            "name": "Digital",
-                            "value": 0
-                        },
-                        {
-                            "name": "Non Digital",
-                            "value": 0
-                        }
-                    ]
-                }
-            ],
-            "permitsIssued": [
-                {
-                    "groupBy": "riskType",
-                    "buckets": [
-                        {
-                            "name": "LOW",
-                            "value": 0
-                        },
-                        {
-                            "name": "MEDIUM",
-                            "value": 0
-                        },
-                        {
-                            "name": "HIGH",
-                            "value": 0
-                        }
-                    ]
-                } ,
-                {
-                    "groupBy": "occupancyType",
-                    "buckets": [
-                        {
-                            "name": "RESIDENTIAL",
-                            "value": 0
-                        },
-                        {
-                            "name": "INSTITUTIONAL",
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "groupBy": "subOccupancyType",
-                    "buckets": [
-                        {
-                            "name": "RESIDENTIAL.INDIVIDUAL",
-                            "value": 0
-                        },
-                        {
-                            "name": "RESIDENTIAL.SHARED",
-                            "value": 0
-                        },
-                        {
-                            "name": "INSITUTIONAL.SHARED",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        }
-    }
+    return {'date':date,'module':'OBPS','ward':ward,'ulb':ulb,
+            'region':region,'state':'Punjab','metrics':copy.deepcopy(_DEFAULT_METRICS)}
