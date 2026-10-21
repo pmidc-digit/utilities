@@ -603,22 +603,22 @@ load_mcollect = PythonOperator(
 # #     op_kwargs={ 'module' : 'WS_DIGIT'},
 #     dag=dag)
 
- extract_obps = PythonOperator(
-     task_id='elastic_search_extract_obps',
-     python_callable=dump_kibana,
-     do_xcom_push=True,
-     op_kwargs={ 'module' : 'OBPS'},
-     dag=dag)
+extract_obps = PythonOperator(
+    task_id='elastic_search_extract_obps',
+    python_callable=dump_kibana,
+    op_kwargs={'module': 'OBPS'},
+    dag=dag)
 
- transform_obps = PythonOperator(
-     task_id='nudb_transform_obps',
-     python_callable=transform,
-     dag=dag)
+transform_obps = PythonOperator(
+    task_id='nudb_transform_obps',
+    python_callable=transform,
+    dag=dag)
 
- load_obps = PythonOperator(
-     task_id='nudb_ingest_load_obps',
-
-
+load_obps = PythonOperator(
+    task_id='nudb_ingest_load_obps',
+    python_callable=load,
+    op_kwargs={'module': 'OBPS'},
+    dag=dag)
 
 extract_tl >> transform_tl >> load_tl
 extract_pgr >> transform_pgr >> load_pgr
