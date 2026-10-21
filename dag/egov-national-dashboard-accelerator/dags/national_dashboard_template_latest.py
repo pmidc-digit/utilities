@@ -64,7 +64,7 @@ module_map = {
     'FIRENOC' : (firenoc_queries, empty_firenoc_payload),
     'MCOLLECT' : (mcollect_queries, empty_mcollect_payload),
     'OBPS' : (obps_queries, empty_obps_payload),
-  #  'COMMON' : (common_queries,empty_common_payload)
+    'COMMON' : (common_queries,empty_common_payload)
 }
 
 
